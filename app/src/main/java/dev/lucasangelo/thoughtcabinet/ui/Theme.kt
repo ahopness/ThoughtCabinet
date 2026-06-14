@@ -1,4 +1,4 @@
-package dev.lucasangelo.thoughtcabinet
+package dev.lucasangelo.thoughtcabinet.ui
 
 import android.app.Activity
 import androidx.compose.foundation.layout.fillMaxSize

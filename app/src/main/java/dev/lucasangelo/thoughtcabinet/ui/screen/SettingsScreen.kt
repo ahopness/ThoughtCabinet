@@ -1,14 +1,11 @@
-package dev.lucasangelo.thoughtcabinet.screens
+package dev.lucasangelo.thoughtcabinet.ui.screen
 
-import androidx.compose.foundation.Image
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.painterResource
-import dev.lucasangelo.thoughtcabinet.R
 import kotlinx.serialization.Serializable
 
 @Serializable
-object SettingsScreen
+object SettingsRoute
 
 @Composable
 fun SettingsScreen() {

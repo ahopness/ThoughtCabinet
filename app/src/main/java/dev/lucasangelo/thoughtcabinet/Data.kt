@@ -12,7 +12,7 @@ import java.time.Instant
 // NOTE: would prob be easier to do with Realm
 
 @Entity
-data class Persona(
+data class PersonaEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
 
@@ -37,13 +37,13 @@ data class PersonaData(
 @Entity(
     foreignKeys = [
         ForeignKey(
-            entity = Persona::class,
+            entity = PersonaEntity::class,
             parentColumns = ["id"],
             childColumns = ["authorId"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
-            entity = Post::class,
+            entity = PostEntity::class,
             parentColumns = ["id"],
             childColumns = ["commentOf"],
             onDelete = ForeignKey.CASCADE
@@ -54,7 +54,7 @@ data class PersonaData(
         Index("commentOf"),
     ]
 )
-data class Post(
+data class PostEntity(
     @PrimaryKey(autoGenerate = true)
     val id : Long,
 
