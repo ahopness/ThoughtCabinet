@@ -1,4 +1,4 @@
-package dev.lucasangelo.thoughtcabinet.ui.screen
+package dev.lucasangelo.thoughtcabinet.ui.screen.home
 
 import androidx.compose.runtime.Composable
 import kotlinx.serialization.Serializable

@@ -2,6 +2,7 @@ package dev.lucasangelo.thoughtcabinet.ui.component
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -38,31 +40,27 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
-import dev.lucasangelo.thoughtcabinet.R
-import dev.lucasangelo.thoughtcabinet.ui.screen.CrowdRoute
-import dev.lucasangelo.thoughtcabinet.ui.screen.ThoughtsRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 
-// TODO: make more modular, works for now
+// NOTE: slightly inspired by https://github.com/elyesmansour/compose-floating-tab-bar
+
 @Composable
 fun BoxScope.FloatingNavigationBar(
     currentDestination: NavDestination?,
-    onNavigate: (route: Any, topLevel: Boolean) -> Unit
+    onNavigate: (route: Any, topLevel: Boolean) -> Unit,
+    tabItems: List<FloatingNavigationActionItem>,
+    actionItems: List<FloatingNavigationItem>,
 ) {
-    AnimatedContent(
-        targetState = (currentDestination?.hasRoute<ThoughtsRoute>() == true ||
-                currentDestination?.hasRoute<CrowdRoute>() == true),
-        transitionSpec = {
-            (slideInVertically(initialOffsetY = { it }) + fadeIn(tween(220)))
-                .togetherWith(slideOutVertically(targetOffsetY = { it }) + fadeOut(tween(220)))
-        },
+    Box(
         modifier = Modifier
             .align(Alignment.BottomCenter)
             .fillMaxWidth()
-    ) { toggled ->
-        if (!toggled) return@AnimatedContent
-
-        Box(
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom,
             modifier = Modifier
+                .fillMaxWidth()
                 .background(Brush.verticalGradient(
                     colors = listOf(Color.Transparent, Color.Black)
                 ))
@@ -77,75 +75,69 @@ fun BoxScope.FloatingNavigationBar(
                 horizontalArrangement = spacing,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = modifier
-                    .align(Alignment.BottomStart)
             ) {
-                FloatingNavigationButton(
-                    icon = R.drawable.icon_list,
-                    title = "Thoughts",
-                    showTitle = currentDestination?.hasRoute<ThoughtsRoute>() == true,
-                    onClick = { onNavigate(ThoughtsRoute, true) },
-                )
-                FloatingNavigationButton(
-                    icon = R.drawable.icon_crowd,
-                    title = "Crowd",
-                    showTitle = currentDestination?.hasRoute<CrowdRoute>() == true,
-                    onClick = { onNavigate(CrowdRoute, true) },
-                )
+                tabItems.forEach { item ->
+                    FloatingNavigationButton(
+                        icon = item.icon,
+                        title = item.title,
+                        showTitle = currentDestination?.hierarchy?.any { it.hasRoute(route = item.route::class) } == true,
+                        onClick = { onNavigate(item.route, true) },
+                    )
+                }
             }
 
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Row(
+                horizontalArrangement = spacing,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = modifier
-                    .align(Alignment.BottomEnd)
-
             ) {
-                var newPostOptionsOpen by remember { mutableStateOf(false) }
-
-                AnimatedVisibility(newPostOptionsOpen) {
-                    Column(
-                        verticalArrangement = spacing,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        FloatingNavigationButton(
-                            icon = R.drawable.icon_note_post,
-                            title = "Note",
-                            showTitle = true,
-                            onClick = {},
-                        )
-                        FloatingNavigationButton(
-                            icon = R.drawable.icon_article_post,
-                            title = "Article",
-                            showTitle = true,
-                            onClick = {},
-                        )
-                        FloatingNavigationButton(
-                            icon = R.drawable.icon_media_post_alt,
-                            title = "Media",
-                            showTitle = true,
-                            onClick = {},
-                        )
-                        FloatingNavigationButton(
-                            icon = R.drawable.icon_link_post,
-                            title = "Link",
-                            showTitle = true,
-                            onClick = {},
-                        )
+                actionItems.forEach { item ->
+                    when (item) {
+                        is FloatingNavigationActionItem -> {
+                            FloatingNavigationButton(
+                                icon = item.icon,
+                                title = item.title,
+                                showTitle = false,
+                                onClick = { onNavigate(item.route, false) },
+                            )
+                        }
+                        is FloatingNavigationExpandableItem -> {
+                            ExpandableFloatingNavigationButton(
+                                icon = item.icon,
+                                title = item.title,
+                                false
+                            ) {
+                                item.items.forEach { subItem ->
+                                    FloatingNavigationButton(
+                                        icon = subItem.icon,
+                                        title = subItem.title,
+                                        showTitle = true,
+                                        onClick = { onNavigate(subItem.route, false) },
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
-
-                Image(
-                    painter = painterResource(R.drawable.icon_add),
-                    contentDescription = "Add",
-                    modifier = Modifier
-                        .size(72.dp)
-                        .rotate(if (newPostOptionsOpen) 45f else 0f)
-                        .clickable(onClick = { newPostOptionsOpen = !newPostOptionsOpen })
-                )
             }
         }
     }
 }
+
+sealed interface FloatingNavigationItem {
+    val icon: Int
+    val title: String
+}
+data class FloatingNavigationActionItem(
+    override val icon: Int,
+    override val title: String,
+    val route: Any
+) : FloatingNavigationItem
+data class FloatingNavigationExpandableItem(
+    override val icon: Int,
+    override val title: String,
+    val items: List<FloatingNavigationActionItem>
+) : FloatingNavigationItem
 
 @Composable
 fun FloatingNavigationButton(
@@ -169,6 +161,53 @@ fun FloatingNavigationButton(
                 fontFamily = FontFamily.Monospace,
                 style = MaterialTheme.typography.titleSmall
             )
+        }
+    }
+}
+@Composable
+fun ExpandableFloatingNavigationButton(
+    icon: Int,
+    title: String,
+    showTitle: Boolean,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        var expanded by remember { mutableStateOf(false) }
+
+        AnimatedVisibility(expanded) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                content()
+            }
+        }
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.clickable(onClick = { expanded = !expanded }),
+        ) {
+            val rotation by animateFloatAsState(
+                targetValue = if (expanded) 45f else 0f
+            )
+
+            Image(
+                painter = painterResource(icon),
+                contentDescription = title,
+                modifier = Modifier
+                    .rotate(rotation)
+                    .size(72.dp)
+            )
+            AnimatedVisibility(showTitle) {
+                Text(
+                    text = title,
+                    fontFamily = FontFamily.Monospace,
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
         }
     }
 }

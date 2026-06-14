@@ -1,4 +1,4 @@
-package dev.lucasangelo.thoughtcabinet.ui.screen
+package dev.lucasangelo.thoughtcabinet.ui.screen.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
@@ -29,15 +29,22 @@ fun CrowdScreen() {
         topBarActionIcon = R.drawable.icon_settings,
         onTopBarActionClicked = { },
         listState = listState
-    ) { innerPadding ->
+    ) { topBarSpacing, navBarSpacing ->
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(32.dp),
             modifier = Modifier.fillMaxSize(),
             state = listState
         ) {
-            items((1..100).toList()) { item ->
-                if (item == 1) Spacer(Modifier.height(innerPadding))
-                Text("Item ${item}")
+            item {
+                Spacer(Modifier.height(topBarSpacing))
+            }
+
+            items((1..20).toList()) { item ->
+                Text("Item #${item}")
+            }
+
+            item {
+                Spacer(Modifier.height(navBarSpacing))
             }
         }
     }
