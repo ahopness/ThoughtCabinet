@@ -1,13 +1,13 @@
-package dev.lucasangelo.thoughtcabinet.ui.screen.home
+package dev.lucasangelo.thoughtcabinet.ui.screen.inspect
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PostRoute(val id: Long)
+data class InspectPostRoute(val id: Long)
 
 @Composable
-fun PostScreen() {
+fun InspectPostScreen() {
     Text("Post")
 }

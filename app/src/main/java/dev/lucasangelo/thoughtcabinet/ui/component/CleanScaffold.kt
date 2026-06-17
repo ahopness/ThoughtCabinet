@@ -1,5 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,7 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -43,33 +46,35 @@ fun CleanScaffold(
     topBarActionName: String,
     topBarActionIcon: Int,
     onTopBarActionClicked: () -> Unit,
-    listState : LazyListState,
+    listState: LazyListState,
     content: @Composable (topBarSpacing: Dp, navBarSpacing: Dp) -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        val topBarHeight = 420.dp
-        val collapseRangePx = with(LocalDensity.current) { topBarHeight.toPx() }
+    Surface(Modifier.fillMaxSize()) {
+        Box {
+            val topBarHeight = 420.dp
+            val collapseRangePx = with(LocalDensity.current) { topBarHeight.toPx() / 1.5f }
 
-        val collapseFraction = remember(collapseRangePx) {
-            derivedStateOf {
-                when {
-                    listState.firstVisibleItemIndex > 0 -> 1f
-                    else -> (listState.firstVisibleItemScrollOffset / collapseRangePx).coerceIn(0f, 1f)
+            val collapseFraction = remember(collapseRangePx) {
+                derivedStateOf {
+                    when {
+                        (listState.firstVisibleItemIndex > 0) -> 1f
+                        else -> (listState.firstVisibleItemScrollOffset / collapseRangePx).coerceIn(0f, 1f)
+                    }
                 }
             }
+
+            content(topBarHeight, 128.dp)
+
+            FloatingTopBar(
+                title = title,
+                icon = icon,
+                actionName = topBarActionName,
+                actionIcon = topBarActionIcon,
+                onActionClick = onTopBarActionClicked,
+                collapsedFraction = collapseFraction,
+                maxHeight = topBarHeight,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
         }
-
-        content(topBarHeight, 128.dp)
-
-        FloatingTopBar(
-            title = title,
-            icon = icon,
-            actionName = topBarActionName,
-            actionIcon = topBarActionIcon,
-            onActionClick = onTopBarActionClicked,
-            collapsedFraction = collapseFraction,
-            maxHeight = topBarHeight,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
     }
 }

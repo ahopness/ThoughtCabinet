@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
 import kotlinx.serialization.Serializable
@@ -22,7 +23,7 @@ import kotlinx.serialization.Serializable
 object ThoughtsRoute
 
 @Composable
-fun ThoughtsScreen(){
+fun ThoughtsScreen(rootNavController: NavController){
     val listState = rememberLazyListState()
 
     CleanScaffold(

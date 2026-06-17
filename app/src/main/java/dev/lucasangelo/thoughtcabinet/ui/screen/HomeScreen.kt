@@ -1,18 +1,16 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen
 
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -21,16 +19,10 @@ import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationActionItem
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationBar
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationExpandableItem
+import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationRouteItem
+import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.home.CrowdRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.home.CrowdScreen
-import dev.lucasangelo.thoughtcabinet.ui.screen.home.PersonaRoute
-import dev.lucasangelo.thoughtcabinet.ui.screen.home.PersonaScreen
-import dev.lucasangelo.thoughtcabinet.ui.screen.home.PostRoute
-import dev.lucasangelo.thoughtcabinet.ui.screen.home.PostScreen
-import dev.lucasangelo.thoughtcabinet.ui.screen.home.SearchRoute
-import dev.lucasangelo.thoughtcabinet.ui.screen.home.SearchScreen
-import dev.lucasangelo.thoughtcabinet.ui.screen.home.SettingsRoute
-import dev.lucasangelo.thoughtcabinet.ui.screen.home.SettingsScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.home.ThoughtsRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.home.ThoughtsScreen
 import kotlinx.serialization.Serializable
@@ -39,9 +31,7 @@ import kotlinx.serialization.Serializable
 object HomeRoute
 
 @Composable
-fun HomeScreen(
-    rootNavController: NavController
-) {
+fun HomeScreen(rootNavController: NavController) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -50,46 +40,16 @@ fun HomeScreen(
         NavHost(
             navController = navController,
             startDestination = ThoughtsRoute,
-            enterTransition = {
-                slideIntoContainer(
-                    animationSpec = tween(300, easing = EaseOut),
-                    towards = AnimatedContentTransitionScope.SlideDirection.Start
-                )
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    animationSpec = tween(300, easing = EaseIn),
-                    towards = AnimatedContentTransitionScope.SlideDirection.End
-                )
-            }
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
         ) {
-            composable<ThoughtsRoute>(
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None }
-            ) {
-                ThoughtsScreen()
+            composable<ThoughtsRoute>() {
+                ThoughtsScreen(rootNavController)
             }
-            composable<PostRoute> {
-                PostScreen()
-            }
-            composable<SearchRoute> {
-                SearchScreen()
-            }
-
-            composable<CrowdRoute>(
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None }
-            ) {
-                CrowdScreen()
-            }
-            composable<PersonaRoute> {
-                PersonaScreen()
-            }
-            composable<SettingsRoute> {
-                SettingsScreen()
+            composable<CrowdRoute>() {
+                CrowdScreen(rootNavController)
             }
         }
-
 
         FloatingNavigationBar(
             currentDestination = currentDestination,
@@ -105,50 +65,60 @@ fun HomeScreen(
                 }
             },
             tabItems = listOf(
-                FloatingNavigationActionItem(
+                FloatingNavigationRouteItem(
                     icon = R.drawable.icon_list,
                     title = "Thoughts",
                     route = ThoughtsRoute
                 ),
-                FloatingNavigationActionItem(
+                FloatingNavigationRouteItem(
                     icon = R.drawable.icon_crowd,
                     title = "Crowd",
                     route = CrowdRoute
                 ),
             ),
-            actionItems = listOf(
-                FloatingNavigationExpandableItem(
-                    icon = R.drawable.icon_add,
-                    title = "Add",
-                    items = listOf(
-                        FloatingNavigationActionItem(
-                            icon = R.drawable.icon_note_post,
-                            title = "Crowd",
-                            route = SettingsRoute // TODO: Update
-                        ),
-                        FloatingNavigationActionItem(
-                            icon = R.drawable.icon_article_post,
-                            title = "Article",
-                            route = SettingsRoute // TODO: Update
-                        ),
-                        FloatingNavigationActionItem(
-                            icon = R.drawable.icon_media_post_alt,
-                            title = "Media",
-                            route = SettingsRoute // TODO: Update
-                        ),
-                        FloatingNavigationActionItem(
-                            icon = R.drawable.icon_link_post,
-                            title = "Link",
-                            route = SettingsRoute // TODO: Update
-                        ),
-                        FloatingNavigationActionItem(
-                            icon = R.drawable.icon_persona,
-                            title = "Persona",
-                            route = SettingsRoute // TODO: Update
-                        ),
+            actionItems =
+                if (currentDestination?.hasRoute<ThoughtsRoute>() == true ||
+                    currentDestination?.hasRoute<CrowdRoute>() == true)
+                    listOf(
+                        FloatingNavigationExpandableItem(
+                            icon = R.drawable.icon_add,
+                            title = "Add",
+                            items =
+                                if(currentDestination.hasRoute<ThoughtsRoute>())
+                                    listOf(
+                                        FloatingNavigationActionItem(
+                                            icon = R.drawable.icon_note_post,
+                                            title = "Crowd",
+                                            action = {}
+                                        ),
+                                        FloatingNavigationActionItem(
+                                            icon = R.drawable.icon_article_post,
+                                            title = "Article",
+                                            action = {}
+                                        ),
+                                        FloatingNavigationActionItem(
+                                            icon = R.drawable.icon_media_post_alt,
+                                            title = "Media",
+                                            action = {}
+                                        ),
+                                        FloatingNavigationActionItem(
+                                            icon = R.drawable.icon_link_post,
+                                            title = "Link",
+                                            action = {}
+                                        ),
+                                    )
+                                else
+                                    listOf(
+                                        FloatingNavigationActionItem(
+                                            icon = R.drawable.icon_persona,
+                                            title = "Persona",
+                                            action = { rootNavController.navigate(EditPersonaRoute(null)) }
+                                        ),
+                                    )
+                        )
                     )
-                )
-            ),
+                else
+                    emptyList()
         )
     }
 }

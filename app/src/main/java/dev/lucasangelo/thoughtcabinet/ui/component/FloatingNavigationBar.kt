@@ -18,11 +18,14 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,20 +38,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
+import dev.lucasangelo.thoughtcabinet.R
 
-// NOTE: slightly inspired by https://github.com/elyesmansour/compose-floating-tab-bar
+// NOTE: inspired by https://github.com/elyesmansour/compose-floating-tab-bar
 
 @Composable
 fun BoxScope.FloatingNavigationBar(
     currentDestination: NavDestination?,
     onNavigate: (route: Any, topLevel: Boolean) -> Unit,
-    tabItems: List<FloatingNavigationActionItem>,
+    tabItems: List<FloatingNavigationRouteItem>,
     actionItems: List<FloatingNavigationItem>,
 ) {
     Box(
@@ -61,9 +66,11 @@ fun BoxScope.FloatingNavigationBar(
             verticalAlignment = Alignment.Bottom,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Brush.verticalGradient(
-                    colors = listOf(Color.Transparent, Color.Black)
-                ))
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.Black)
+                    )
+                )
         ) {
             val spacing = Arrangement.spacedBy(8.dp)
             val modifier = Modifier
@@ -93,7 +100,7 @@ fun BoxScope.FloatingNavigationBar(
             ) {
                 actionItems.forEach { item ->
                     when (item) {
-                        is FloatingNavigationActionItem -> {
+                        is FloatingNavigationRouteItem -> {
                             FloatingNavigationButton(
                                 icon = item.icon,
                                 title = item.title,
@@ -101,8 +108,19 @@ fun BoxScope.FloatingNavigationBar(
                                 onClick = { onNavigate(item.route, false) },
                             )
                         }
+                        is FloatingNavigationActionItem -> {
+                            FloatingNavigationButton(
+                                icon = item.icon,
+                                title = item.title,
+                                showTitle = false,
+                                onClick = item.action,
+                            )
+                        }
                         is FloatingNavigationExpandableItem -> {
+                            var expanded by remember { mutableStateOf(false) }
                             ExpandableFloatingNavigationButton(
+                                expanded = expanded,
+                                onExpandedChanged = { value -> expanded = value },
                                 icon = item.icon,
                                 title = item.title,
                                 false
@@ -112,7 +130,10 @@ fun BoxScope.FloatingNavigationBar(
                                         icon = subItem.icon,
                                         title = subItem.title,
                                         showTitle = true,
-                                        onClick = { onNavigate(subItem.route, false) },
+                                        onClick = {
+                                            expanded = false
+                                            subItem.action()
+                                        },
                                     )
                                 }
                             }
@@ -128,15 +149,20 @@ sealed interface FloatingNavigationItem {
     val icon: Int
     val title: String
 }
+data class FloatingNavigationRouteItem(
+    override val icon: Int,
+    override val title: String,
+    val route: Any,
+) : FloatingNavigationItem
 data class FloatingNavigationActionItem(
     override val icon: Int,
     override val title: String,
-    val route: Any
+    val action: () -> Unit,
 ) : FloatingNavigationItem
 data class FloatingNavigationExpandableItem(
     override val icon: Int,
     override val title: String,
-    val items: List<FloatingNavigationActionItem>
+    val items: List<FloatingNavigationActionItem>,
 ) : FloatingNavigationItem
 
 @Composable
@@ -166,6 +192,8 @@ fun FloatingNavigationButton(
 }
 @Composable
 fun ExpandableFloatingNavigationButton(
+    expanded: Boolean,
+    onExpandedChanged: (Boolean) -> Unit,
     icon: Int,
     title: String,
     showTitle: Boolean,
@@ -175,8 +203,6 @@ fun ExpandableFloatingNavigationButton(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        var expanded by remember { mutableStateOf(false) }
-
         AnimatedVisibility(expanded) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -188,7 +214,7 @@ fun ExpandableFloatingNavigationButton(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.clickable(onClick = { expanded = !expanded }),
+            modifier = Modifier.clickable(onClick = { onExpandedChanged(!expanded) }),
         ) {
             val rotation by animateFloatAsState(
                 targetValue = if (expanded) 45f else 0f
