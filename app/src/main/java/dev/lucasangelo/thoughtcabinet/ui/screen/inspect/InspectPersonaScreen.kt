@@ -71,7 +71,7 @@ fun InspectPersonaScreen(
         topBar = {
             FloatingExtendedTopBar(
                 title = currentPersona?.name ?: "",
-                description = currentPersona?.description ?: "",
+                description = currentPersona?.bio ?: "",
                 canGoBack = true,
                 onGoBackRequest = { rootNavController.popBackStack() },
                 iconContent = { modifier, collapsedFraction ->

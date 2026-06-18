@@ -7,9 +7,6 @@ import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
-// TODO: bookmarks (?)
-// TODO: post archives (?)
-
 @Entity
 data class PersonaEntity(
     @PrimaryKey(autoGenerate = true)
@@ -19,23 +16,23 @@ data class PersonaEntity(
     val updatedAt: Instant?,
 
     val name: String,
-    val description: String,
+    val bio: String,
     val profilePic: String?,
     val colorTheme: Int,
 
-    val inspirations: List<PersonaInspiration>,
+    val trait: List<PersonaTrait>,
 
     val metadata: Map<String, String>,
 )
 @Serializable
-data class PersonaInspiration(
-    val type: PersonaInspirationType,
+data class PersonaTrait(
+    val type: PersonaTraitType,
     val content: String,
 
     val metadata: Map<String, String>,
 )
 @Serializable
-enum class PersonaInspirationType {
+enum class PersonaTraitType {
     TEXT,
     MEDIA,
     LINK
@@ -43,6 +40,12 @@ enum class PersonaInspirationType {
 
 @Entity(
     foreignKeys = [
+        ForeignKey(
+            entity = PostEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["repostOf"],
+            onDelete = ForeignKey.CASCADE
+        ),
         ForeignKey(
             entity = PersonaEntity::class,
             parentColumns = ["id"],
@@ -54,9 +57,10 @@ enum class PersonaInspirationType {
             parentColumns = ["id"],
             childColumns = ["commentOf"],
             onDelete = ForeignKey.CASCADE
-        )
+        ),
     ],
     indices = [
+        Index("repostOf"),
         Index("authorId"),
         Index("commentOf"),
     ]
@@ -64,6 +68,8 @@ enum class PersonaInspirationType {
 data class PostEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
+
+    val repostOf: Long?,
 
     val createdAt: Instant,
     val updatedAt: Instant?,
@@ -73,11 +79,12 @@ data class PostEntity(
 
     val type: PostType,
 
+    val mood: String,
     val content: String,
     val media: List<String>,
 
-    val mood: String,
     val liked: Boolean,
+    val archived: Boolean,
 
     val metadata: Map<String, String>,
 )

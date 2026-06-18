@@ -92,7 +92,7 @@ fun CrowdScreen(rootNavController: NavController) {
                     crowd.forEach { persona ->
                         CrowdCard(
                             title = persona.name,
-                            description = persona.description,
+                            description = persona.bio,
                             backgroundColor = Color(persona.colorTheme),
                             onClick = { rootNavController.navigate(InspectPersonaRoute(persona.id)) /* TODO: persona route */ }
                         ) {
@@ -155,12 +155,14 @@ fun CrowdCard(
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
             )
-            Text(
-                text = description,
-                color = Color.Gray,
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center,
-            )
+            if (description.isNotEmpty()) {
+                Text(
+                    text = description,
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
     }
 }

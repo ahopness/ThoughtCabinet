@@ -82,7 +82,7 @@ fun EditPersonaScreen(
     var currentPersona by remember { mutableStateOf<PersonaEntity?>(null) }
 
     var name by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    var bio by remember { mutableStateOf("") }
     var profilePic by remember { mutableStateOf<String?>(null) }
     var colorTheme by remember { mutableStateOf(Color.Black) }
 
@@ -90,7 +90,7 @@ fun EditPersonaScreen(
         currentPersona = if (personaId != null) database.getPersona(personaId) else null
         currentPersona?.let {
             name = it.name
-            description = it.description
+            bio = it.bio
             profilePic = it.profilePic
             colorTheme = Color(it.colorTheme)
         }
@@ -124,8 +124,8 @@ fun EditPersonaScreen(
                 EditPersonaTextFields(
                     name = name,
                     onNameChanged = { name = it },
-                    description = description,
-                    onDescriptionChanged = { if (hasLoadedPersona) description = it },
+                    bio = bio,
+                    onBioChanged = { if (hasLoadedPersona) bio = it },
                     onNextPageRequested = {
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(2)
@@ -147,7 +147,7 @@ fun EditPersonaScreen(
             3 -> {
                 EditPersonaSummary(
                     name = name,
-                    description = description,
+                    bio = bio,
                     profilePic = profilePic,
                     isEditingPersona = (currentPersona != null),
                     onCreatePersonaRequested = {
@@ -162,10 +162,10 @@ fun EditPersonaScreen(
                                 createdAt = currentPersona?.createdAt ?: Instant.now(),
                                 updatedAt = if (currentPersona != null) Instant.now() else null,
                                 name = name.trim(),
-                                description = description.trim(),
+                                bio = bio.trim(),
                                 profilePic = profilePic,
                                 colorTheme = colorTheme.toArgb(),
-                                inspirations = currentPersona?.inspirations ?: emptyList(),
+                                trait = currentPersona?.trait ?: emptyList(),
                                 metadata = currentPersona?.metadata ?: emptyMap()
                             )
 
@@ -306,8 +306,8 @@ fun EditPersonaProfilePicture(
 fun EditPersonaTextFields(
     name: String,
     onNameChanged: (String) -> Unit,
-    description: String,
-    onDescriptionChanged: (String) -> Unit,
+    bio: String,
+    onBioChanged: (String) -> Unit,
     onNextPageRequested: () -> Unit,
 ) {
     Box(Modifier.fillMaxSize()) {
@@ -333,8 +333,8 @@ fun EditPersonaTextFields(
             )
             Spacer(Modifier.height(16.dp))
             OutlinedTextField(
-                value = description,
-                onValueChange = onDescriptionChanged,
+                value = bio,
+                onValueChange = onBioChanged,
                 label = { Text("Persona's Bio") },
                 maxLines = 6,
                 minLines = 3,
@@ -414,7 +414,7 @@ fun EditPersonaColorPicker(
 @Composable
 fun EditPersonaSummary(
     name: String,
-    description: String,
+    bio: String,
     profilePic: String?,
     isEditingPersona: Boolean,
     onCreatePersonaRequested: () -> Unit,
@@ -441,7 +441,7 @@ fun EditPersonaSummary(
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = description.ifEmpty { "(Empty)" },
+                        text = bio.ifEmpty { "(Empty)" },
                         color = Color.Gray,
                         style = MaterialTheme.typography.bodySmall
                     )

@@ -29,9 +29,9 @@ class Converters {
 
 
     @TypeConverter
-    fun inspirationListToJson(data: List<PersonaInspiration>): String =
+    fun inspirationListToJson(data: List<PersonaTrait>): String =
         Json.encodeToString(data)
     @TypeConverter
-    fun jsonToInspirationList(jsonString: String): List<PersonaInspiration> =
+    fun jsonToInspirationList(jsonString: String): List<PersonaTrait> =
         Json.decodeFromString(jsonString)
 }
