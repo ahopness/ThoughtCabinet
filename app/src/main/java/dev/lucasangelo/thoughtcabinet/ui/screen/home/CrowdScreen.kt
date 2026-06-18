@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,9 +35,13 @@ import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.AppDatabase
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
+import dev.lucasangelo.thoughtcabinet.ui.component.FloatingExtendedTopBar
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
+import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
+import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
 import dev.lucasangelo.thoughtcabinet.util.darken
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -45,23 +50,29 @@ object CrowdRoute
 @OptIn(ExperimentalGridApi::class)
 @Composable
 fun CrowdScreen(rootNavController: NavController) {
+    val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
     CleanScaffold(
-        title = "Your Personas",
-        icon = R.drawable.icon_profile,
-        topBarActionName = "Settings",
-        topBarActionIcon = R.drawable.icon_settings,
-        onTopBarActionClicked = { /* TODO: settings route */ },
-        listState = listState
-    ) { topBarSpacing, navBarSpacing ->
+        topBar = {
+            FloatingExtendedTopBar(
+                title = "Your Personas",
+                icon = R.drawable.icon_profile,
+                onIconClicked = { coroutineScope.launch { listState.animateScrollToItem(0) } },
+                actionName = "Settings",
+                actionIcon = R.drawable.icon_settings,
+                onActionClick = { /* TODO: settings route */ },
+                listState = listState,
+            )
+        }
+    ) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(32.dp),
             modifier = Modifier.fillMaxSize(),
             state = listState
         ) {
             item {
-                Spacer(Modifier.height(topBarSpacing))
+                Spacer(Modifier.height(floatingExtendedTopBarPadding))
             }
 
             item {
@@ -108,7 +119,7 @@ fun CrowdScreen(rootNavController: NavController) {
             }
 
             item {
-                Spacer(Modifier.height(navBarSpacing))
+                Spacer(Modifier.height(floatingNavigationBarPadding))
             }
         }
     }

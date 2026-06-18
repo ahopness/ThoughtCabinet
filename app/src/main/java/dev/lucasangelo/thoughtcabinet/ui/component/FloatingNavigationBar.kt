@@ -1,14 +1,7 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,14 +11,11 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,22 +28,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
-import dev.lucasangelo.thoughtcabinet.R
 
 // NOTE: inspired by https://github.com/elyesmansour/compose-floating-tab-bar
 
+val floatingNavigationBarPadding = 130.dp
+
 @Composable
 fun BoxScope.FloatingNavigationBar(
-    currentDestination: NavDestination?,
-    onNavigate: (route: Any, topLevel: Boolean) -> Unit,
-    tabItems: List<FloatingNavigationRouteItem>,
+    tabItems: List<FloatingNavigationActionItem>,
     actionItems: List<FloatingNavigationItem>,
 ) {
     Box(
@@ -87,8 +72,8 @@ fun BoxScope.FloatingNavigationBar(
                     FloatingNavigationButton(
                         icon = item.icon,
                         title = item.title,
-                        showTitle = currentDestination?.hierarchy?.any { it.hasRoute(route = item.route::class) } == true,
-                        onClick = { onNavigate(item.route, true) },
+                        showTitle = item.showTitle,
+                        onClick = item.action,
                     )
                 }
             }
@@ -100,19 +85,11 @@ fun BoxScope.FloatingNavigationBar(
             ) {
                 actionItems.forEach { item ->
                     when (item) {
-                        is FloatingNavigationRouteItem -> {
-                            FloatingNavigationButton(
-                                icon = item.icon,
-                                title = item.title,
-                                showTitle = false,
-                                onClick = { onNavigate(item.route, false) },
-                            )
-                        }
                         is FloatingNavigationActionItem -> {
                             FloatingNavigationButton(
                                 icon = item.icon,
                                 title = item.title,
-                                showTitle = false,
+                                showTitle = item.showTitle,
                                 onClick = item.action,
                             )
                         }
@@ -123,13 +100,13 @@ fun BoxScope.FloatingNavigationBar(
                                 onExpandedChanged = { value -> expanded = value },
                                 icon = item.icon,
                                 title = item.title,
-                                false
+                                showTitle = item.showTitle,
                             ) {
                                 item.items.forEach { subItem ->
                                     FloatingNavigationButton(
                                         icon = subItem.icon,
                                         title = subItem.title,
-                                        showTitle = true,
+                                        showTitle = subItem.showTitle,
                                         onClick = {
                                             expanded = false
                                             subItem.action()
@@ -148,20 +125,18 @@ fun BoxScope.FloatingNavigationBar(
 sealed interface FloatingNavigationItem {
     val icon: Int
     val title: String
+    val showTitle: Boolean
 }
-data class FloatingNavigationRouteItem(
-    override val icon: Int,
-    override val title: String,
-    val route: Any,
-) : FloatingNavigationItem
 data class FloatingNavigationActionItem(
     override val icon: Int,
     override val title: String,
+    override val showTitle: Boolean,
     val action: () -> Unit,
 ) : FloatingNavigationItem
 data class FloatingNavigationExpandableItem(
     override val icon: Int,
     override val title: String,
+    override val showTitle: Boolean,
     val items: List<FloatingNavigationActionItem>,
 ) : FloatingNavigationItem
 

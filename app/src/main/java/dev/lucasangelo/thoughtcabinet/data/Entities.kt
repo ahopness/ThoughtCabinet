@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 import java.time.Instant
 
 // TODO: bookmarks (?)
+// TODO: post archives (?)
 
 @Entity
 data class PersonaEntity(

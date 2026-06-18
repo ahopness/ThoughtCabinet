@@ -1,8 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -17,17 +15,12 @@ import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import dev.lucasangelo.thoughtcabinet.R
 
 @Composable
 fun PagerScaffold(
@@ -38,7 +31,16 @@ fun PagerScaffold(
     pageCount: Int,
     pageContent: @Composable (PagerScope.(Int, PagerState) -> Unit)
 ) {
-    Surface(color = backgroundColor) {
+    CleanScaffold(
+        backgroundColor = backgroundColor,
+        topBar = {
+            FloatingTopBar(
+                title = title,
+                canGoBack = canGoBack,
+                onGoBackRequest = onGoBackRequest
+            )
+        }
+    ) {
         Box {
             val pagerState = rememberPagerState(pageCount = { pageCount })
             HorizontalPager(
@@ -46,30 +48,6 @@ fun PagerScaffold(
                 modifier = Modifier.fillMaxSize(),
                 pageContent = { page -> pageContent(page, pagerState) }
             )
-
-            Box(
-                modifier = Modifier
-                    .safeDrawingPadding()
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-            ) {
-                if (canGoBack) {
-                    Image(
-                        painter = painterResource(R.drawable.icon_back),
-                        contentDescription = "Go Back",
-                        modifier = Modifier
-                            .size(64.dp)
-                            .align(Alignment.CenterStart)
-                            .clickable(onClick = onGoBackRequest)
-                    )
-                }
-
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
 
             Row(
                 horizontalArrangement = Arrangement.Center,
