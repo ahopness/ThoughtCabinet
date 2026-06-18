@@ -54,7 +54,7 @@ fun PagerScaffold(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .background(Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black)
+                        colors = listOf(Color.Transparent, Color.Black.copy(0.5f))
                     ))
                     .wrapContentHeight()
                     .fillMaxWidth()

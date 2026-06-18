@@ -96,7 +96,7 @@ fun BoxScope.FloatingExtendedTopBar(
             .align(Alignment.TopCenter)
             .fillMaxWidth()
             .background(Brush.verticalGradient(
-                colors = listOf(Color.Black, Color.Transparent)
+                colors = listOf(Color.Black.copy(0.5f), Color.Transparent)
             ))
     ) {
         val collapseRangePx = with(LocalDensity.current) { floatingExtendedTopBarPadding.toPx() / 1.5f }

@@ -31,7 +31,7 @@ fun BoxScope.FloatingTopBar(
     Box(
         modifier = Modifier
             .background(Brush.verticalGradient(
-                colors = listOf(Color.Black, Color.Transparent)
+                colors = listOf(Color.Black.copy(0.5f), Color.Transparent)
             ))
             .safeDrawingPadding()
             .align(Alignment.TopCenter)

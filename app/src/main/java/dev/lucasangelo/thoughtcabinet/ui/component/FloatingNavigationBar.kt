@@ -71,7 +71,7 @@ fun BoxScope.FloatingNavigationBar(
                 .fillMaxWidth()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black)
+                        colors = listOf(Color.Transparent, Color.Black.copy(0.5f))
                     )
                 )
         ) {
