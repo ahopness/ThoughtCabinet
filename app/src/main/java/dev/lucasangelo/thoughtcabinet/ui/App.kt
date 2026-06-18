@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -69,7 +70,10 @@ fun App() {
                     { showSnackbar(it) }
                 )
             }
-            composable<InspectPersonaRoute> { backStackEntry ->
+            composable<InspectPersonaRoute>(
+                enterTransition = { if (!initialState.destination.hasRoute<HomeRoute>()) EnterTransition.None else null },
+                exitTransition = { if (!targetState.destination.hasRoute<HomeRoute>()) ExitTransition.None else null }
+            ) { backStackEntry ->
                 val routeObject :InspectPersonaRoute = backStackEntry.toRoute()
                 InspectPersonaScreen(
                     routeObject.id,

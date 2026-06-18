@@ -35,11 +35,12 @@ import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.AppDatabase
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
-import dev.lucasangelo.thoughtcabinet.ui.component.FloatingExtendedTopBar
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
+import dev.lucasangelo.thoughtcabinet.ui.component.SimpleFloatingExtendedTopBar
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.util.darken
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -55,7 +56,7 @@ fun CrowdScreen(rootNavController: NavController) {
 
     CleanScaffold(
         topBar = {
-            FloatingExtendedTopBar(
+            SimpleFloatingExtendedTopBar(
                 title = "Your Personas",
                 icon = R.drawable.icon_profile,
                 onIconClicked = { coroutineScope.launch { listState.animateScrollToItem(0) } },
@@ -93,11 +94,10 @@ fun CrowdScreen(rootNavController: NavController) {
                             title = persona.name,
                             description = persona.description,
                             backgroundColor = Color(persona.colorTheme),
-                            onClick = { rootNavController.navigate(EditPersonaRoute(persona.id)) /* TODO: persona route */ }
+                            onClick = { rootNavController.navigate(InspectPersonaRoute(persona.id)) /* TODO: persona route */ }
                         ) {
                             PersonaProfilePicture(
                                 profilePic = persona.profilePic,
-                                name = persona.name,
                                 modifier = Modifier.size(72.dp)
                             )
                         }

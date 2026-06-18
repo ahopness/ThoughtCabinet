@@ -7,7 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,18 +15,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -46,13 +41,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.core.graphics.toColor
 import androidx.navigation.NavController
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
-import com.github.skydoves.colorpicker.compose.ColorPickerController
 import com.github.skydoves.colorpicker.compose.HueSlider
-import com.github.skydoves.colorpicker.compose.SaturationSlider
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.AppDatabase
@@ -61,12 +52,10 @@ import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
 import dev.lucasangelo.thoughtcabinet.util.copyUriToInternalStorage
 import dev.lucasangelo.thoughtcabinet.util.darken
-import dev.lucasangelo.thoughtcabinet.util.deleteInternalStorageFile
 import dev.lucasangelo.thoughtcabinet.util.getFileExtension
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.io.File
@@ -119,7 +108,6 @@ fun EditPersonaScreen(
                 EditPersonaProfilePicture(
                     profilePic = profilePic,
                     onProfilePicChanged = { if (hasLoadedPersona) profilePic = it },
-                    name = name,
                     onNotifyError = {
                         coroutineScope.launch {
                             rootShowSnackbar(it)
@@ -221,7 +209,6 @@ fun EditPersonaScreen(
 fun EditPersonaProfilePicture(
     profilePic: String?,
     onProfilePicChanged: (String?) -> Unit,
-    name: String,
     onNotifyError: (String) -> Unit,
     onNextPageRequested: () -> Unit,
 ) {
@@ -257,7 +244,6 @@ fun EditPersonaProfilePicture(
 
             PersonaProfilePicture(
                 profilePic = profilePic,
-                name = name,
                 modifier = Modifier.size(114.dp)
             )
 
@@ -446,7 +432,6 @@ fun EditPersonaSummary(
             ) {
                 PersonaProfilePicture(
                     profilePic = profilePic,
-                    name = name,
                     modifier = Modifier.size(114.dp)
                 )
                 Column {

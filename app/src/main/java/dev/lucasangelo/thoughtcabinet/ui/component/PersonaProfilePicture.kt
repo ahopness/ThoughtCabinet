@@ -17,21 +17,19 @@ import java.io.File
 @Composable
 fun PersonaProfilePicture(
     profilePic: String?,
-    name: String,
     modifier: Modifier = Modifier
-)
-{
+) {
     val context = LocalContext.current
     if (profilePic == null) {
         Image(
             painter = painterResource(R.drawable.icon_profile),
-            contentDescription = "Empty profile picture",
+            contentDescription = null,
             modifier = modifier.fillMaxSize()
         )
     } else {
         AsyncImage(
             model = File(context.filesDir, "profile-pictures/${profilePic}"),
-            contentDescription = "Profile picture of ${name}",
+            contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = modifier
                 .fillMaxSize()

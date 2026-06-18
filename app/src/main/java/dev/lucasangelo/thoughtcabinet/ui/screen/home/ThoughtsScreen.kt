@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
-import dev.lucasangelo.thoughtcabinet.ui.component.FloatingExtendedTopBar
+import dev.lucasangelo.thoughtcabinet.ui.component.SimpleFloatingExtendedTopBar
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
 import kotlinx.coroutines.launch
@@ -34,7 +34,7 @@ fun ThoughtsScreen(rootNavController: NavController){
 
     CleanScaffold(
         topBar = {
-            FloatingExtendedTopBar(
+            SimpleFloatingExtendedTopBar(
                 title = "Thought Cabinet",
                 icon = R.drawable.logo,
                 onIconClicked = { coroutineScope.launch { listState.animateScrollToItem(0) } },

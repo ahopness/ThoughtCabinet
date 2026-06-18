@@ -36,6 +36,24 @@ import androidx.compose.ui.unit.dp
 
 val floatingNavigationBarPadding = 130.dp
 
+sealed interface FloatingNavigationItem {
+    val icon: Int
+    val title: String
+    val showTitle: Boolean
+}
+data class FloatingNavigationActionItem(
+    override val icon: Int,
+    override val title: String,
+    override val showTitle: Boolean,
+    val action: () -> Unit,
+) : FloatingNavigationItem
+data class FloatingNavigationExpandableItem(
+    override val icon: Int,
+    override val title: String,
+    override val showTitle: Boolean,
+    val items: List<FloatingNavigationActionItem>,
+) : FloatingNavigationItem
+
 @Composable
 fun BoxScope.FloatingNavigationBar(
     tabItems: List<FloatingNavigationActionItem>,
@@ -121,24 +139,6 @@ fun BoxScope.FloatingNavigationBar(
         }
     }
 }
-
-sealed interface FloatingNavigationItem {
-    val icon: Int
-    val title: String
-    val showTitle: Boolean
-}
-data class FloatingNavigationActionItem(
-    override val icon: Int,
-    override val title: String,
-    override val showTitle: Boolean,
-    val action: () -> Unit,
-) : FloatingNavigationItem
-data class FloatingNavigationExpandableItem(
-    override val icon: Int,
-    override val title: String,
-    override val showTitle: Boolean,
-    val items: List<FloatingNavigationActionItem>,
-) : FloatingNavigationItem
 
 @Composable
 fun FloatingNavigationButton(

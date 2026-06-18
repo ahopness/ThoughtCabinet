@@ -3,13 +3,16 @@ package dev.lucasangelo.thoughtcabinet.ui.component
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -28,22 +32,61 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import dev.lucasangelo.thoughtcabinet.R
 import kotlin.math.roundToInt
 
 val floatingExtendedTopBarPadding = 420.dp
 
+data class FloatingExtendedTopBarActionItem(
+    val name: String,
+    val icon: Int,
+    val onClick: () -> Unit
+)
+
 @Composable
-fun BoxScope.FloatingExtendedTopBar(
+fun BoxScope.SimpleFloatingExtendedTopBar(
     title: String,
     icon: Int,
     onIconClicked: () -> Unit,
     actionName: String,
     actionIcon: Int,
     onActionClick: () -> Unit,
+    listState: LazyListState,
+) {
+    FloatingExtendedTopBar(
+        title = title,
+        description = "",
+        canGoBack = false,
+        iconContent = { modifier, _ ->
+            Image(
+                painter = painterResource(icon),
+                contentDescription = null,
+                contentScale = ContentScale.Inside,
+                modifier = modifier.clickable(onClick = onIconClicked)
+            )
+        },
+        actions = listOf(FloatingExtendedTopBarActionItem(
+            name = actionName,
+            icon = actionIcon,
+            onClick = onActionClick
+        )),
+        listState = listState
+    )
+}
+
+@Composable
+fun BoxScope.FloatingExtendedTopBar(
+    title: String,
+    description: String,
+    canGoBack: Boolean,
+    onGoBackRequest: () -> Unit = { },
+    iconContent: @Composable (Modifier, Float) -> Unit,
+    actions: List<FloatingExtendedTopBarActionItem>,
     listState: LazyListState,
 ) {
     var parentSize by remember { mutableStateOf(IntSize.Zero) }
@@ -88,19 +131,25 @@ fun BoxScope.FloatingExtendedTopBar(
                     parentSize = it
                 }
         ) {
-            Image(
-                painter = painterResource(icon),
-                contentDescription = title,
-                contentScale = ContentScale.Inside,
-                modifier = Modifier
-                    .padding(end = 16.dp)
+            if (canGoBack) {
+                Image(
+                    painter = painterResource(R.drawable.icon_back),
+                    contentDescription = "Go Back",
+                    modifier = Modifier
+                        .size(floatingTopBarButtonSize)
+                        .align(Alignment.TopStart)
+                        .clickable(onClick = onGoBackRequest)
+                )
+            }
+
+            iconContent(
+                Modifier
                     .size(floatingTopBarButtonSize)
-                    .clickable(onClick = onIconClicked)
                     .offset {
                         IntOffset(
                             x = lerp(
                                 (parentSize.width / 2f) - 36.dp.toPx(),
-                                16.dp.toPx(),
+                                if (canGoBack) floatingTopBarButtonSize.toPx() else 16.dp.toPx(),
                                 collapsedFraction.value
                             ).toInt(),
                             y = lerp(
@@ -109,34 +158,63 @@ fun BoxScope.FloatingExtendedTopBar(
                                 collapsedFraction.value
                             ).toInt()
                         )
-                    }
+                    },
+                collapsedFraction.value
             )
+
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .offset {
-                        IntOffset(
+                    .offset { IntOffset(
                             x = 0,
                             y = lerp(
                                 72.dp.toPx(),
                                 0f,
                                 collapsedFraction.value
                             ).toInt()
-                        )
-                    }
+                        ) }
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.titleSmall,
+                color = Color.Gray,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .width(360.dp)
+                    .offset { IntOffset(
+                        x = 0,
+                        y = lerp(
+                            108.dp.toPx(),
+                            24.dp.toPx(),
+                            collapsedFraction.value
+                        ).toInt()
+                    ) }
+                    .alpha(lerp(
+                            1f,
+                            0f,
+                            collapsedFraction.value
+                        ))
             )
 
-            Image(
-                painter = painterResource(actionIcon),
-                contentDescription = actionName,
+            Row(
+                horizontalArrangement = Arrangement.spacedBy((-36).dp),
                 modifier = Modifier
-                    .padding(end = 16.dp)
-                    .size(floatingTopBarButtonSize)
                     .align(Alignment.BottomEnd)
-                    .clickable(onClick = onActionClick)
-            )
+            ) {
+                actions.forEach {
+                    Image(
+                        painter = painterResource(it.icon),
+                        contentDescription = it.name,
+                        modifier = Modifier
+                            .padding(end = 16.dp)
+                            .size(floatingTopBarButtonSize)
+                            .clickable(onClick = it.onClick)
+                    )
+                }
+            }
         }
     }
 }
