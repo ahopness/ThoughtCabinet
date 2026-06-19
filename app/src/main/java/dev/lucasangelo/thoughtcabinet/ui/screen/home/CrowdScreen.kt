@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.AppDatabase
+import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
 import dev.lucasangelo.thoughtcabinet.ui.component.SimpleFloatingExtendedTopBar
@@ -50,9 +52,12 @@ object CrowdRoute
 
 @OptIn(ExperimentalGridApi::class)
 @Composable
-fun CrowdScreen(rootNavController: NavController) {
+fun CrowdScreen(
+    rootNavController: NavController,
+    listState: LazyListState,
+    crowd: List<PersonaEntity>,
+) {
     val coroutineScope = rememberCoroutineScope()
-    val listState = rememberLazyListState()
 
     CleanScaffold(
         topBar = {
@@ -77,10 +82,6 @@ fun CrowdScreen(rootNavController: NavController) {
             }
 
             item {
-                val context = LocalContext.current
-                val database = remember { AppDatabase.getInstance(context).dao }
-                val crowd by database.getAllPersonas().collectAsState(initial = emptyList())
-
                 Grid(
                     config = {
                         repeat(2){ column(0.5f) }
@@ -94,7 +95,7 @@ fun CrowdScreen(rootNavController: NavController) {
                             title = persona.name,
                             description = persona.bio,
                             backgroundColor = Color(persona.colorTheme),
-                            onClick = { rootNavController.navigate(InspectPersonaRoute(persona.id)) /* TODO: persona route */ }
+                            onClick = { rootNavController.navigate(InspectPersonaRoute(persona.id)) }
                         ) {
                             PersonaProfilePicture(
                                 profilePic = persona.profilePic,

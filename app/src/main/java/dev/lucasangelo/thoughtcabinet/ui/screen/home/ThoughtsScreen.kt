@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.data.PostEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.SimpleFloatingExtendedTopBar
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
@@ -28,9 +30,12 @@ import kotlinx.serialization.Serializable
 object ThoughtsRoute
 
 @Composable
-fun ThoughtsScreen(rootNavController: NavController){
+fun ThoughtsScreen(
+    rootNavController: NavController,
+    listState: LazyListState,
+    thoughts: List<PostEntity>,
+){
     val coroutineScope = rememberCoroutineScope()
-    val listState = rememberLazyListState()
 
     CleanScaffold(
         topBar = {

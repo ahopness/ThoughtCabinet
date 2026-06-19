@@ -1,5 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.inspect
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,8 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
@@ -30,17 +35,20 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigator
 import androidx.navigation.navOptions
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.data.AppDao
 import dev.lucasangelo.thoughtcabinet.data.AppDatabase
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingExtendedTopBar
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingExtendedTopBarActionItem
+import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationActionItem
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationBar
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationExpandableItem
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaTraitRoute
 import dev.lucasangelo.thoughtcabinet.util.darken
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -52,18 +60,17 @@ data class InspectPersonaRoute(val id: Long)
 fun InspectPersonaScreen(
     personaId: Long,
     rootNavController: NavController,
-    rootShowSnackbar: (String) -> Unit
+    rootShowSnackbar: (String) -> Unit,
+    database: AppDao,
 ) {
-    val context = LocalContext.current
-
     val coroutineScope = rememberCoroutineScope()
-    val database = remember { AppDatabase.getInstance(context).dao }
 
     var currentPersona by remember { mutableStateOf<PersonaEntity?>(null) }
-
     LaunchedEffect(personaId) {
         currentPersona = database.getPersona(personaId)
     }
+
+    var openDeleteAlertDialog by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
     CleanScaffold(
@@ -79,7 +86,7 @@ fun InspectPersonaScreen(
                         profilePic = currentPersona?.profilePic,
                         modifier = modifier
                             .scale(
-                                lerp(.9f, .6f, collapsedFraction)
+                                lerp(.9f, .6f, collapsedFraction())
                             )
                             .clickable(onClick = {
                                 coroutineScope
@@ -96,7 +103,7 @@ fun InspectPersonaScreen(
                     FloatingExtendedTopBarActionItem(
                         name = "Remove",
                         icon = R.drawable.icon_delete,
-                        onClick = { }
+                        onClick = { openDeleteAlertDialog = true }
                     )
                 ),
                 listState = listState
@@ -136,9 +143,49 @@ fun InspectPersonaScreen(
                     icon = R.drawable.icon_add,
                     title = "Add",
                     showTitle = false,
-                    items = emptyList()
+                    items = listOf(
+                        FloatingNavigationActionItem(
+                            icon = R.drawable.icon_post,
+                            title = "Trait",
+                            showTitle = true,
+                            action = { rootNavController.navigate(EditPersonaTraitRoute(personaId)) }
+                        ),
+                    )
                 )
             )
+        )
+    }
+
+    if (openDeleteAlertDialog) {
+        val onDismissRequest: () -> Unit = { openDeleteAlertDialog = false }
+        AlertDialog(
+            containerColor = Color.Black,
+            icon = { Image(
+                painter = painterResource(R.drawable.icon_delete),
+                contentDescription = null,
+                modifier = Modifier.size(64.dp)
+            )
+            },
+            title = { Text("Are you sure?") },
+            text = { Text("If you delete this persona, you can't recover it later.") },
+            onDismissRequest = onDismissRequest,
+            dismissButton = {
+                Button(onClick = onDismissRequest) {
+                    Text("Dismiss")
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    coroutineScope.launch {
+                        currentPersona?.let { database.deletePersona(it) }
+                        onDismissRequest()
+                        rootNavController.popBackStack()
+                        rootShowSnackbar("Persona deletes successfully!")
+                    }
+                }) {
+                    Text("Confirm")
+                }
+            },
         )
     }
 }

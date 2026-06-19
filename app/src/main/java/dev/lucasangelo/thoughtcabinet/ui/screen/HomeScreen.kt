@@ -2,6 +2,7 @@ package dev.lucasangelo.thoughtcabinet.ui.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -9,12 +10,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.data.AppDao
+import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
+import dev.lucasangelo.thoughtcabinet.data.PostEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationActionItem
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationBar
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationExpandableItem
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.home.CrowdScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.home.ThoughtsScreen
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -22,7 +27,14 @@ import kotlinx.serialization.Serializable
 object HomeRoute
 
 @Composable
-fun HomeScreen(rootNavController: NavController) {
+fun HomeScreen(
+    rootNavController: NavController,
+    thoughtsListState: LazyListState,
+    crowdListState: LazyListState,
+    thoughts: List<PostEntity>,
+    crowd: List<PersonaEntity>,
+    database: AppDao,
+) {
     Box(Modifier.fillMaxSize()) {
         val pagerState = rememberPagerState(pageCount = { 2 })
 
@@ -31,8 +43,8 @@ fun HomeScreen(rootNavController: NavController) {
             modifier = Modifier.fillMaxSize()
         ) { page ->
             when(page) {
-                0 -> ThoughtsScreen(rootNavController)
-                1 -> CrowdScreen(rootNavController)
+                0 -> ThoughtsScreen(rootNavController, thoughtsListState, thoughts)
+                1 -> CrowdScreen(rootNavController, crowdListState, crowd)
             }
         }
 

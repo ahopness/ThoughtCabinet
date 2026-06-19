@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -19,23 +20,30 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import dev.lucasangelo.thoughtcabinet.R
 import kotlin.math.roundToInt
@@ -85,7 +93,7 @@ fun BoxScope.FloatingExtendedTopBar(
     description: String,
     canGoBack: Boolean,
     onGoBackRequest: () -> Unit = { },
-    iconContent: @Composable (Modifier, Float) -> Unit,
+    iconContent: @Composable (Modifier, () -> Float) -> Unit,
     actions: List<FloatingExtendedTopBarActionItem>,
     listState: LazyListState,
 ) {
@@ -95,9 +103,11 @@ fun BoxScope.FloatingExtendedTopBar(
         modifier = Modifier
             .align(Alignment.TopCenter)
             .fillMaxWidth()
-            .background(Brush.verticalGradient(
-                colors = listOf(Color.Black.copy(0.5f), Color.Transparent)
-            ))
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color.Black.copy(0.5f), Color.Transparent)
+                )
+            )
     ) {
         val collapseRangePx = with(LocalDensity.current) { floatingExtendedTopBarPadding.toPx() / 1.5f }
         val collapsedFraction = remember(collapseRangePx) {
@@ -113,7 +123,7 @@ fun BoxScope.FloatingExtendedTopBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .safeDrawingPadding()
-                .layout{ measurable, constraints ->
+                .layout { measurable, constraints ->
                     val currentHeight = lerp(
                         floatingExtendedTopBarPadding.toPx(),
                         floatingTopBarButtonSize.toPx(),
@@ -148,59 +158,74 @@ fun BoxScope.FloatingExtendedTopBar(
                     .offset {
                         IntOffset(
                             x = lerp(
-                                (parentSize.width / 2f) - 36.dp.toPx(),
+                                (parentSize.width / 2f) - (floatingTopBarButtonSize / 2f).toPx(),
                                 if (canGoBack) floatingTopBarButtonSize.toPx() else 16.dp.toPx(),
                                 collapsedFraction.value
                             ).toInt(),
                             y = lerp(
-                                parentSize.height / 2f - 36.dp.toPx(),
+                                (parentSize.height / 2f) - (floatingTopBarButtonSize / 2f).toPx(),
                                 0f,
                                 collapsedFraction.value
                             ).toInt()
                         )
                     },
-                collapsedFraction.value
+                { collapsedFraction.value }
             )
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
+            var titleLineHeight: Float by remember { mutableFloatStateOf(0f) }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .offset { IntOffset(
+                    .offset {
+                        IntOffset(
                             x = 0,
                             y = lerp(
-                                72.dp.toPx(),
-                                0f,
+                                84.dp.toPx(),
+                                if (description.isEmpty()) 0f else titleLineHeight,
                                 collapsedFraction.value
                             ).toInt()
-                        ) }
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.titleSmall,
-                color = Color.Gray,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .width(360.dp)
-                    .offset { IntOffset(
-                        x = 0,
-                        y = lerp(
-                            108.dp.toPx(),
-                            24.dp.toPx(),
+                        )
+                    }
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .width(lerp(
+                            360.dp,
+                            130.dp,
                             collapsedFraction.value
-                        ).toInt()
-                    ) }
-                    .alpha(lerp(
-                            1f,
-                            0f,
-                            collapsedFraction.value
-                        ))
-            )
+                        )),
+                    onTextLayout = {
+                        titleLineHeight = it.getLineBottom(0) / maxOf(1, it.lineCount)
+                    }
+                )
+                if (description.isNotEmpty()) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .width(360.dp)
+                            .alpha(
+                                lerp(
+                                    1f,
+                                    0f,
+                                    collapsedFraction.value
+                                )
+                            )
+                    )
+                }
+            }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy((-36).dp),
+                horizontalArrangement = Arrangement.spacedBy((-24).dp),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
             ) {

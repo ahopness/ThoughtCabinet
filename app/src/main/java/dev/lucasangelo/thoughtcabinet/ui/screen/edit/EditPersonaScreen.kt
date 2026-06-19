@@ -46,6 +46,7 @@ import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.HueSlider
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.data.AppDao
 import dev.lucasangelo.thoughtcabinet.data.AppDatabase
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
@@ -71,12 +72,10 @@ data class EditPersonaRoute(val id: Long?)
 fun EditPersonaScreen(
     personaId: Long?,
     rootNavController: NavController,
-    rootShowSnackbar: (String) -> Unit
+    rootShowSnackbar: (String) -> Unit,
+    database: AppDao,
 ) {
-    val context = LocalContext.current
-
     val coroutineScope = rememberCoroutineScope()
-    val database = remember { AppDatabase.getInstance(context).dao }
 
     var hasLoadedPersona by remember { mutableStateOf(false) }
     var currentPersona by remember { mutableStateOf<PersonaEntity?>(null) }
@@ -188,6 +187,7 @@ fun EditPersonaScreen(
     // NOTE: the 'Clear Current' button only sets the variable to null
     // because if the user exists this screen without saving after deleting
     // a pfp, the path the variable is pointing to gets invalidated
+    val context = LocalContext.current
     DisposableEffect(Unit) {
         onDispose {
             coroutineScope.launch {
