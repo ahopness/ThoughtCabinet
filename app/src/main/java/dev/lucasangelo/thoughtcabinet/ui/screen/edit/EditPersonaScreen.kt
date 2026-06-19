@@ -8,14 +8,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -39,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -50,22 +49,16 @@ import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
+import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
-import dev.lucasangelo.thoughtcabinet.util.cleanupDrafts
-import dev.lucasangelo.thoughtcabinet.util.copyUriToInternalStorage
 import dev.lucasangelo.thoughtcabinet.util.darken
-import dev.lucasangelo.thoughtcabinet.util.draftsDir
-import dev.lucasangelo.thoughtcabinet.util.getFileExtension
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import java.util.UUID
 
 @Serializable
 data class EditPersonaRoute(val id: Long?)
-
-// TODO: add animations
 
 @Composable
 fun EditPersonaScreen(
@@ -93,44 +86,48 @@ fun EditPersonaScreen(
         title = if (viewModel.persona != null) "Edit Your Persona" else "Create A Persona",
         backgroundColor = viewModel.colorTheme.darken(),
         onGoBackRequest = { rootNavController.popBackStack() },
-        pageCount = 4,
+        pageCount = 5,
     ) { page, pagerState ->
-        when (page) {
-            0 -> {
+        val getOffsetDistanceInPages = { pagerState.getOffsetDistanceInPages(page) }
+        val onNextPageRequested = { coroutineScope.launch { pagerState.animateScrollToPage(page+1) } }
+        listOf<@Composable () -> Unit>(
+            {
+                EditPersonaIntroduction(
+                    pageOffsetDistance = getOffsetDistanceInPages(),
+                    onNextPageRequested = { onNextPageRequested() },
+                )
+            },
+            {
                 EditPersonaProfilePicture(
+                    pageOffsetDistance = getOffsetDistanceInPages(),
                     viewModel = viewModel,
                     profilePic = viewModel.profilePic,
                     onProfilePicChanged = { if (viewModel.hasLoadedPersona) viewModel.profilePic = it },
-                    onNotifyError = {
-                        coroutineScope.launch { rootShowSnackbar(it) }
-                    },
-                    onNextPageRequested = {
-                        coroutineScope.launch { pagerState.animateScrollToPage(1) }
-                    },
+                    onNotifyError = { rootShowSnackbar(it) },
+                    onNextPageRequested = { onNextPageRequested() },
                 )
-            }
-            1 -> {
+            },
+            {
                 EditPersonaTextFields(
+                    pageOffsetDistance = getOffsetDistanceInPages(),
                     name = viewModel.nameText,
                     onNameChanged = { viewModel.nameText = it },
                     bio = viewModel.bioText,
                     onBioChanged = { if (viewModel.hasLoadedPersona) viewModel.bioText = it },
-                    onNextPageRequested = {
-                        coroutineScope.launch { pagerState.animateScrollToPage(2) }
-                    },
+                    onNextPageRequested = { onNextPageRequested() },
                 )
-            }
-            2 -> {
+            },
+            {
                 EditPersonaColorPicker(
+                    pageOffsetDistance = getOffsetDistanceInPages(),
                     colorTheme = viewModel.colorTheme,
                     onThemeChanged = { if (viewModel.hasLoadedPersona) viewModel.colorTheme = it },
-                    onNextPageRequested = {
-                        coroutineScope.launch { pagerState.animateScrollToPage(3) }
-                    },
+                    onNextPageRequested = { onNextPageRequested() },
                 )
-            }
-            3 -> {
+            },
+            {
                 EditPersonaSummary(
+                    pageOffsetDistance = getOffsetDistanceInPages(),
                     viewModel = viewModel,
                     name = viewModel.nameText,
                     bio = viewModel.bioText,
@@ -160,7 +157,7 @@ fun EditPersonaScreen(
                     },
                 )
             }
-        }
+        )
     }
 
     DisposableEffect(Unit) {
@@ -171,7 +168,35 @@ fun EditPersonaScreen(
 }
 
 @Composable
+fun EditPersonaIntroduction(
+    pageOffsetDistance: Float,
+    onNextPageRequested: () -> Unit,
+) {
+    PagerScaffoldContent(pageOffsetDistance) {
+        Text(
+            text = "In Thought Cabinet, instead of users, posts are made by personas",
+            textAlign = TextAlign.Center,
+        )
+
+        Text(
+            text =
+"""Personas are the social role that one adopts: They can be things we aspire to be, specific personalities or even fictional characters.
+
+Instead of a profile page, they have a board which you can add personality traits to, don't forget to do it after you're done here!""",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Light
+        )
+
+        Button(onClick = onNextPageRequested) {
+            Text("Next")
+        }
+    }
+}
+
+@Composable
 fun EditPersonaProfilePicture(
+    pageOffsetDistance: Float,
     viewModel: EditPersonaViewModel,
     profilePic: String?,
     onProfilePicChanged: (String?) -> Unit,
@@ -195,14 +220,12 @@ fun EditPersonaProfilePicture(
 
     var openAlertDialog by remember { mutableStateOf(false) }
 
-    Box(Modifier.fillMaxSize()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.align(Alignment.Center)
-        ) {
-            Text("Choose A Profile Picture")
-            Spacer(Modifier.height(32.dp))
+    PagerScaffoldContent(pageOffsetDistance) {
+        Text("First, choose a profile picture")
 
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             PersonaProfilePicture(
                 profilePic = profilePic,
                 inCache = viewModel.hasNewProfilePicDraft,
@@ -228,12 +251,10 @@ fun EditPersonaProfilePicture(
                     onClick = { openAlertDialog = true },
                 ) { Text("Clear Current") }
             }
+        }
 
-            Spacer(Modifier.height(84.dp))
-            Button(onClick = onNextPageRequested) {
-                Text("Next")
-            }
-
+        Button(onClick = onNextPageRequested) {
+            Text("Next")
         }
     }
 
@@ -266,22 +287,19 @@ fun EditPersonaProfilePicture(
 
 @Composable
 fun EditPersonaTextFields(
+    pageOffsetDistance: Float,
     name: String,
     onNameChanged: (String) -> Unit,
     bio: String,
     onBioChanged: (String) -> Unit,
     onNextPageRequested: () -> Unit,
 ) {
-    Box(Modifier.fillMaxSize()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(32.dp)
-        ) {
-            Text("Write some information")
-            Spacer(Modifier.height(32.dp))
+    PagerScaffoldContent(pageOffsetDistance) {
+        Text("Then, write some information")
 
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             OutlinedTextField(
                 value = name,
                 onValueChange = onNameChanged,
@@ -307,34 +325,30 @@ fun EditPersonaTextFields(
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
+        }
 
-            Spacer(Modifier.height(84.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(onClick = onNextPageRequested) { Text("Next") }
-            }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(24.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = onNextPageRequested) { Text("Next") }
         }
     }
 }
 
 @Composable
 fun EditPersonaColorPicker(
+    pageOffsetDistance: Float,
     colorTheme: Color,
     onThemeChanged: (Color) -> Unit,
     onNextPageRequested: () -> Unit,
 ) {
-    Box(Modifier.fillMaxSize()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(32.dp)
-        ) {
-            Text("Pick A Color")
-            Spacer(Modifier.height(32.dp))
+    PagerScaffoldContent(pageOffsetDistance) {
+        Text("Finally, pick a color theme")
 
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             val colorPickerController = rememberColorPickerController()
 
             val slidersModifier = Modifier
@@ -364,17 +378,17 @@ fun EditPersonaColorPicker(
                     .filter { it != Color.Transparent } // NOTE: color reset bug fix
                     .collect(onThemeChanged)
             }
+        }
 
-            Spacer(Modifier.height(84.dp))
-            Button(onClick = onNextPageRequested) {
-                Text("Next")
-            }
+        Button(onClick = onNextPageRequested) {
+            Text("Next")
         }
     }
 }
 
 @Composable
 fun EditPersonaSummary(
+    pageOffsetDistance: Float,
     viewModel: EditPersonaViewModel,
     name: String,
     bio: String,
@@ -382,40 +396,34 @@ fun EditPersonaSummary(
     isEditingPersona: Boolean,
     onCreatePersonaRequested: () -> Unit,
 ) {
-    Box(Modifier.fillMaxSize()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(32.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                PersonaProfilePicture(
-                    profilePic = profilePic,
-                    inCache = viewModel.hasNewProfilePicDraft,
-                    modifier = Modifier.size(114.dp)
-                )
-                Column {
-                    Text(
-                        text = name.ifEmpty { "(Empty)" },
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = bio.ifEmpty { "(Empty)" },
-                        color = Color.Gray,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
+    PagerScaffoldContent(pageOffsetDistance) {
+        Text("Looks good?")
 
-            Spacer(Modifier.height(64.dp))
-            Button(onClick = onCreatePersonaRequested) {
-                Text(if (isEditingPersona) "Update Persona" else "Create Persona")
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            PersonaProfilePicture(
+                profilePic = profilePic,
+                inCache = viewModel.hasNewProfilePicDraft,
+                modifier = Modifier.size(114.dp)
+            )
+            Column {
+                Text(
+                    text = name.ifEmpty { "(Empty)" },
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = bio.ifEmpty { "(Empty)" },
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
+        }
+
+        Button(onClick = onCreatePersonaRequested) {
+            Text(if (isEditingPersona) "Update Persona" else "Create Persona")
         }
     }
 }

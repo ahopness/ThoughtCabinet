@@ -11,12 +11,6 @@ posts
 - media: image-centric, additional text
 - link: outside links for other sites, music, videos or pictures
 
-personas
-- instead of users, posts are made by personas
-- personas are things we aspire to be
-- instead of a profile page, they have a board
-- you can decorate those boards with custom colors, images, videos, text and music.
-
 psychology
 - instead of starting with a black canvas, it is recommended to import posts from other social media and personal diaries of the user, this helps with onboarding
 - there’s always a default persona: you, before deciding on what to be, first you need to know who you already are
@@ -28,3 +22,4 @@ psychology
 
 todos
 - white color theme
+- move all texts to a strings.xml

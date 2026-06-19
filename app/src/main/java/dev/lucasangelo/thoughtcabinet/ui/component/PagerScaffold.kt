@@ -30,7 +30,7 @@ fun PagerScaffold(
     canGoBack: Boolean = true,
     onGoBackRequest: () -> Unit,
     pageCount: Int,
-    pageContent: @Composable (PagerScope.(Int, PagerState) -> Unit)
+    pageContent: @Composable (PagerScope.(Int, PagerState) -> List<@Composable () -> Unit>)
 ) {
     CleanScaffold(
         backgroundColor = backgroundColor,
@@ -47,7 +47,7 @@ fun PagerScaffold(
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                pageContent = { page -> pageContent(page, pagerState) }
+                pageContent = { page -> pageContent(page, pagerState)[page].invoke() }
             )
 
             Row(
