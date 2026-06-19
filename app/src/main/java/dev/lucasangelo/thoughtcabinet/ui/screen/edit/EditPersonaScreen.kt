@@ -131,6 +131,7 @@ fun EditPersonaScreen(
             }
             3 -> {
                 EditPersonaSummary(
+                    viewModel = viewModel,
                     name = viewModel.nameText,
                     bio = viewModel.bioText,
                     profilePic = viewModel.profilePic,
@@ -204,7 +205,7 @@ fun EditPersonaProfilePicture(
 
             PersonaProfilePicture(
                 profilePic = profilePic,
-                inCache = true,
+                inCache = viewModel.hasNewProfilePicDraft,
                 modifier = Modifier.size(114.dp)
             )
 
@@ -374,6 +375,7 @@ fun EditPersonaColorPicker(
 
 @Composable
 fun EditPersonaSummary(
+    viewModel: EditPersonaViewModel,
     name: String,
     bio: String,
     profilePic: String?,
@@ -393,7 +395,7 @@ fun EditPersonaSummary(
             ) {
                 PersonaProfilePicture(
                     profilePic = profilePic,
-                    inCache = true,
+                    inCache = viewModel.hasNewProfilePicDraft,
                     modifier = Modifier.size(114.dp)
                 )
                 Column {
