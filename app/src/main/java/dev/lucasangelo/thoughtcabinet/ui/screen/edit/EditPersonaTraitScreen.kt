@@ -25,14 +25,12 @@ fun EditPersonaTraitScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val context = LocalContext.current
+
     val application = context.applicationContext as MainApplication
     val database = application.database
-
     val viewModel: EditPersonaTraitViewModel = viewModel(
         factory = viewModelFactory {
-            initializer {
-                EditPersonaTraitViewModel(dao = database.dao)
-            }
+            initializer { EditPersonaTraitViewModel(dao = database.dao) }
         }
     )
 

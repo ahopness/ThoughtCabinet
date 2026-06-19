@@ -62,14 +62,12 @@ fun InspectPersonaScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val context = LocalContext.current
+
     val application = context.applicationContext as MainApplication
     val database = application.database
-
     val viewModel: InspectPersonaViewModel = viewModel(
         factory = viewModelFactory {
-            initializer {
-                InspectPersonaViewModel(dao = database.dao)
-            }
+            initializer { InspectPersonaViewModel(dao = database.dao) }
         }
     )
 

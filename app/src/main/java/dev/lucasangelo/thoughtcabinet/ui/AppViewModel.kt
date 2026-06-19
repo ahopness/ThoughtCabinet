@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 
 class AppViewModel(private val dao: AppDao) : ViewModel() {
-    val thoughts: StateFlow<List<PostEntity>> = dao.getAllPosts()
+    val thoughts: StateFlow<List<PostEntity>> = dao.getAllFeedPosts()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000), // NOTE: standard android boilerplate for smooth rotations

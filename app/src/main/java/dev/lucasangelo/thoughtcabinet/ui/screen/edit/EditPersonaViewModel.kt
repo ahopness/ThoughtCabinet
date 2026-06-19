@@ -1,5 +1,7 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.edit
 
+import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,11 +11,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppDao
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
+import dev.lucasangelo.thoughtcabinet.util.cleanupDrafts
+import dev.lucasangelo.thoughtcabinet.util.copyInInternalStorage
+import dev.lucasangelo.thoughtcabinet.util.copyUriToInternalStorage
+import dev.lucasangelo.thoughtcabinet.util.draftsDir
+import dev.lucasangelo.thoughtcabinet.util.getFileExtension
+import dev.lucasangelo.thoughtcabinet.util.profilePicDir
 import kotlinx.coroutines.launch
-import java.io.File
 import java.time.Instant
+import java.util.UUID
 
 class EditPersonaViewModel(private val dao: AppDao) : ViewModel() {
     // NOTE: using Two-Way Data Binding here for simplicity’s sake
@@ -27,7 +33,6 @@ class EditPersonaViewModel(private val dao: AppDao) : ViewModel() {
         private set
     var persona by mutableStateOf<PersonaEntity?>(null)
         private set
-
     fun fetchPersona(id: Long?) {
         viewModelScope.launch {
             persona = if (id != null) dao.getPersona(id) else null
@@ -56,7 +61,7 @@ class EditPersonaViewModel(private val dao: AppDao) : ViewModel() {
             ))
         }
     }
-    fun InsertPersona() {
+    fun insertPersona() {
         viewModelScope.launch {
             dao.insertPersona(PersonaEntity(
                 id = 0,
@@ -72,20 +77,39 @@ class EditPersonaViewModel(private val dao: AppDao) : ViewModel() {
         }
     }
 
-    // NOTE: the 'Clear Current' button only sets the variable to null
-    // because if the user exists this screen without saving after deleting a pfp
-    // the path the variable is pointing to gets invalidated
-    fun cleanupProfilePics(filesDir: File) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val referencedProfilePics = dao.getAllPersonas()
-                .first()
-                .mapNotNull { it.profilePic }
-                .toSet()
-
-            val folder = File(filesDir, "profile-pictures")
-            folder.listFiles()
-                ?.filter { it.isFile && it.name !in referencedProfilePics }
-                ?.forEach { it.delete() }
+    var hasNewProfilePicDraft by mutableStateOf(false)
+        private set
+    fun importProfilePic(
+        context: Context,
+        uri: Uri,
+    ) : String? {
+        val newProfilePic = "${UUID.randomUUID()}.${getFileExtension(context, uri)}"
+        val copyResult = copyUriToInternalStorage(
+            context = context,
+            uri = uri,
+            fileParentDir = context.cacheDir,
+            fileName = draftsDir + newProfilePic
+        )
+        if (copyResult != null) {
+            hasNewProfilePicDraft = true
+            return newProfilePic
+        } else {
+            return null
         }
     }
+    fun commitProfilePic(
+        context: Context,
+    ) : Boolean {
+        if (profilePic == null || !hasNewProfilePicDraft)
+            return true
+
+        var commitedProfilePic = copyInInternalStorage(
+            context.cacheDir, draftsDir + profilePic,
+            context.filesDir, profilePicDir + profilePic
+        )
+
+        return commitedProfilePic != null
+    }
+    fun cleanupProfilePicDrafts(context: Context) =
+        cleanupDrafts(context)
 }

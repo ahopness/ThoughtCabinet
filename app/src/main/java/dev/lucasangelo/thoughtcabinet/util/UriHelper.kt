@@ -6,7 +6,15 @@ import android.webkit.MimeTypeMap
 import java.io.File
 import java.io.FileOutputStream
 
-fun getFileExtension(context: Context, uri: Uri): String? {
+val draftsDir = "drafts/"
+val profilePicDir = "profile-pictures/"
+val mediaDir = "post-media/"
+val traitsDir = "persona-traits/"
+
+fun getFileExtension(
+    context: Context,
+    uri: Uri
+) : String? {
     val mimeType = context.contentResolver.getType(uri) ?: return null
     return MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
 }
@@ -14,12 +22,13 @@ fun getFileExtension(context: Context, uri: Uri): String? {
 fun copyUriToInternalStorage(
     context: Context,
     uri: Uri,
-    fileName: String
-): File? {
+    fileParentDir: File,
+    fileName: String,
+) : File? {
     val inputStream = context.contentResolver.openInputStream(uri)
         ?: return null
 
-    val outputFile = File(context.filesDir, fileName)
+    val outputFile = File(fileParentDir, fileName)
     outputFile.parentFile?.mkdirs()
 
     inputStream.use { input ->
@@ -31,10 +40,32 @@ fun copyUriToInternalStorage(
     return outputFile
 }
 
+fun copyInInternalStorage(
+    inputFileParentDir: File,
+    inputFileName: String,
+    outputFileParentDir: File,
+    outputFileName: String,
+) : File? {
+    val inputFile = File(inputFileParentDir, inputFileName)
+    if (!inputFile.exists()) return null
+
+    val outputFile = File(outputFileParentDir, outputFileName)
+    outputFile.parentFile?.mkdirs()
+
+    return inputFile.copyTo(outputFile, overwrite = true)
+}
+
 fun deleteInternalStorageFile(
-    context: Context,
-    fileName: String
-): Boolean {
-    val file = File(context.filesDir, fileName)
+    fileParentDir: File,
+    fileName: String,
+) : Boolean {
+    val file = File(fileParentDir, fileName)
     return file.delete()
+}
+
+fun cleanupDrafts(
+    context: Context,
+) {
+    val drafts = File(context.cacheDir, draftsDir)
+    drafts.listFiles()?.forEach { it.delete() }
 }

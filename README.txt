@@ -1,0 +1,30 @@
+Thought Cabinet: Post For Yourself
+
+Your private microblogger.
+A chronology-based note app alternative to dopamine inducing social media and micro-blogging, a.k.a. microblog as a journal.
+
+# ABOUT
+
+posts
+- note: text-centric, additional media
+- article: formatted text and media
+- media: image-centric, additional text
+- link: outside links for other sites, music, videos or pictures
+
+personas
+- instead of users, posts are made by personas
+- personas are things we aspire to be
+- instead of a profile page, they have a board
+- you can decorate those boards with custom colors, images, videos, text and music.
+
+psychology
+- instead of starting with a black canvas, it is recommended to import posts from other social media and personal diaries of the user, this helps with onboarding
+- there’s always a default persona: you, before deciding on what to be, first you need to know who you already are
+- this is a diary disguised as a feed, you can freely post your thoughts here without the fear of other’s reactions and algorithms feeding off of you
+- the app should work great for people with adhd, this should be a place to dispose your firehose of thoughts
+- it started as an await to make me less addicted to twitter, now it turned into a mental health and personality tracker
+
+#######
+
+todos
+- white color theme

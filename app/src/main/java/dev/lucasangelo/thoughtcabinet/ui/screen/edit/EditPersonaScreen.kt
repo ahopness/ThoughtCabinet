@@ -51,8 +51,10 @@ import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
+import dev.lucasangelo.thoughtcabinet.util.cleanupDrafts
 import dev.lucasangelo.thoughtcabinet.util.copyUriToInternalStorage
 import dev.lucasangelo.thoughtcabinet.util.darken
+import dev.lucasangelo.thoughtcabinet.util.draftsDir
 import dev.lucasangelo.thoughtcabinet.util.getFileExtension
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -74,14 +76,12 @@ fun EditPersonaScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val context = LocalContext.current
+
     val application = context.applicationContext as MainApplication
     val database = application.database
-
     val viewModel: EditPersonaViewModel = viewModel(
         factory = viewModelFactory {
-            initializer {
-                EditPersonaViewModel(dao = database.dao)
-            }
+            initializer { EditPersonaViewModel(dao = database.dao) }
         }
     )
 
@@ -98,17 +98,14 @@ fun EditPersonaScreen(
         when (page) {
             0 -> {
                 EditPersonaProfilePicture(
+                    viewModel = viewModel,
                     profilePic = viewModel.profilePic,
                     onProfilePicChanged = { if (viewModel.hasLoadedPersona) viewModel.profilePic = it },
                     onNotifyError = {
-                        coroutineScope.launch {
-                            rootShowSnackbar(it)
-                        }
+                        coroutineScope.launch { rootShowSnackbar(it) }
                     },
                     onNextPageRequested = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(1)
-                        }
+                        coroutineScope.launch { pagerState.animateScrollToPage(1) }
                     },
                 )
             }
@@ -119,9 +116,7 @@ fun EditPersonaScreen(
                     bio = viewModel.bioText,
                     onBioChanged = { if (viewModel.hasLoadedPersona) viewModel.bioText = it },
                     onNextPageRequested = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(2)
-                        }
+                        coroutineScope.launch { pagerState.animateScrollToPage(2) }
                     },
                 )
             }
@@ -130,9 +125,7 @@ fun EditPersonaScreen(
                     colorTheme = viewModel.colorTheme,
                     onThemeChanged = { if (viewModel.hasLoadedPersona) viewModel.colorTheme = it },
                     onNextPageRequested = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(3)
-                        }
+                        coroutineScope.launch { pagerState.animateScrollToPage(3) }
                     },
                 )
             }
@@ -153,8 +146,12 @@ fun EditPersonaScreen(
                                 viewModel.updatePersona(viewModel.persona!!)
                                 rootShowSnackbar("Persona updated successfully!")
                             } else {
-                                viewModel.InsertPersona()
+                                viewModel.insertPersona()
                                 rootShowSnackbar("Persona created successfully!")
+                            }
+
+                            if (!viewModel.commitProfilePic(context)) {
+                                coroutineScope.launch { rootShowSnackbar("ERROR: Couldn't import profile picture.") }
                             }
 
                             rootNavController.popBackStack()
@@ -165,16 +162,16 @@ fun EditPersonaScreen(
         }
     }
 
-    // NOTE: read comments at EditPersonaViewModel::CleanupProfilePics for more info
     DisposableEffect(Unit) {
         onDispose {
-            viewModel.cleanupProfilePics(context.filesDir)
+            viewModel.cleanupProfilePicDrafts(context)
         }
     }
 }
 
 @Composable
 fun EditPersonaProfilePicture(
+    viewModel: EditPersonaViewModel,
     profilePic: String?,
     onProfilePicChanged: (String?) -> Unit,
     onNotifyError: (String) -> Unit,
@@ -185,13 +182,8 @@ fun EditPersonaProfilePicture(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         if (uri != null) {
-            val newProfilePic = "${UUID.randomUUID()}.${getFileExtension(context, uri)}"
-            val copyResult = copyUriToInternalStorage(
-                context = context,
-                uri = uri,
-                fileName = "profile-pictures/${newProfilePic}"
-            )
-            if (copyResult == null) {
+            val newProfilePic = viewModel.importProfilePic(context, uri)
+            if(newProfilePic == null) {
                 onNotifyError("ERROR: Couldn't open selected image.")
                 return@rememberLauncherForActivityResult
             }

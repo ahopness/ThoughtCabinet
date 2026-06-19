@@ -44,19 +44,17 @@ fun AppScreen() {
 
     val snackbarScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    fun showSnackbar(message: String) {
+    val showSnackbar: (String) -> Unit = { message: String ->
         snackbarScope.launch { snackbarHostState.showSnackbar(message) }
     }
 
     val context = LocalContext.current
+
     val application = context.applicationContext as MainApplication
     val database = application.database
-
     val viewModel: AppViewModel = viewModel(
         factory = viewModelFactory {
-            initializer {
-                AppViewModel(dao = database.dao)
-            }
+            initializer { AppViewModel(dao = database.dao) }
         }
     )
 
@@ -102,7 +100,7 @@ fun AppScreen() {
                 InspectPersonaScreen(
                     routeObject.id,
                     navController,
-                    { showSnackbar(it) },
+                    showSnackbar,
                 )
             }
             composable<EditPersonaRoute>() { backStackEntry ->
@@ -110,7 +108,7 @@ fun AppScreen() {
                 EditPersonaScreen(
                     routeObject.id,
                     navController,
-                    { showSnackbar(it) },
+                    showSnackbar,
                 )
             }
             composable<EditPersonaTraitRoute>() { backStackEntry ->
@@ -118,7 +116,7 @@ fun AppScreen() {
                 EditPersonaTraitScreen(
                     routeObject.id,
                     navController,
-                    { showSnackbar(it) },
+                    showSnackbar,
                 )
             }
         }

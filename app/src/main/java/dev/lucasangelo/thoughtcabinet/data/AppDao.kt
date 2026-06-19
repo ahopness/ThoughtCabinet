@@ -22,8 +22,12 @@ interface AppDao {
 
     @Insert
     suspend fun insertPost(post: PostEntity): Long
-    @Query("SELECT * FROM PostEntity")
-    fun getAllPosts(): Flow<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity WHERE commentOf IS NULL")
+    fun getAllFeedPosts(): Flow<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity WHERE commentOf = :id")
+    fun getAllCommentsOf(id: Long): Flow<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity WHERE authorId = :authorId")
+    fun getAllPostsBy(authorId: Long): Flow<List<PostEntity>>
     @Query("SELECT * FROM PostEntity WHERE id = :id")
     suspend fun getPost(id: Long): PostEntity?
     @Update
