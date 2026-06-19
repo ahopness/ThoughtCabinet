@@ -204,6 +204,7 @@ fun EditPersonaProfilePicture(
 
             PersonaProfilePicture(
                 profilePic = profilePic,
+                inCache = true,
                 modifier = Modifier.size(114.dp)
             )
 
@@ -392,6 +393,7 @@ fun EditPersonaSummary(
             ) {
                 PersonaProfilePicture(
                     profilePic = profilePic,
+                    inCache = true,
                     modifier = Modifier.size(114.dp)
                 )
                 Column {

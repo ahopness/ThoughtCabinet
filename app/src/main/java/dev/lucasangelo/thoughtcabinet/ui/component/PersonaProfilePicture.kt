@@ -12,12 +12,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import coil3.compose.AsyncImage
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.util.draftsDir
+import dev.lucasangelo.thoughtcabinet.util.profilePicDir
 import java.io.File
 
 @Composable
 fun PersonaProfilePicture(
     profilePic: String?,
-    modifier: Modifier = Modifier
+    inCache: Boolean = false,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     if (profilePic == null) {
@@ -28,7 +31,10 @@ fun PersonaProfilePicture(
         )
     } else {
         AsyncImage(
-            model = File(context.filesDir, "profile-pictures/${profilePic}"),
+            model = File(
+                if (inCache) context.cacheDir else context.filesDir,
+                (if (inCache) draftsDir else profilePicDir) + profilePic
+            ),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = modifier
