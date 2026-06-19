@@ -2,20 +2,15 @@ package dev.lucasangelo.thoughtcabinet.ui.screen.edit
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.graphics.toColor
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
-import dev.lucasangelo.thoughtcabinet.data.AppDao
-import dev.lucasangelo.thoughtcabinet.data.AppDatabase
-import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
+import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
-import dev.lucasangelo.thoughtcabinet.util.darken
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -26,18 +21,28 @@ fun EditPersonaTraitScreen(
     personaId: Long,
     rootNavController: NavController,
     rootShowSnackbar: (String) -> Unit,
-    database: AppDao,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    var currentPersona by remember { mutableStateOf<PersonaEntity?>(null) }
+    val context = LocalContext.current
+    val application = context.applicationContext as MainApplication
+    val database = application.database
+
+    val viewModel: EditPersonaTraitViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer {
+                EditPersonaTraitViewModel(dao = database.dao)
+            }
+        }
+    )
+
     LaunchedEffect(personaId) {
-        currentPersona = database.getPersona(personaId)
+        // TODO
     }
 
     PagerScaffold(
         title = "Add A Trait To Your Persona",
-        backgroundColor = Color(currentPersona?.colorTheme ?: 0).darken(),
+        backgroundColor = Color.Black, /* TODO Color(currentPersona?.colorTheme ?: 0).darken(), */
         canGoBack = true,
         onGoBackRequest = { rootNavController.popBackStack() },
         pageCount = 2

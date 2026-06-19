@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import dev.lucasangelo.thoughtcabinet.ui.App
+import dev.lucasangelo.thoughtcabinet.ui.AppScreen
 import dev.lucasangelo.thoughtcabinet.ui.ThoughtCabinetTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ThoughtCabinetTheme {
-                App()
+                AppScreen()
             }
         }
     }

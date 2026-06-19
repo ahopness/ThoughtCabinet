@@ -37,18 +37,18 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.HueSlider
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
-import dev.lucasangelo.thoughtcabinet.data.AppDao
-import dev.lucasangelo.thoughtcabinet.data.AppDatabase
-import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
 import dev.lucasangelo.thoughtcabinet.util.copyUriToInternalStorage
@@ -56,11 +56,8 @@ import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.getFileExtension
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import java.io.File
-import java.time.Instant
 import java.util.UUID
 
 @Serializable
@@ -73,40 +70,36 @@ fun EditPersonaScreen(
     personaId: Long?,
     rootNavController: NavController,
     rootShowSnackbar: (String) -> Unit,
-    database: AppDao,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    var hasLoadedPersona by remember { mutableStateOf(false) }
-    var currentPersona by remember { mutableStateOf<PersonaEntity?>(null) }
+    val context = LocalContext.current
+    val application = context.applicationContext as MainApplication
+    val database = application.database
 
-    var name by remember { mutableStateOf("") }
-    var bio by remember { mutableStateOf("") }
-    var profilePic by remember { mutableStateOf<String?>(null) }
-    var colorTheme by remember { mutableStateOf(Color.Black) }
+    val viewModel: EditPersonaViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer {
+                EditPersonaViewModel(dao = database.dao)
+            }
+        }
+    )
 
     LaunchedEffect(personaId) {
-        currentPersona = if (personaId != null) database.getPersona(personaId) else null
-        currentPersona?.let {
-            name = it.name
-            bio = it.bio
-            profilePic = it.profilePic
-            colorTheme = Color(it.colorTheme)
-        }
-        hasLoadedPersona = true
+        viewModel.fetchPersona(personaId)
     }
 
     PagerScaffold(
-        title = if (currentPersona != null) "Edit Your Persona" else "Create A Persona",
-        backgroundColor = colorTheme.darken(),
+        title = if (viewModel.persona != null) "Edit Your Persona" else "Create A Persona",
+        backgroundColor = viewModel.colorTheme.darken(),
         onGoBackRequest = { rootNavController.popBackStack() },
         pageCount = 4,
     ) { page, pagerState ->
         when (page) {
             0 -> {
                 EditPersonaProfilePicture(
-                    profilePic = profilePic,
-                    onProfilePicChanged = { if (hasLoadedPersona) profilePic = it },
+                    profilePic = viewModel.profilePic,
+                    onProfilePicChanged = { if (viewModel.hasLoadedPersona) viewModel.profilePic = it },
                     onNotifyError = {
                         coroutineScope.launch {
                             rootShowSnackbar(it)
@@ -121,10 +114,10 @@ fun EditPersonaScreen(
             }
             1 -> {
                 EditPersonaTextFields(
-                    name = name,
-                    onNameChanged = { name = it },
-                    bio = bio,
-                    onBioChanged = { if (hasLoadedPersona) bio = it },
+                    name = viewModel.nameText,
+                    onNameChanged = { viewModel.nameText = it },
+                    bio = viewModel.bioText,
+                    onBioChanged = { if (viewModel.hasLoadedPersona) viewModel.bioText = it },
                     onNextPageRequested = {
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(2)
@@ -134,8 +127,8 @@ fun EditPersonaScreen(
             }
             2 -> {
                 EditPersonaColorPicker(
-                    colorTheme = colorTheme,
-                    onThemeChanged = { if (hasLoadedPersona) colorTheme = it },
+                    colorTheme = viewModel.colorTheme,
+                    onThemeChanged = { if (viewModel.hasLoadedPersona) viewModel.colorTheme = it },
                     onNextPageRequested = {
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(3)
@@ -145,34 +138,22 @@ fun EditPersonaScreen(
             }
             3 -> {
                 EditPersonaSummary(
-                    name = name,
-                    bio = bio,
-                    profilePic = profilePic,
-                    isEditingPersona = (currentPersona != null),
+                    name = viewModel.nameText,
+                    bio = viewModel.bioText,
+                    profilePic = viewModel.profilePic,
+                    isEditingPersona = (viewModel.persona != null),
                     onCreatePersonaRequested = {
                         coroutineScope.launch {
-                            if (name.trim().isEmpty()) {
+                            if (viewModel.nameText.trim().isEmpty()) {
                                 rootShowSnackbar("Your persona needs at least a name!")
                                 return@launch
                             }
 
-                            val basePersona = PersonaEntity(
-                                id = currentPersona?.id ?: 0,
-                                createdAt = currentPersona?.createdAt ?: Instant.now(),
-                                updatedAt = if (currentPersona != null) Instant.now() else null,
-                                name = name.trim(),
-                                bio = bio.trim(),
-                                profilePic = profilePic,
-                                colorTheme = colorTheme.toArgb(),
-                                trait = currentPersona?.trait ?: emptyList(),
-                                metadata = currentPersona?.metadata ?: emptyMap()
-                            )
-
-                            if (currentPersona != null) {
-                                database.updatePersona(basePersona)
+                            if (viewModel.persona != null) {
+                                viewModel.updatePersona(viewModel.persona!!)
                                 rootShowSnackbar("Persona updated successfully!")
                             } else {
-                                database.insertPersona(basePersona)
+                                viewModel.InsertPersona()
                                 rootShowSnackbar("Persona created successfully!")
                             }
 
@@ -184,23 +165,10 @@ fun EditPersonaScreen(
         }
     }
 
-    // NOTE: the 'Clear Current' button only sets the variable to null
-    // because if the user exists this screen without saving after deleting
-    // a pfp, the path the variable is pointing to gets invalidated
-    val context = LocalContext.current
+    // NOTE: read comments at EditPersonaViewModel::CleanupProfilePics for more info
     DisposableEffect(Unit) {
         onDispose {
-            coroutineScope.launch {
-                val referencedProfilePics = database.getAllPersonas()
-                    .first()
-                    .mapNotNull { it.profilePic }
-                    .toSet()
-
-                val folder = File(context.filesDir, "profile-pictures")
-                folder.listFiles()
-                    ?.filter { it.isFile && it.name !in referencedProfilePics }
-                    ?.forEach { it.delete() }
-            }
+            viewModel.cleanupProfilePics(context.filesDir)
         }
     }
 }

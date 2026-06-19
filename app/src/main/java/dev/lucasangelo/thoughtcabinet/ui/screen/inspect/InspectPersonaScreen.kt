@@ -1,10 +1,8 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.inspect
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,13 +29,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
-import androidx.navigation.Navigator
-import androidx.navigation.navOptions
+import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
-import dev.lucasangelo.thoughtcabinet.data.AppDao
-import dev.lucasangelo.thoughtcabinet.data.AppDatabase
-import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingExtendedTopBar
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingExtendedTopBarActionItem
@@ -61,29 +58,39 @@ fun InspectPersonaScreen(
     personaId: Long,
     rootNavController: NavController,
     rootShowSnackbar: (String) -> Unit,
-    database: AppDao,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    var currentPersona by remember { mutableStateOf<PersonaEntity?>(null) }
+    val context = LocalContext.current
+    val application = context.applicationContext as MainApplication
+    val database = application.database
+
+    val viewModel: InspectPersonaViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer {
+                InspectPersonaViewModel(dao = database.dao)
+            }
+        }
+    )
+
     LaunchedEffect(personaId) {
-        currentPersona = database.getPersona(personaId)
+        viewModel.fetchPersona(personaId)
     }
 
     var openDeleteAlertDialog by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
     CleanScaffold(
-        backgroundColor = Color(currentPersona?.colorTheme ?: 0).darken(),
+        backgroundColor = Color(viewModel.persona?.colorTheme ?: 0).darken(),
         topBar = {
             FloatingExtendedTopBar(
-                title = currentPersona?.name ?: "",
-                description = currentPersona?.bio ?: "",
+                title = viewModel.persona?.name ?: "",
+                description = viewModel.persona?.bio ?: "",
                 canGoBack = true,
                 onGoBackRequest = { rootNavController.popBackStack() },
                 iconContent = { modifier, collapsedFraction ->
                     PersonaProfilePicture(
-                        profilePic = currentPersona?.profilePic,
+                        profilePic = viewModel.persona?.profilePic,
                         modifier = modifier
                             .scale(
                                 lerp(.9f, .6f, collapsedFraction())
@@ -177,7 +184,7 @@ fun InspectPersonaScreen(
             confirmButton = {
                 Button(onClick = {
                     coroutineScope.launch {
-                        currentPersona?.let { database.deletePersona(it) }
+                        viewModel.persona?.let { viewModel.deletePersona(it) }
                         onDismissRequest()
                         rootNavController.popBackStack()
                         rootShowSnackbar("Persona deletes successfully!")

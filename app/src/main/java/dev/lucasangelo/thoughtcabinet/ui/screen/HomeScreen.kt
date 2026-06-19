@@ -10,7 +10,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
-import dev.lucasangelo.thoughtcabinet.data.AppDao
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationActionItem
@@ -19,7 +18,6 @@ import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationExpandableI
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.home.CrowdScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.home.ThoughtsScreen
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -33,7 +31,6 @@ fun HomeScreen(
     crowdListState: LazyListState,
     thoughts: List<PostEntity>,
     crowd: List<PersonaEntity>,
-    database: AppDao,
 ) {
     Box(Modifier.fillMaxSize()) {
         val pagerState = rememberPagerState(pageCount = { 2 })

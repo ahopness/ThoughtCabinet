@@ -20,7 +20,7 @@ data class PersonaEntity(
     val profilePic: String?,
     val colorTheme: Int,
 
-    val trait: List<PersonaTrait>,
+    val traits: List<PersonaTrait>,
 
     val metadata: Map<String, String>,
 )
