@@ -10,7 +10,9 @@ import dev.lucasangelo.thoughtcabinet.data.AppDao
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaTrait
 import dev.lucasangelo.thoughtcabinet.data.PersonaTraitType
+import dev.lucasangelo.thoughtcabinet.util.LinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.deleteInternalStorageFile
+import dev.lucasangelo.thoughtcabinet.util.fetchLinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.traitsDir
 import kotlinx.coroutines.launch
 import java.time.Instant

@@ -180,7 +180,7 @@ fun InspectPersonaScreen(
                                                 .background(
                                                     brush = Brush.radialGradient(
                                                         colors = listOf(
-                                                            Color.Black.copy(0.25f),
+                                                            Color.Black.copy(0.5f),
                                                             Color.Transparent
                                                         ),
                                                         center = Offset(Float.POSITIVE_INFINITY, 0f),
