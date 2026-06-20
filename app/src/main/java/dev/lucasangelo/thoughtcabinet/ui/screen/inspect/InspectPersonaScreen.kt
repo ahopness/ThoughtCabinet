@@ -162,13 +162,12 @@ fun InspectPersonaScreen(
                         viewModel.persona.let {
                             val persona = it!!
 
-                            persona.traits.forEach { trait ->
-                                val traitId = persona.traits.indexOf(trait)
-
+                            persona.traits.forEachIndexed { traitId, trait ->
                                 PersonaTraitTile(
                                     type = trait.type,
                                     content = trait.content,
-                                    backgroundColor = Color(persona.colorTheme)
+                                    backgroundColor = Color(persona.colorTheme),
+                                    rootShowSnackbar = rootShowSnackbar
                                 ) {
                                     var expanded by remember { mutableStateOf(false) }
                                     Box(Modifier.align(Alignment.TopEnd)) {
@@ -325,6 +324,7 @@ fun InspectPersonaScreen(
                         trait = pendingTraitForDeletion!!,
                         at = it!!
                     )
+                    rootShowSnackbar("Trait deleted successfully!")
                 }
             }
         )

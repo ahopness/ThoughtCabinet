@@ -64,15 +64,13 @@ fun EditPersonaScreen(
     rootNavController: NavController,
     rootShowSnackbar: (String) -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
     val context = LocalContext.current
 
     val application = context.applicationContext as MainApplication
     val database = application.database
     val viewModel: EditPersonaViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { EditPersonaViewModel(dao = database.dao) }
+            initializer { EditPersonaViewModel(database.dao, application) }
         }
     )
 
@@ -97,27 +95,21 @@ fun EditPersonaScreen(
                 EditPersonaProfilePicture(
                     pageOffsetDistance = offsetDistance,
                     viewModel = viewModel,
-                    profilePic = viewModel.profilePic,
-                    onProfilePicChanged = { if (viewModel.hasLoadedPersona) viewModel.profilePic = it },
-                    onNotifyError = { rootShowSnackbar(it) },
+                    onNotifyError = rootShowSnackbar,
                     onNextPageRequested = onNextPageRequested,
                 )
             },
             {
                 EditPersonaTextFields(
                     pageOffsetDistance = offsetDistance,
-                    name = viewModel.nameText,
-                    onNameChanged = { viewModel.nameText = it },
-                    bio = viewModel.bioText,
-                    onBioChanged = { if (viewModel.hasLoadedPersona) viewModel.bioText = it },
+                    viewModel = viewModel,
                     onNextPageRequested = onNextPageRequested,
                 )
             },
             {
                 EditPersonaColorPicker(
                     pageOffsetDistance = offsetDistance,
-                    colorTheme = viewModel.colorTheme,
-                    onThemeChanged = { if (viewModel.hasLoadedPersona) viewModel.colorTheme = it },
+                    viewModel = viewModel,
                     onNextPageRequested = onNextPageRequested,
                 )
             },
@@ -125,32 +117,8 @@ fun EditPersonaScreen(
                 EditPersonaSummary(
                     pageOffsetDistance = offsetDistance,
                     viewModel = viewModel,
-                    name = viewModel.nameText,
-                    bio = viewModel.bioText,
-                    profilePic = viewModel.profilePic,
-                    isEditingPersona = (viewModel.persona != null),
-                    onCreatePersonaRequested = {
-                        coroutineScope.launch {
-                            if (viewModel.nameText.trim().isEmpty()) {
-                                rootShowSnackbar("Your persona needs at least a name!")
-                                return@launch
-                            }
-
-                            if (viewModel.persona != null) {
-                                viewModel.updatePersona(viewModel.persona!!)
-                                rootShowSnackbar("Persona updated successfully!")
-                            } else {
-                                viewModel.insertPersona()
-                                rootShowSnackbar("Persona created successfully!")
-                            }
-
-                            if (!viewModel.commitProfilePic(context)) {
-                                coroutineScope.launch { rootShowSnackbar("ERROR: Couldn't import profile picture.") }
-                            }
-
-                            rootNavController.popBackStack()
-                        }
-                    },
+                    rootNavController = rootNavController,
+                    rootShowSnackbar = rootShowSnackbar
                 )
             }
         )
@@ -158,7 +126,7 @@ fun EditPersonaScreen(
 
     DisposableEffect(Unit) {
         onDispose {
-            viewModel.cleanupProfilePicDrafts(context)
+            viewModel.cleanupProfilePicDrafts()
         }
     }
 }
@@ -195,17 +163,19 @@ Instead of a profile page, personas have a board which you can add personality t
 fun EditPersonaProfilePicture(
     pageOffsetDistance: Float,
     viewModel: EditPersonaViewModel,
-    profilePic: String?,
-    onProfilePicChanged: (String?) -> Unit,
     onNotifyError: (String) -> Unit,
     onNextPageRequested: () -> Unit,
 ) {
-    val context = LocalContext.current
+    val onProfilePicChanged: (String?) -> Unit = {
+        if (viewModel.hasLoadedPersona)
+            viewModel.profilePic = it
+    }
+
     val picker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         if (uri != null) {
-            val newProfilePic = viewModel.importProfilePic(context, uri)
+            val newProfilePic = viewModel.importProfilePic(uri)
             if(newProfilePic == null) {
                 onNotifyError("ERROR: Couldn't open selected image.")
                 return@rememberLauncherForActivityResult
@@ -224,7 +194,7 @@ fun EditPersonaProfilePicture(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             PersonaProfilePicture(
-                profilePic = profilePic,
+                profilePic = viewModel.profilePic,
                 inCache = viewModel.hasNewProfilePicDraft,
                 modifier = Modifier.size(114.dp)
             )
@@ -240,7 +210,7 @@ fun EditPersonaProfilePicture(
                 },
             ) { Text("Import From Library") }
 
-            if (profilePic != null) {
+            if (viewModel.profilePic != null) {
                 Spacer(Modifier.height(8.dp))
 
                 OutlinedButton(
@@ -267,10 +237,7 @@ fun EditPersonaProfilePicture(
 @Composable
 fun EditPersonaTextFields(
     pageOffsetDistance: Float,
-    name: String,
-    onNameChanged: (String) -> Unit,
-    bio: String,
-    onBioChanged: (String) -> Unit,
+    viewModel: EditPersonaViewModel,
     onNextPageRequested: () -> Unit,
 ) {
     PagerScaffoldContent(pageOffsetDistance) {
@@ -280,8 +247,8 @@ fun EditPersonaTextFields(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             OutlinedTextField(
-                value = name,
-                onValueChange = onNameChanged,
+                value = viewModel.nameText,
+                onValueChange = { viewModel.nameText = it },
                 label = { Text("Persona's Name") },
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
@@ -292,8 +259,8 @@ fun EditPersonaTextFields(
             )
             Spacer(Modifier.height(16.dp))
             OutlinedTextField(
-                value = bio,
-                onValueChange = onBioChanged,
+                value = viewModel.bioText,
+                onValueChange = { if (viewModel.hasLoadedPersona) viewModel.bioText = it },
                 label = { Text("Persona's Bio") },
                 maxLines = 6,
                 minLines = 3,
@@ -318,8 +285,7 @@ fun EditPersonaTextFields(
 @Composable
 fun EditPersonaColorPicker(
     pageOffsetDistance: Float,
-    colorTheme: Color,
-    onThemeChanged: (Color) -> Unit,
+    viewModel: EditPersonaViewModel,
     onNextPageRequested: () -> Unit,
 ) {
     PagerScaffoldContent(pageOffsetDistance) {
@@ -341,13 +307,13 @@ fun EditPersonaColorPicker(
 
             HueSlider(
                 controller = colorPickerController,
-                initialColor = colorTheme,
+                initialColor = viewModel.colorTheme,
                 modifier = slidersModifier
             )
             Spacer(Modifier.height(24.dp))
             BrightnessSlider(
                 controller = colorPickerController,
-                initialColor = colorTheme,
+                initialColor = viewModel.colorTheme,
                 modifier = slidersModifier
             )
 
@@ -355,7 +321,7 @@ fun EditPersonaColorPicker(
                 snapshotFlow { colorPickerController.selectedColor.value }
                     .distinctUntilChanged()
                     .filter { it != Color.Transparent } // NOTE: color reset bug fix
-                    .collect(onThemeChanged)
+                    .collect({ if (viewModel.hasLoadedPersona) viewModel.colorTheme = it })
             }
         }
 
@@ -369,11 +335,8 @@ fun EditPersonaColorPicker(
 fun EditPersonaSummary(
     pageOffsetDistance: Float,
     viewModel: EditPersonaViewModel,
-    name: String,
-    bio: String,
-    profilePic: String?,
-    isEditingPersona: Boolean,
-    onCreatePersonaRequested: () -> Unit,
+    rootShowSnackbar: (String) -> Unit,
+    rootNavController: NavController,
 ) {
     PagerScaffoldContent(pageOffsetDistance) {
         Text("Looks good?")
@@ -383,25 +346,48 @@ fun EditPersonaSummary(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             PersonaProfilePicture(
-                profilePic = profilePic,
+                profilePic = viewModel.profilePic,
                 inCache = viewModel.hasNewProfilePicDraft,
                 modifier = Modifier.size(114.dp)
             )
             Column {
                 Text(
-                    text = name.ifEmpty { "(Empty)" },
+                    text = viewModel.nameText.ifEmpty { "(Empty)" },
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = bio.ifEmpty { "(Empty)" },
+                    text = viewModel.bioText.ifEmpty { "(Empty)" },
                     color = Color.Gray,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
         }
 
-        Button(onClick = onCreatePersonaRequested) {
+        val coroutineScope = rememberCoroutineScope()
+        Button(onClick = {
+            coroutineScope.launch {
+                if (viewModel.nameText.trim().isEmpty()) {
+                    rootShowSnackbar("Your persona needs at least a name!")
+                    return@launch
+                }
+
+                if (viewModel.persona != null) {
+                    viewModel.updatePersona(viewModel.persona!!)
+                    rootShowSnackbar("Persona updated successfully!")
+                } else {
+                    viewModel.insertPersona()
+                    rootShowSnackbar("Persona created successfully!")
+                }
+
+                if (!viewModel.commitProfilePic()) {
+                    coroutineScope.launch { rootShowSnackbar("ERROR: Couldn't import profile picture.") }
+                }
+
+                rootNavController.popBackStack()
+            }
+        }) {
+            val isEditingPersona = (viewModel.persona != null)
             Text(if (isEditingPersona) "Edit Persona" else "Create Persona")
         }
     }

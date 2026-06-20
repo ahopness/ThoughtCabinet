@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -35,7 +36,7 @@ fun DeleteConfirmationDialog(
             Button(onClick = onDismiss) { Text("Dismiss") }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(); onDismiss() }) { Text("Confirm") }
+            OutlinedButton(onClick = { onConfirm(); onDismiss() }) { Text("Confirm") }
         },
     )
 

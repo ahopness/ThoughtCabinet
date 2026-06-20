@@ -47,6 +47,7 @@ fun PersonaTraitTile(
     content: String,
     mediaInCache: Boolean = false,
     backgroundColor: Color,
+    rootShowSnackbar: (String) -> Unit,
     modifier: Modifier = Modifier,
     extras: @Composable BoxScope.() -> Unit = {},
 ) {
@@ -85,7 +86,7 @@ fun PersonaTraitTile(
                         try {
                             uriHandler.openUri(content)
                         } catch (e: Exception) {
-                            Log.e("OpenUrl", "Could not open URL: $content", e)
+                            rootShowSnackbar("ERROR: Could not open URL: $content")
                         }
                 })) {
                     var linkMetadata by remember(content) { mutableStateOf<LinkMetadata?>(null) }

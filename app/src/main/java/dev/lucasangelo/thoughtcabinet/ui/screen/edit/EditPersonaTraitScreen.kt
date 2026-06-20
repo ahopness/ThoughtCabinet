@@ -66,15 +66,13 @@ fun EditPersonaTraitScreen(
     rootNavController: NavController,
     rootShowSnackbar: (String) -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
     val context = LocalContext.current
 
     val application = context.applicationContext as MainApplication
     val database = application.database
     val viewModel: EditPersonaTraitViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { EditPersonaTraitViewModel(dao = database.dao) }
+            initializer { EditPersonaTraitViewModel(database.dao, application) }
         }
     )
 
@@ -101,10 +99,7 @@ fun EditPersonaTraitScreen(
                 EditPersonaTraitContent(
                     pageOffsetDistance = offsetDistance,
                     viewModel = viewModel,
-                    onNotifyError = { rootShowSnackbar(it) },
-                    traitType = viewModel.traitType,
-                    traitContent = viewModel.traitContent,
-                    onTraitContentChanced = { viewModel.traitContent = it },
+                    onNotifyError = rootShowSnackbar,
                     onNextPageRequested = onNextPageRequested
                 )
             },
@@ -112,36 +107,8 @@ fun EditPersonaTraitScreen(
                 EditPersonaTraitTypeSummary(
                     pageOffsetDistance = offsetDistance,
                     viewModel = viewModel,
-                    isEditingPersonaTrait = (viewModel.trait != null),
-                    onCreatePersonaTraitRequested = {
-                        coroutineScope.launch {
-                            val currentPersona = viewModel.persona
-                            if (currentPersona == null) {
-                                rootShowSnackbar("ERROR: Persona not found.")
-                                return@launch
-                            }
-
-                            if (viewModel.traitContent.trim().isEmpty()) {
-                                rootShowSnackbar("Your trait cannot be empty!")
-                                return@launch
-                            }
-
-                            val oldTrait = viewModel.trait
-                            if (oldTrait != null) {
-                                viewModel.updateTrait(oldTrait, currentPersona)
-                                rootShowSnackbar("Trait updated successfully!")
-                            } else {
-                                viewModel.insertTrait(currentPersona)
-                                rootShowSnackbar("Trait added successfully!")
-                            }
-
-                            if (!viewModel.commitMedia(context)) {
-                                rootShowSnackbar("ERROR: Couldn't import media.")
-                            }
-
-                            rootNavController.popBackStack()
-                        }
-                    }
+                    rootNavController = rootNavController,
+                    rootShowSnackbar = rootShowSnackbar,
                 )
             },
         )
@@ -149,7 +116,7 @@ fun EditPersonaTraitScreen(
 
     DisposableEffect(Unit) {
         onDispose {
-            viewModel.cleanupMediaDrafts(context)
+            viewModel.cleanupMediaDrafts()
         }
     }
 }
@@ -183,21 +150,34 @@ fun EditPersonaTraitTypeSelect(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            val isEditingPersonaTrait = (viewModel.trait != null)
             TypeDescriptionButton(
                 icon = R.drawable.icon_post,
-                title = "Text",
+                title = "Text" +
+                        if (isEditingPersonaTrait && viewModel.traitType == PersonaTraitType.TEXT)
+                            " " + "(current)"
+                        else
+                            "",
                 description = "Values, goals, quotes: Motivation.",
                 onClick = { onTryChangeTraitType(PersonaTraitType.TEXT) }
             )
             TypeDescriptionButton(
                 icon = R.drawable.icon_media,
-                title = "Media",
+                title = "Media" +
+                        if (isEditingPersonaTrait && viewModel.traitType == PersonaTraitType.MEDIA)
+                            " " + "(current)"
+                        else
+                            "",
                 description = "Aesthetics, memories: Identity",
                 onClick = { onTryChangeTraitType(PersonaTraitType.MEDIA) }
             )
             TypeDescriptionButton(
-                icon = R.drawable.icon_link_post,
-                title = "Link",
+                icon = R.drawable.icon_link,
+                title = "Link" +
+                        if (isEditingPersonaTrait && viewModel.traitType == PersonaTraitType.LINK)
+                            " " + "(current)"
+                        else
+                            "",
                 description = "Songs, videos, wikis: Logic",
                 onClick = { onTryChangeTraitType(PersonaTraitType.LINK) }
             )
@@ -218,18 +198,16 @@ fun EditPersonaTraitContent(
     pageOffsetDistance: Float,
     viewModel: EditPersonaTraitViewModel,
     onNotifyError: (String) -> Unit,
-    traitType: PersonaTraitType,
-    traitContent: String,
-    onTraitContentChanced: (String) -> Unit,
     onNextPageRequested: () -> Unit,
 ) {
     PagerScaffoldContent(pageOffsetDistance) {
         Text("Then, add the content you want to")
 
-        when(traitType) {
+        val onTraitContentChanced: (String) -> Unit = { viewModel.traitContent = it }
+        when(viewModel.traitType) {
             PersonaTraitType.TEXT ->
                 OutlinedTextField(
-                    value = traitContent,
+                    value = viewModel.traitContent,
                     onValueChange = onTraitContentChanced,
                     label = { Text("Text") },
                     maxLines = 6,
@@ -243,14 +221,14 @@ fun EditPersonaTraitContent(
                 )
             PersonaTraitType.MEDIA ->
                 EditPersonaTraitContentImagePicker(
-                    traitContent = traitContent,
+                    traitContent = viewModel.traitContent,
                     viewModel = viewModel,
                     onNotifyError = onNotifyError,
                     onTraitContentChanced = onTraitContentChanced,
                 )
             PersonaTraitType.LINK ->
                 OutlinedTextField(
-                    value = traitContent,
+                    value = viewModel.traitContent,
                     onValueChange = onTraitContentChanced,
                     label = { Text("Link") },
                     singleLine = true,
@@ -275,12 +253,11 @@ fun EditPersonaTraitContentImagePicker(
     onNotifyError: (String) -> Unit,
     onTraitContentChanced: (String) -> Unit,
 ) {
-    val context = LocalContext.current
     val picker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         if (uri != null) {
-            val newMedia = viewModel.importMedia(context, uri)
+            val newMedia = viewModel.importMedia(uri)
             if(newMedia == null) {
                 onNotifyError("ERROR: Couldn't open selected image.")
                 return@rememberLauncherForActivityResult
@@ -293,47 +270,29 @@ fun EditPersonaTraitContentImagePicker(
     var openAlertDialog by remember { mutableStateOf(false) }
 
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f/1f)
-        ) {
-            if (traitContent.isEmpty()) {
-                Image(
-                    painter = painterResource(R.drawable.icon_camera),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(72.dp)
-                        .align(Alignment.Center)
-                )
-            } else {
-                var aspectRatio by remember { mutableStateOf<Float?>(null) }
-                AsyncImage(
-                    model = File(
-                        if (viewModel.hasMediaDraft) context.cacheDir else context.filesDir,
-                        (if (viewModel.hasMediaDraft) draftsDir else traitsDir) + traitContent
-                    ),
-                    onSuccess = { result ->
-                        val image = result.result.image
-                        aspectRatio = image.width.toFloat() / image.height.toFloat()
-                    },
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .then( other =
-                            if (aspectRatio != null)
-                                Modifier.aspectRatio(aspectRatio!!)
-                            else
-                                Modifier
-                        )
-                        .fillMaxSize()
-                        .align(Alignment.Center)
-                        .shadow(elevation = 8.dp)
-                )
-            }
-        }
+        val context = LocalContext.current
+        if (traitContent.isNotEmpty())
+            AsyncImage(
+                model = File(
+                    if (viewModel.hasMediaDraft) context.cacheDir else context.filesDir,
+                    (if (viewModel.hasMediaDraft) draftsDir else traitsDir) + traitContent
+                ),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 8.dp)
+            )
+        else
+            Image(
+                painter = painterResource(R.drawable.icon_camera),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(72.dp)
+            )
 
         Row(
             horizontalArrangement =
@@ -375,8 +334,8 @@ fun EditPersonaTraitContentImagePicker(
 fun EditPersonaTraitTypeSummary(
     pageOffsetDistance: Float,
     viewModel: EditPersonaTraitViewModel,
-    isEditingPersonaTrait: Boolean,
-    onCreatePersonaTraitRequested: () -> Unit,
+    rootShowSnackbar: (String) -> Unit,
+    rootNavController: NavController,
 ) {
     PagerScaffoldContent(pageOffsetDistance) {
         Text("Looks good?")
@@ -386,12 +345,43 @@ fun EditPersonaTraitTypeSummary(
             content = viewModel.traitContent,
             mediaInCache = viewModel.hasMediaDraft,
             backgroundColor = viewModel.colorTheme,
+            rootShowSnackbar = rootShowSnackbar,
             modifier = Modifier
                 .size(206.dp)
                 .shadow(elevation = 8.dp)
         )
 
-        Button(onClick = onCreatePersonaTraitRequested) {
+        val coroutineScope = rememberCoroutineScope()
+        Button(onClick = {
+                coroutineScope.launch {
+                    val currentPersona = viewModel.persona
+                    if (currentPersona == null) {
+                        rootShowSnackbar("ERROR: Persona not found.")
+                        return@launch
+                    }
+
+                    if (viewModel.traitContent.trim().isEmpty()) {
+                        rootShowSnackbar("Your trait cannot be empty!")
+                        return@launch
+                    }
+
+                    val oldTrait = viewModel.trait
+                    if (oldTrait != null) {
+                        viewModel.updateTrait(oldTrait, currentPersona)
+                        rootShowSnackbar("Trait updated successfully!")
+                    } else {
+                        viewModel.insertTrait(currentPersona)
+                        rootShowSnackbar("Trait added successfully!")
+                    }
+
+                    if (!viewModel.commitMedia()) {
+                        rootShowSnackbar("ERROR: Couldn't import media.")
+                    }
+
+                    rootNavController.popBackStack()
+                }
+        }) {
+            val isEditingPersonaTrait = (viewModel.trait != null)
             Text(if (isEditingPersonaTrait) "Edit Trait" else "Add Trait")
         }
     }

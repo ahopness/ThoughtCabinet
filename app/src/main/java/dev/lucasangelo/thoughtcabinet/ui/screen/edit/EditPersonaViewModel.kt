@@ -1,5 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.edit
 
+import android.app.Application
 import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.getValue
@@ -7,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppDao
@@ -17,11 +19,16 @@ import dev.lucasangelo.thoughtcabinet.util.copyUriToInternalStorage
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
 import dev.lucasangelo.thoughtcabinet.util.getFileExtension
 import dev.lucasangelo.thoughtcabinet.util.profilePicDir
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.util.UUID
 
-class EditPersonaViewModel(private val dao: AppDao) : ViewModel() {
+class EditPersonaViewModel(
+    private val dao: AppDao,
+    application: Application,
+) : AndroidViewModel(application) {
     // NOTE: using Two-Way Data Binding here for simplicity’s sake
     // might change in the future, I just don't wanna write a bunch of setters for such a simple screen rn
     var nameText by mutableStateOf("")
@@ -79,10 +86,9 @@ class EditPersonaViewModel(private val dao: AppDao) : ViewModel() {
 
     var hasNewProfilePicDraft by mutableStateOf(false)
         private set
-    fun importProfilePic(
-        context: Context,
-        uri: Uri,
-    ) : String? {
+    fun importProfilePic(uri: Uri) : String? {
+        val context = getApplication<Application>()
+
         val newProfilePic = "${UUID.randomUUID()}.${getFileExtension(context, uri)}"
         val copyResult = copyUriToInternalStorage(
             context = context,
@@ -97,19 +103,18 @@ class EditPersonaViewModel(private val dao: AppDao) : ViewModel() {
             return null
         }
     }
-    fun commitProfilePic(
-        context: Context,
-    ) : Boolean {
-        if (profilePic == null || !hasNewProfilePicDraft)
-            return true
+    suspend fun commitProfilePic() : Boolean = withContext(Dispatchers.IO) {
+        if (profilePic.isNullOrEmpty() || !hasNewProfilePicDraft)
+            return@withContext true
 
-        var commitedProfilePic = copyInInternalStorage(
+        val context = getApplication<Application>()
+        val commitedProfilePic = copyInInternalStorage(
             context.cacheDir, draftsDir + profilePic,
             context.filesDir, profilePicDir + profilePic
         )
 
-        return commitedProfilePic != null
+        commitedProfilePic != null
     }
-    fun cleanupProfilePicDrafts(context: Context) =
-        cleanupDrafts(context)
+    fun cleanupProfilePicDrafts() =
+        cleanupDrafts(getApplication<Application>())
 }
