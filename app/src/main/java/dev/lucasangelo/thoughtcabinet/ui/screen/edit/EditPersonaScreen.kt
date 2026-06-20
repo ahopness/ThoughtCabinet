@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,9 +12,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -35,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -47,7 +45,7 @@ import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.HueSlider
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import dev.lucasangelo.thoughtcabinet.MainApplication
-import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
@@ -87,47 +85,45 @@ fun EditPersonaScreen(
         backgroundColor = viewModel.colorTheme.darken(),
         onGoBackRequest = { rootNavController.popBackStack() },
         pageCount = 5,
-    ) { page, pagerState ->
-        val getOffsetDistanceInPages = { pagerState.getOffsetDistanceInPages(page) }
-        val onNextPageRequested = { coroutineScope.launch { pagerState.animateScrollToPage(page+1) } }
+    ) { pagerState, page, offsetDistance, onNextPageRequested ->
         listOf<@Composable () -> Unit>(
             {
                 EditPersonaIntroduction(
-                    pageOffsetDistance = getOffsetDistanceInPages(),
-                    onNextPageRequested = { onNextPageRequested() },
+                    pageOffsetDistance = offsetDistance,
+                    onNextPageRequested = onNextPageRequested,
                 )
             },
             {
                 EditPersonaProfilePicture(
-                    pageOffsetDistance = getOffsetDistanceInPages(),
+                    pageOffsetDistance = offsetDistance,
                     viewModel = viewModel,
                     profilePic = viewModel.profilePic,
                     onProfilePicChanged = { if (viewModel.hasLoadedPersona) viewModel.profilePic = it },
                     onNotifyError = { rootShowSnackbar(it) },
-                    onNextPageRequested = { onNextPageRequested() },
+                    onNextPageRequested = onNextPageRequested,
                 )
             },
             {
                 EditPersonaTextFields(
-                    pageOffsetDistance = getOffsetDistanceInPages(),
+                    pageOffsetDistance = offsetDistance,
                     name = viewModel.nameText,
                     onNameChanged = { viewModel.nameText = it },
                     bio = viewModel.bioText,
                     onBioChanged = { if (viewModel.hasLoadedPersona) viewModel.bioText = it },
-                    onNextPageRequested = { onNextPageRequested() },
+                    onNextPageRequested = onNextPageRequested,
                 )
             },
             {
                 EditPersonaColorPicker(
-                    pageOffsetDistance = getOffsetDistanceInPages(),
+                    pageOffsetDistance = offsetDistance,
                     colorTheme = viewModel.colorTheme,
                     onThemeChanged = { if (viewModel.hasLoadedPersona) viewModel.colorTheme = it },
-                    onNextPageRequested = { onNextPageRequested() },
+                    onNextPageRequested = onNextPageRequested,
                 )
             },
             {
                 EditPersonaSummary(
-                    pageOffsetDistance = getOffsetDistanceInPages(),
+                    pageOffsetDistance = offsetDistance,
                     viewModel = viewModel,
                     name = viewModel.nameText,
                     bio = viewModel.bioText,
@@ -182,10 +178,11 @@ fun EditPersonaIntroduction(
             text =
 """Personas are the social role that one adopts: They can be things we aspire to be, specific personalities or even fictional characters.
 
-Instead of a profile page, they have a board which you can add personality traits to, don't forget to do it after you're done here!""",
+Instead of a profile page, personas have a board which you can add personality traits to, don't forget to do that after you're done here!""",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Light
+            fontWeight = FontWeight.Light,
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
 
         Button(onClick = onNextPageRequested) {
@@ -259,28 +256,10 @@ fun EditPersonaProfilePicture(
     }
 
     if (openAlertDialog) {
-        val onDismissRequest: () -> Unit = { openAlertDialog = false }
-        AlertDialog(
-            containerColor = Color.Black,
-            icon = { Image(
-                painter = painterResource(R.drawable.icon_delete),
-                contentDescription = null,
-                modifier = Modifier.size(64.dp)
-                )
-            },
-            title = { Text("Are you sure?") },
-            text = { Text("If you delete the profile picture now, you can't recover it later.") },
-            onDismissRequest = onDismissRequest,
-            dismissButton = {
-                Button(onClick = onDismissRequest) {
-                    Text("Dismiss")
-                }
-            },
-            confirmButton = {
-                Button(onClick = { onProfilePicChanged(null); onDismissRequest() }) {
-                    Text("Confirm")
-                }
-            },
+        DeleteConfirmationDialog(
+            text = "If you delete the profile picture now you won't be able to recover it later.",
+            onDismiss = { openAlertDialog = false },
+            onConfirm = { onProfilePicChanged(null) }
         )
     }
 }
@@ -423,7 +402,7 @@ fun EditPersonaSummary(
         }
 
         Button(onClick = onCreatePersonaRequested) {
-            Text(if (isEditingPersona) "Update Persona" else "Create Persona")
+            Text(if (isEditingPersona) "Edit Persona" else "Create Persona")
         }
     }
 }

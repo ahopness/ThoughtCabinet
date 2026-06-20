@@ -16,12 +16,14 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 
 @Composable
 fun PagerScaffold(
@@ -30,7 +32,10 @@ fun PagerScaffold(
     canGoBack: Boolean = true,
     onGoBackRequest: () -> Unit,
     pageCount: Int,
-    pageContent: @Composable (PagerScope.(Int, PagerState) -> List<@Composable () -> Unit>)
+    pageContent:
+        @Composable PagerScope.(
+            PagerState, Int, Float, () -> Unit
+        ) -> List<@Composable () -> Unit>
 ) {
     CleanScaffold(
         backgroundColor = backgroundColor,
@@ -47,8 +52,17 @@ fun PagerScaffold(
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                pageContent = { page -> pageContent(page, pagerState)[page].invoke() }
-            )
+            ) { page ->
+                val offsetDistance = { pagerState.getOffsetDistanceInPages(page) }
+
+                val coroutineScope = rememberCoroutineScope()
+                val onNextPageRequested: () -> Unit =
+                    { coroutineScope.launch { pagerState.animateScrollToPage(page+1) } }
+
+                pageContent(
+                    pagerState, page, offsetDistance(), onNextPageRequested
+                )[page].invoke()
+            }
 
             Row(
                 horizontalArrangement = Arrangement.Center,

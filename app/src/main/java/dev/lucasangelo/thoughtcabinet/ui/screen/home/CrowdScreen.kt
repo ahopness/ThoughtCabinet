@@ -1,6 +1,5 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.home
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.GridFlow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,7 +24,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -35,7 +34,6 @@ import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
 import dev.lucasangelo.thoughtcabinet.ui.component.SimpleFloatingExtendedTopBar
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
-import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.util.darken
 import kotlinx.coroutines.launch
@@ -71,57 +69,68 @@ fun CrowdScreen(
             modifier = Modifier.fillMaxSize(),
             state = listState
         ) {
-            item {
-                Spacer(Modifier.height(floatingExtendedTopBarPadding))
-            }
+            item { Spacer(Modifier.height(floatingExtendedTopBarPadding)) }
 
-            item {
-                Grid(
-                    config = {
-                        repeat(2){ column(0.5f) }
-                        gap(0.dp)
-                        flow = GridFlow.Row
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    crowd.forEach { persona ->
-                        CrowdCard(
-                            title = persona.name,
-                            description = persona.bio,
-                            backgroundColor = Color(persona.colorTheme),
-                            onClick = { rootNavController.navigate(InspectPersonaRoute(persona.id)) }
+            if (crowd.isEmpty())
+                item {
+                        Text(
+                            text = "You stare into the abyss, and the abyss stares back...",
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(vertical = 128.dp)
+                                .fillMaxWidth(),
+                        )
+                }
+
+            if (crowd.isNotEmpty())
+                item {
+                    Grid(
+                        config = {
+                            repeat(2){ column(0.5f) }
+                            gap(0.dp)
+                            flow = GridFlow.Row
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        crowd.forEach { persona ->
+                            PersonaTile(
+                                title = persona.name,
+                                description = persona.bio,
+                                backgroundColor = Color(persona.colorTheme),
+                                onClick = { rootNavController.navigate(InspectPersonaRoute(persona.id)) }
+                            ) {
+                                PersonaProfilePicture(
+                                    profilePic = persona.profilePic,
+                                    modifier = Modifier.size(72.dp)
+                                )
+                            }
+                        }
+
+                        /*
+                        PersonaTile(
+                            title = "New",
+                            description = "Create new persona.",
+                            backgroundColor = Color.DarkGray,
+                            onClick = { rootNavController.navigate(EditPersonaRoute(null)) }
                         ) {
-                            PersonaProfilePicture(
-                                profilePic = persona.profilePic,
+                            Image(
+                                painter = painterResource(R.drawable.icon_add),
+                                contentDescription = null,
                                 modifier = Modifier.size(72.dp)
                             )
                         }
-                    }
-
-                    CrowdCard(
-                        title = "New",
-                        description = "Create new persona.",
-                        backgroundColor = Color.DarkGray,
-                        onClick = { rootNavController.navigate(EditPersonaRoute(null)) }
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.icon_add),
-                            contentDescription = null,
-                            modifier = Modifier.size(72.dp)
-                        )
+                        */
                     }
                 }
-            }
 
-            item {
-                Spacer(Modifier.height(floatingNavigationBarPadding))
-            }
+            item { Spacer(Modifier.height(floatingNavigationBarPadding)) }
         }
     }
 }
 
 @Composable
-fun CrowdCard(
+fun PersonaTile(
     title: String,
     description: String,
     backgroundColor: Color,

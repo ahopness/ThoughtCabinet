@@ -114,7 +114,8 @@ fun AppScreen() {
             composable<EditPersonaTraitRoute>() { backStackEntry ->
                 val routeObject :EditPersonaTraitRoute = backStackEntry.toRoute()
                 EditPersonaTraitScreen(
-                    routeObject.id,
+                    routeObject.personaId,
+                    routeObject.traitId,
                     navController,
                     showSnackbar,
                 )

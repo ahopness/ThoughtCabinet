@@ -54,24 +54,21 @@ fun ThoughtsScreen(
             modifier = Modifier.fillMaxSize(),
             state = listState
         ) {
-            item {
-                Spacer(Modifier.height(floatingExtendedTopBarPadding))
-            }
+            item { Spacer(Modifier.height(floatingExtendedTopBarPadding)) }
 
-            item {
-                Text(
-                    text = "TODO",
-                    color = Color.Gray,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(vertical = 128.dp)
-                        .fillMaxWidth(),
-                )
-            }
+            if (thoughts.isEmpty())
+                item {
+                    Text(
+                        text = "A blank canvas, ready to be given purpose.",
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 128.dp)
+                            .fillMaxWidth(),
+                    )
+                }
 
-            item {
-                Spacer(Modifier.height(floatingNavigationBarPadding))
-            }
+            item { Spacer(Modifier.height(floatingNavigationBarPadding)) }
         }
     }
 }

@@ -1,0 +1,74 @@
+package dev.lucasangelo.thoughtcabinet.ui.component
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
+import coil3.compose.AsyncImage
+import dev.lucasangelo.thoughtcabinet.data.PersonaTraitType
+import dev.lucasangelo.thoughtcabinet.util.darken
+import dev.lucasangelo.thoughtcabinet.util.draftsDir
+import dev.lucasangelo.thoughtcabinet.util.traitsDir
+import java.io.File
+
+@Composable
+fun PersonaTraitTile(
+    type: PersonaTraitType,
+    content: String,
+    mediaInCache: Boolean = false,
+    backgroundColor: Color,
+    modifier: Modifier = Modifier,
+    extras: @Composable BoxScope.() -> Unit = {},
+) {
+    Box(
+        modifier = modifier
+            .aspectRatio(1f/1f)
+            .background(backgroundColor.darken(0.8f))
+
+    ) {
+        val context = LocalContext.current
+        when(type) {
+            PersonaTraitType.TEXT ->
+                Text(
+                    text = "\"$content\"",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    fontStyle = FontStyle.Italic,
+                    fontFamily = FontFamily.Serif,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            PersonaTraitType.MEDIA ->
+                AsyncImage(
+                    model = File(
+                        if (mediaInCache) context.cacheDir else context.filesDir,
+                        (if (mediaInCache) draftsDir else traitsDir) + content
+                    ),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = modifier
+                        .fillMaxSize()
+                        .aspectRatio(1f / 1f)
+                )
+            PersonaTraitType.LINK -> // TODO: link caching
+                Text(
+                    text = "LINKTO: $content",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+        }
+
+        extras()
+    }
+}

@@ -23,7 +23,7 @@ import java.util.UUID
 
 class EditPersonaViewModel(private val dao: AppDao) : ViewModel() {
     // NOTE: using Two-Way Data Binding here for simplicity’s sake
-    // might change in the future, I just don't wanna write 10 setters for such a simple screen rn
+    // might change in the future, I just don't wanna write a bunch of setters for such a simple screen rn
     var nameText by mutableStateOf("")
     var bioText by mutableStateOf("")
     var profilePic by mutableStateOf<String?>(null)

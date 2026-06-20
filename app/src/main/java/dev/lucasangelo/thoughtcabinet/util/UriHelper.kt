@@ -8,8 +8,8 @@ import java.io.FileOutputStream
 
 val draftsDir = "drafts/"
 val profilePicDir = "profile-pictures/"
-val mediaDir = "post-media/"
 val traitsDir = "persona-traits/"
+val mediaDir = "post-media/"
 
 fun getFileExtension(
     context: Context,
