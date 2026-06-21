@@ -7,11 +7,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -46,11 +43,9 @@ import dev.lucasangelo.thoughtcabinet.data.PersonaTraitType
 import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
-import dev.lucasangelo.thoughtcabinet.ui.component.PersonaTraitTile
 import dev.lucasangelo.thoughtcabinet.ui.component.TypeDescriptionButton
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
-import dev.lucasangelo.thoughtcabinet.util.profilePicDir
 import dev.lucasangelo.thoughtcabinet.util.traitsDir
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -81,28 +76,36 @@ fun EditPersonaTraitScreen(
     }
 
     PagerScaffold(
-        title = if (viewModel.trait != null) "Edit The Trait Of Your Persona" else "Add A Trait To Your Persona",
-        backgroundColor = viewModel.colorTheme.darken(),
+        title =
+            if (traitId != null)
+                "Edit The Trait Of Your Persona"
+            else
+                "Add A Trait To Your Persona",
+        backgroundColor = viewModel.personaColorTheme.darken(),
         canGoBack = true,
         onGoBackRequest = { rootNavController.popBackStack() },
-        pageCount = 3
+        pageCount = 2,
+        initialPage = if (traitId != null) 1 else 0,
     ) { pagerState, page, offsetDistance, onNextPageRequested ->
         listOf<@Composable () -> Unit>(
             {
                 EditPersonaTraitTypeSelect(
                     pageOffsetDistance = offsetDistance,
-                    viewModel = viewModel,
-                    onNextPageRequested = onNextPageRequested
+                    viewModel,
+                    onNextPageRequested
                 )
             },
             {
                 EditPersonaTraitContent(
                     pageOffsetDistance = offsetDistance,
-                    viewModel = viewModel,
-                    onNotifyError = rootShowSnackbar,
-                    onNextPageRequested = onNextPageRequested
+                    viewModel,
+                    //onNotifyError = rootShowSnackbar,
+                    //onNextPageRequested,
+                    rootShowSnackbar,
+                    rootNavController
                 )
             },
+            /*
             {
                 EditPersonaTraitTypeSummary(
                     pageOffsetDistance = offsetDistance,
@@ -111,6 +114,7 @@ fun EditPersonaTraitScreen(
                     rootShowSnackbar = rootShowSnackbar,
                 )
             },
+            */
         )
     }
 
@@ -133,9 +137,13 @@ fun EditPersonaTraitTypeSelect(
         var pendingTraitTypeChange by remember { mutableStateOf<PersonaTraitType?>(null) }
 
         val onTraitTypeChanged: (PersonaTraitType) -> Unit = {
-            if (it != viewModel.traitType) viewModel.traitContent = ""
-            viewModel.traitType = it
-            onNextPageRequested()
+            if (viewModel.hasLoadedTrait) {
+                if (it != viewModel.traitType)
+                    viewModel.traitContent = ""
+
+                viewModel.traitType = it
+                onNextPageRequested()
+            }
         }
         val onTryChangeTraitType: (PersonaTraitType) -> Unit = {
             if (viewModel.traitContent.isNotEmpty() &&
@@ -150,36 +158,26 @@ fun EditPersonaTraitTypeSelect(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            val isEditingPersonaTrait = (viewModel.trait != null)
-            TypeDescriptionButton(
-                icon = R.drawable.icon_post,
-                title = "Text" +
-                        if (isEditingPersonaTrait && viewModel.traitType == PersonaTraitType.TEXT)
-                            " " + "(current)"
-                        else
-                            "",
-                description = "Values, goals, quotes: Motivation.",
-                onClick = { onTryChangeTraitType(PersonaTraitType.TEXT) }
+            TraitTypeDescriptionButton(
+                type = PersonaTraitType.TEXT,
+                icon = R.drawable.icon_text,
+                title = "Text",
+                description = "Values, goals, quotes: Motivation",
+                onTypeChanged = onTryChangeTraitType
             )
-            TypeDescriptionButton(
+            TraitTypeDescriptionButton(
+                type = PersonaTraitType.MEDIA,
                 icon = R.drawable.icon_media,
-                title = "Media" +
-                        if (isEditingPersonaTrait && viewModel.traitType == PersonaTraitType.MEDIA)
-                            " " + "(current)"
-                        else
-                            "",
+                title = "Media",
                 description = "Aesthetics, memories: Identity",
-                onClick = { onTryChangeTraitType(PersonaTraitType.MEDIA) }
+                onTypeChanged = onTryChangeTraitType
             )
-            TypeDescriptionButton(
+            TraitTypeDescriptionButton(
+                type = PersonaTraitType.LINK,
                 icon = R.drawable.icon_link,
-                title = "Link" +
-                        if (isEditingPersonaTrait && viewModel.traitType == PersonaTraitType.LINK)
-                            " " + "(current)"
-                        else
-                            "",
+                title = "Link",
                 description = "Songs, videos, wikis: Logic",
-                onClick = { onTryChangeTraitType(PersonaTraitType.LINK) }
+                onTypeChanged = onTryChangeTraitType
             )
         }
 
@@ -192,18 +190,39 @@ fun EditPersonaTraitTypeSelect(
         }
     }
 }
+@Composable
+fun TraitTypeDescriptionButton(
+    type: PersonaTraitType,
+    icon: Int,
+    title: String,
+    description: String,
+    onTypeChanged: (PersonaTraitType) -> Unit
+) {
+    TypeDescriptionButton(
+        icon,
+        title,
+        description,
+        onClick = { onTypeChanged(type) }
+    )
+}
 
 @Composable
 fun EditPersonaTraitContent(
     pageOffsetDistance: Float,
     viewModel: EditPersonaTraitViewModel,
-    onNotifyError: (String) -> Unit,
-    onNextPageRequested: () -> Unit,
+    //onNotifyError: (String) -> Unit,
+    //onNextPageRequested: () -> Unit,
+    rootShowSnackbar: (String) -> Unit,
+    rootNavController: NavController,
 ) {
     PagerScaffoldContent(pageOffsetDistance) {
         Text("Then, add the content you want to")
 
-        val onTraitContentChanced: (String) -> Unit = { viewModel.traitContent = it }
+        val onTraitContentChanced: (String) -> Unit = {
+            if (viewModel.hasLoadedTrait)
+                viewModel.traitContent = it
+        }
+
         when(viewModel.traitType) {
             PersonaTraitType.TEXT ->
                 OutlinedTextField(
@@ -212,18 +231,13 @@ fun EditPersonaTraitContent(
                     label = { Text("Text") },
                     maxLines = 6,
                     minLines = 4,
-                    colors = TextFieldDefaults.colors(
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedContainerColor = Color.Transparent,
-
-                        ),
                     modifier = Modifier.fillMaxWidth()
                 )
             PersonaTraitType.MEDIA ->
                 EditPersonaTraitContentImagePicker(
                     traitContent = viewModel.traitContent,
                     viewModel = viewModel,
-                    onNotifyError = onNotifyError,
+                    onNotifyError = rootShowSnackbar,
                     onTraitContentChanced = onTraitContentChanced,
                 )
             PersonaTraitType.LINK ->
@@ -232,18 +246,20 @@ fun EditPersonaTraitContent(
                     onValueChange = onTraitContentChanced,
                     label = { Text("Link") },
                     singleLine = true,
-                    colors = TextFieldDefaults.colors(
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedContainerColor = Color.Transparent,
-
-                        ),
                     modifier = Modifier.fillMaxWidth()
                 )
         }
 
+        /*
         Button(onClick = onNextPageRequested) {
             Text("Next")
         }
+        */
+        EditPersonaFinishButton(
+            viewModel,
+            rootShowSnackbar,
+            rootNavController
+        )
     }
 }
 @Composable
@@ -254,18 +270,19 @@ fun EditPersonaTraitContentImagePicker(
     onTraitContentChanced: (String) -> Unit,
 ) {
     val picker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            val newMedia = viewModel.importMedia(uri)
-            if(newMedia == null) {
-                onNotifyError("ERROR: Couldn't open selected image.")
-                return@rememberLauncherForActivityResult
-            }
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri: Uri? ->
+            if (uri != null) {
+                val newMedia = viewModel.importMedia(uri)
+                if(newMedia == null) {
+                    onNotifyError("ERROR: Couldn't open selected image.")
+                    return@rememberLauncherForActivityResult
+                }
 
-            onTraitContentChanced(newMedia)
+                onTraitContentChanced(newMedia)
+            }
         }
-    }
+    )
 
     var openAlertDialog by remember { mutableStateOf(false) }
 
@@ -330,6 +347,7 @@ fun EditPersonaTraitContentImagePicker(
     }
 }
 
+/*
 @Composable
 fun EditPersonaTraitTypeSummary(
     pageOffsetDistance: Float,
@@ -344,45 +362,61 @@ fun EditPersonaTraitTypeSummary(
             type = viewModel.traitType,
             content = viewModel.traitContent,
             mediaInCache = viewModel.hasMediaDraft,
-            backgroundColor = viewModel.colorTheme,
+            backgroundColor = viewModel.personaColorTheme,
             rootShowSnackbar = rootShowSnackbar,
             modifier = Modifier
                 .size(206.dp)
                 .shadow(elevation = 8.dp)
         )
 
-        val coroutineScope = rememberCoroutineScope()
-        Button(onClick = {
-                coroutineScope.launch {
-                    val currentPersona = viewModel.persona
-                    if (currentPersona == null) {
-                        rootShowSnackbar("ERROR: Persona not found.")
-                        return@launch
-                    }
+        EditPersonaFinishButton(
+            viewModel,
+            rootShowSnackbar,
+            rootNavController
+        )
+    }
+}
+ */
+@Composable
+fun EditPersonaFinishButton(
+    viewModel: EditPersonaTraitViewModel,
+    rootShowSnackbar: (String) -> Unit,
+    rootNavController: NavController,
+) {
+    val coroutineScope = rememberCoroutineScope()
+    Button(onClick = {
+        coroutineScope.launch {
+            val currentPersona = viewModel.persona
+            if (currentPersona == null) {
+                rootShowSnackbar("ERROR: Persona not found.")
+                return@launch
+            }
 
-                    if (viewModel.traitContent.trim().isEmpty()) {
-                        rootShowSnackbar("Your trait cannot be empty!")
-                        return@launch
-                    }
+            if (viewModel.traitContent.trim().isEmpty()) {
+                rootShowSnackbar("Your trait cannot be empty!")
+                return@launch
+            }
 
-                    val oldTrait = viewModel.trait
-                    if (oldTrait != null) {
-                        viewModel.updateTrait(oldTrait, currentPersona)
-                        rootShowSnackbar("Trait updated successfully!")
-                    } else {
-                        viewModel.insertTrait(currentPersona)
-                        rootShowSnackbar("Trait added successfully!")
-                    }
+            if (viewModel.trait != null) {
+                viewModel.updateTrait(viewModel.trait!!, currentPersona)
+                rootShowSnackbar("Trait updated successfully!")
+            } else {
+                viewModel.insertTrait(currentPersona)
+                rootShowSnackbar("Trait added successfully!")
+            }
 
-                    if (!viewModel.commitMedia()) {
-                        rootShowSnackbar("ERROR: Couldn't import media.")
-                    }
+            if (!viewModel.commitMedia()) {
+                rootShowSnackbar("ERROR: Couldn't import media.")
+            }
 
-                    rootNavController.popBackStack()
-                }
-        }) {
-            val isEditingPersonaTrait = (viewModel.trait != null)
-            Text(if (isEditingPersonaTrait) "Edit Trait" else "Add Trait")
+            rootNavController.popBackStack()
         }
+    }) {
+        Text(
+            if (viewModel.trait != null)
+                "Edit Trait"
+            else
+                "Add Trait"
+        )
     }
 }

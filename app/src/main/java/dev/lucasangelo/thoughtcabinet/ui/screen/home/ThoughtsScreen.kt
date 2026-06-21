@@ -44,7 +44,7 @@ fun ThoughtsScreen(
                 onIconClicked = { coroutineScope.launch { listState.animateScrollToItem(0) } },
                 actionName = "Search",
                 actionIcon = R.drawable.icon_search,
-                onActionClick = { /* TODO: settings route */ },
+                onActionClick = { /* TODO: search route */ },
                 listState = listState,
             )
         }
@@ -63,7 +63,8 @@ fun ThoughtsScreen(
                         color = Color.Gray,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
-                            .padding(vertical = 128.dp)
+                            .padding(horizontal = 48.dp)
+                            .padding(top = 128.dp)
                             .fillMaxWidth(),
                     )
                 }

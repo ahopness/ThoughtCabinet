@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package dev.lucasangelo.thoughtcabinet.util
 
 import androidx.compose.ui.graphics.Color

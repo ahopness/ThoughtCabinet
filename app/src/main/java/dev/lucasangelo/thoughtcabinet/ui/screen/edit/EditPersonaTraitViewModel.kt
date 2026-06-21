@@ -1,14 +1,12 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.edit
 
 import android.app.Application
-import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppDao
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
@@ -33,14 +31,15 @@ class EditPersonaTraitViewModel(
 ) : AndroidViewModel(application) {
     // NOTE: using Two-Way Data Binding here for simplicity’s sake
     // might change in the future, I just don't wanna write a bunch of setters for such a simple screen rn
-    var colorTheme by mutableStateOf(Color.Black)
     var traitType by mutableStateOf(PersonaTraitType.TEXT)
     var traitContent by mutableStateOf("")
 
-    var hasLoadedPersona by mutableStateOf(false)
+    var personaColorTheme by mutableStateOf(Color.Black)
         private set
+
     var persona by mutableStateOf<PersonaEntity?>(null)
         private set
+
     var hasLoadedTrait by mutableStateOf(false)
         private set
     var trait by mutableStateOf<PersonaTrait?>(null)
@@ -50,7 +49,7 @@ class EditPersonaTraitViewModel(
             persona = dao.getPersona(personaId)
 
             persona?.let { currentPersona ->
-                colorTheme = Color(currentPersona.colorTheme)
+                personaColorTheme = Color(currentPersona.colorTheme)
 
                 if (traitId != null)
                     trait = currentPersona.traits[traitId]
@@ -60,7 +59,6 @@ class EditPersonaTraitViewModel(
                     traitContent = currentTrait.content
                 }
             }
-            hasLoadedPersona = true
             hasLoadedTrait = true
         }
     }

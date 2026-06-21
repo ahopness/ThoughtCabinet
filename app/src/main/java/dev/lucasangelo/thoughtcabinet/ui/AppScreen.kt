@@ -98,7 +98,7 @@ fun AppScreen() {
             ) { backStackEntry ->
                 val routeObject :InspectPersonaRoute = backStackEntry.toRoute()
                 InspectPersonaScreen(
-                    routeObject.id,
+                    routeObject.personaId,
                     navController,
                     showSnackbar,
                 )
@@ -106,7 +106,7 @@ fun AppScreen() {
             composable<EditPersonaRoute>() { backStackEntry ->
                 val routeObject :EditPersonaRoute = backStackEntry.toRoute()
                 EditPersonaScreen(
-                    routeObject.id,
+                    routeObject.personaId,
                     navController,
                     showSnackbar,
                 )

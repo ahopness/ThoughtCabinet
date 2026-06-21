@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaTrait
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
@@ -64,7 +65,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InspectPersonaRoute(val id: Long)
+data class InspectPersonaRoute(val personaId: Long)
 
 @OptIn(ExperimentalGridApi::class)
 @Composable
@@ -144,7 +145,8 @@ fun InspectPersonaScreen(
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
-                                .padding(vertical = 128.dp)
+                                .padding(horizontal = 48.dp)
+                                .padding(top = 128.dp)
                                 .fillMaxWidth(),
                         )
                 }
@@ -159,18 +161,17 @@ fun InspectPersonaScreen(
                         },
                         modifier = Modifier.fillMaxSize(),
                     ) {
-                        viewModel.persona.let {
-                            val persona = it!!
+                        viewModel.persona?.let { persona ->
 
                             persona.traits.forEachIndexed { traitId, trait ->
                                 PersonaTraitTile(
-                                    type = trait.type,
-                                    content = trait.content,
+                                    trait.type,
+                                    trait.content,
                                     backgroundColor = Color(persona.colorTheme),
                                     rootShowSnackbar = rootShowSnackbar
                                 ) {
-                                    var expanded by remember { mutableStateOf(false) }
                                     Box(Modifier.align(Alignment.TopEnd)) {
+                                        var expanded by remember { mutableStateOf(false) }
                                         Image(
                                             painter = painterResource(R.drawable.icon_more),
                                             contentDescription = "Options",
@@ -188,87 +189,16 @@ fun InspectPersonaScreen(
                                                 )
                                                 .clickable(onClick = { expanded = !expanded })
                                         )
-                                        DropdownMenu(
-                                            expanded = expanded,
+                                        PersonaDropdownMenu(
+                                            expanded,
                                             onDismissRequest = { expanded = false },
-                                            containerColor = Color.Black,
-                                            shape = RectangleShape
-                                        ) {
-                                            DropdownMenuItem(
-                                                text = { Text("Edit") },
-                                                onClick = {
-                                                    expanded = false
-                                                    rootNavController.navigate(
-                                                        EditPersonaTraitRoute(personaId, traitId)
-                                                    )
-                                                }
-                                            )
-                                            DropdownMenuItem(
-                                                text = { Text("Delete", color = Color.Red.darken(0.25f)) },
-                                                onClick = {
-                                                    expanded = false
-                                                    pendingTraitForDeletion = trait
-                                                }
-                                            )
-
-                                            val lastTraitIdInList = (persona.traits.size - 1)
-                                            val canMoveUp = traitId >= 2
-                                            val canMoveLeft = traitId % 2 == 0 && traitId != lastTraitIdInList
-                                            val canMoveRight = traitId % 2 == 1
-                                            val canMoveDown = traitId <= lastTraitIdInList - 2
-
-                                            if (canMoveUp || canMoveLeft || canMoveRight || canMoveDown)
-                                                HorizontalDivider()
-
-                                            if (canMoveUp)
-                                                DropdownMenuItem(
-                                                    text = { Text("Move Up") },
-                                                    onClick = {
-                                                        expanded = false
-                                                        viewModel.moveTrait(
-                                                            fromIndex = traitId,
-                                                            toIndex = traitId - 2,
-                                                            at = persona
-                                                        )
-                                                    }
-                                                )
-                                            if (canMoveLeft)
-                                                DropdownMenuItem(
-                                                    text = { Text("Move Left") },
-                                                    onClick = {
-                                                        expanded = false
-                                                        viewModel.moveTrait(
-                                                            fromIndex = traitId,
-                                                            toIndex = traitId + 1,
-                                                            at = persona
-                                                        )
-                                                    }
-                                                )
-                                            if (canMoveRight)
-                                                DropdownMenuItem(
-                                                    text = { Text("Move Right") },
-                                                    onClick = {
-                                                        expanded = false
-                                                        viewModel.moveTrait(
-                                                            fromIndex = traitId,
-                                                            toIndex = traitId - 1,
-                                                            at = persona
-                                                        )
-                                                    }
-                                                )
-                                            if (canMoveDown)
-                                                DropdownMenuItem(
-                                                    text = { Text("Move Down") },
-                                                    onClick = {
-                                                        expanded = false
-                                                        viewModel.moveTrait(
-                                                            fromIndex = traitId,
-                                                            toIndex = traitId + 2,
-                                                            at = persona
-                                                        )
-                                                    }
-                                                )
-                                        }
+                                            onDeletionRequest = { pendingTraitForDeletion = trait },
+                                            rootNavController,
+                                            persona,
+                                            personaId,
+                                            traitId,
+                                            viewModel
+                                        )
                                     }
                                 }
                             }
@@ -307,7 +237,7 @@ fun InspectPersonaScreen(
                 coroutineScope.launch {
                     viewModel.persona?.let { viewModel.deletePersona(it) }
                     rootNavController.popBackStack()
-                    rootShowSnackbar("Persona deletes successfully!")
+                    rootShowSnackbar("Persona deleted successfully!")
                 }
             }
         )
@@ -328,5 +258,97 @@ fun InspectPersonaScreen(
                 }
             }
         )
+    }
+}
+@Composable
+fun PersonaDropdownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    onDeletionRequest: () -> Unit,
+    rootNavController: NavController,
+    persona: PersonaEntity,
+    personaId: Long,
+    traitId: Int,
+    viewModel: InspectPersonaViewModel,
+) {
+    DropdownMenu(
+        expanded,
+        onDismissRequest = onDismissRequest,
+        containerColor = Color.Black,
+    ) {
+        DropdownMenuItem(
+            text = { Text("Edit") },
+            onClick = {
+                onDismissRequest()
+                rootNavController.navigate(
+                    EditPersonaTraitRoute(personaId, traitId)
+                )
+            }
+        )
+        DropdownMenuItem(
+            text = { Text("Delete", color = Color.Red.darken(0.25f)) },
+            onClick = {
+                onDismissRequest()
+                onDeletionRequest()
+            }
+        )
+
+        val lastTraitIdInList = (persona.traits.size - 1)
+        val canMoveUp = traitId >= 2
+        val canMoveLeft = traitId % 2 == 0 && traitId != lastTraitIdInList
+        val canMoveRight = traitId % 2 == 1
+        val canMoveDown = traitId <= lastTraitIdInList - 2
+
+        if (canMoveUp || canMoveLeft || canMoveRight || canMoveDown)
+            HorizontalDivider()
+
+        if (canMoveUp)
+            DropdownMenuItem(
+                text = { Text("Move Up") },
+                onClick = {
+                    onDismissRequest()
+                    viewModel.moveTrait(
+                        fromIndex = traitId,
+                        toIndex = traitId - 2,
+                        at = persona
+                    )
+                }
+            )
+        if (canMoveLeft)
+            DropdownMenuItem(
+                text = { Text("Move Left") },
+                onClick = {
+                    onDismissRequest()
+                    viewModel.moveTrait(
+                        fromIndex = traitId,
+                        toIndex = traitId + 1,
+                        at = persona
+                    )
+                }
+            )
+        if (canMoveRight)
+            DropdownMenuItem(
+                text = { Text("Move Right") },
+                onClick = {
+                    onDismissRequest()
+                    viewModel.moveTrait(
+                        fromIndex = traitId,
+                        toIndex = traitId - 1,
+                        at = persona
+                    )
+                }
+            )
+        if (canMoveDown)
+            DropdownMenuItem(
+                text = { Text("Move Down") },
+                onClick = {
+                    onDismissRequest()
+                    viewModel.moveTrait(
+                        fromIndex = traitId,
+                        toIndex = traitId + 2,
+                        at = persona
+                    )
+                }
+            )
     }
 }

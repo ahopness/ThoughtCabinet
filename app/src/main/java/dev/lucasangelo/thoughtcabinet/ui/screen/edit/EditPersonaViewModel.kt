@@ -1,7 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.edit
 
 import android.app.Application
-import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,7 +8,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppDao
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
@@ -31,10 +29,10 @@ class EditPersonaViewModel(
 ) : AndroidViewModel(application) {
     // NOTE: using Two-Way Data Binding here for simplicity’s sake
     // might change in the future, I just don't wanna write a bunch of setters for such a simple screen rn
-    var nameText by mutableStateOf("")
-    var bioText by mutableStateOf("")
-    var profilePic by mutableStateOf<String?>(null)
-    var colorTheme by mutableStateOf(Color.Black)
+    var personaName by mutableStateOf("")
+    var personaBio by mutableStateOf("")
+    var personaProfilePic by mutableStateOf<String?>(null)
+    var personaColorTheme by mutableStateOf(Color.Black)
 
     var hasLoadedPersona by mutableStateOf(false)
         private set
@@ -44,10 +42,10 @@ class EditPersonaViewModel(
         viewModelScope.launch {
             persona = if (id != null) dao.getPersona(id) else null
             persona?.let {
-                nameText = it.name
-                bioText = it.bio
-                profilePic = it.profilePic
-                colorTheme = Color(it.colorTheme)
+                personaName = it.name
+                personaBio = it.bio
+                personaProfilePic = it.profilePic
+                personaColorTheme = Color(it.colorTheme)
             }
             hasLoadedPersona = true
         }
@@ -59,10 +57,10 @@ class EditPersonaViewModel(
                 id = from.id,
                 createdAt = from.createdAt,
                 updatedAt = Instant.now(),
-                name = nameText.trim(),
-                bio = bioText.trim(),
-                profilePic = profilePic,
-                colorTheme = colorTheme.toArgb(),
+                name = personaName.trim(),
+                bio = personaBio.trim(),
+                profilePic = personaProfilePic,
+                colorTheme = personaColorTheme.toArgb(),
                 traits = from.traits,
                 metadata = from.metadata,
             ))
@@ -74,10 +72,10 @@ class EditPersonaViewModel(
                 id = 0,
                 createdAt = Instant.now(),
                 updatedAt = null,
-                name = nameText.trim(),
-                bio = bioText.trim(),
-                profilePic = profilePic,
-                colorTheme = colorTheme.toArgb(),
+                name = personaName.trim(),
+                bio = personaBio.trim(),
+                profilePic = personaProfilePic,
+                colorTheme = personaColorTheme.toArgb(),
                 traits = emptyList(),
                 metadata = emptyMap(),
             ))
@@ -104,13 +102,13 @@ class EditPersonaViewModel(
         }
     }
     suspend fun commitProfilePic() : Boolean = withContext(Dispatchers.IO) {
-        if (profilePic.isNullOrEmpty() || !hasNewProfilePicDraft)
+        if (personaProfilePic.isNullOrEmpty() || !hasNewProfilePicDraft)
             return@withContext true
 
         val context = getApplication<Application>()
         val commitedProfilePic = copyInInternalStorage(
-            context.cacheDir, draftsDir + profilePic,
-            context.filesDir, profilePicDir + profilePic
+            context.cacheDir, draftsDir + personaProfilePic,
+            context.filesDir, profilePicDir + personaProfilePic
         )
 
         commitedProfilePic != null

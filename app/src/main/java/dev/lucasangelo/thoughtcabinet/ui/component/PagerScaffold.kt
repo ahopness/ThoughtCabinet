@@ -32,6 +32,7 @@ fun PagerScaffold(
     canGoBack: Boolean = true,
     onGoBackRequest: () -> Unit,
     pageCount: Int,
+    initialPage: Int = 0,
     pageContent:
         @Composable PagerScope.(
             PagerState, Int, Float, () -> Unit
@@ -48,7 +49,7 @@ fun PagerScaffold(
         }
     ) {
         Box {
-            val pagerState = rememberPagerState(pageCount = { pageCount })
+            val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { pageCount })
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
@@ -61,7 +62,7 @@ fun PagerScaffold(
 
                 pageContent(
                     pagerState, page, offsetDistance(), onNextPageRequested
-                )[page].invoke()
+                )[page]()
             }
 
             Row(

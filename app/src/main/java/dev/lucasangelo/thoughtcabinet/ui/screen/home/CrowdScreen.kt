@@ -74,11 +74,12 @@ fun CrowdScreen(
             if (crowd.isEmpty())
                 item {
                         Text(
-                            text = "You stare into the abyss, and the abyss stares back...",
+                            text = "You stare into the abyss, and the abyss stares back.",
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
-                                .padding(vertical = 128.dp)
+                                .padding(horizontal = 48.dp)
+                                .padding(top = 128.dp)
                                 .fillMaxWidth(),
                         )
                 }
