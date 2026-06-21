@@ -34,6 +34,8 @@ import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaTraitRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaTraitScreen
+import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPostRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPostScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaScreen
 import kotlinx.coroutines.launch
@@ -87,6 +89,17 @@ fun AppScreen() {
                     crowdListState,
                     thoughts,
                     crowd,
+                )
+            }
+
+            composable<EditPostRoute> { backStackEntry ->
+                val routeObject : EditPostRoute = backStackEntry.toRoute()
+                EditPostScreen(
+                    routeObject.id,
+                    routeObject.childOf,
+                    crowd,
+                    navController,
+                    showSnackbar
                 )
             }
 

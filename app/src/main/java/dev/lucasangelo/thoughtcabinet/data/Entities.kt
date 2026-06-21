@@ -43,7 +43,7 @@ enum class PersonaTraitType {
         ForeignKey(
             entity = PostEntity::class,
             parentColumns = ["id"],
-            childColumns = ["repostOf"],
+            childColumns = ["childOf"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
@@ -52,39 +52,32 @@ enum class PersonaTraitType {
             childColumns = ["authorId"],
             onDelete = ForeignKey.CASCADE
         ),
-        ForeignKey(
-            entity = PostEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["commentOf"],
-            onDelete = ForeignKey.CASCADE
-        ),
     ],
     indices = [
-        Index("repostOf"),
+        Index("childOf"),
         Index("authorId"),
-        Index("commentOf"),
     ]
 )
 data class PostEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
 
-    val repostOf: Long?,
+    val childOf: Long?, // NOTE: can be repost or comment, depends on post type
 
     val createdAt: Instant,
     val updatedAt: Instant?,
 
-    val authorId : Long,
-    val commentOf : Long?,
+    val authorId: Long,
 
     val type: PostType,
 
-    val mood: String,
     val content: String,
     val media: List<String>,
 
+    val mood: String,
+
     val liked: Boolean,
-    val archived: Boolean,
+    val archived: Boolean, // TODO: bookmarks and archives
 
     val metadata: Map<String, String>,
 )

@@ -16,6 +16,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationActionItem
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationBar
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationExpandableItem
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPostRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.home.CrowdScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.home.ThoughtsScreen
 import kotlinx.coroutines.launch
@@ -71,7 +72,7 @@ fun HomeScreen(
                             icon = R.drawable.icon_post,
                             title = "Post",
                             showTitle = true,
-                            action = { /* TODO: edit post screen */ }
+                            action = { rootNavController.navigate(EditPostRoute(null)) }
                         ),
                         FloatingNavigationActionItem(
                             icon = R.drawable.icon_persona,

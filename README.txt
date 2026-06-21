@@ -5,13 +5,6 @@ A chronology-based note app alternative to dopamine inducing social media and mi
 
 # ABOUT
 
-posts
-- note: text-centric, additional media
-- article: formatted text and media
-- media: image-centric, additional text
-- link: outside links for other sites, music, videos or pictures
-
-psychology
 - instead of starting with a black canvas, it is recommended to import posts from other social media and personal diaries of the user, this helps with onboarding
 - there’s always a default persona: you, before deciding on what to be, first you need to know who you already are
 - this is a diary disguised as a feed, you can freely post your thoughts here without the fear of other’s reactions and algorithms feeding off of you
@@ -21,5 +14,6 @@ psychology
 #######
 
 todos
+- 'share post' feature
 - white color theme
 - move all texts to a strings.xml
