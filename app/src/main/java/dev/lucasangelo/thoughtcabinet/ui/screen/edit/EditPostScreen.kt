@@ -1,56 +1,71 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.edit
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostType
+import dev.lucasangelo.thoughtcabinet.ui.component.CleanIconButton
 import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
 import dev.lucasangelo.thoughtcabinet.ui.component.TypeDescriptionButton
 import dev.lucasangelo.thoughtcabinet.util.darken
+import dev.lucasangelo.thoughtcabinet.util.draftsDir
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import java.io.File
 
 @Serializable
 data class EditPostRoute(val id: Long?, val repostOf: Long? = null)
@@ -83,11 +98,11 @@ fun EditPostScreen(
             if (id != null)
                 "Edit Your Post"
             else
-                "Add A Post",
+                "Create A Post",
         backgroundColor = animatedPersonaColorTheme,
         canGoBack = true,
         onGoBackRequest = { rootNavController.popBackStack() },
-        pageCount = 3,
+        pageCount = 2,
         initialPage = if (id != null) 1 else 0
     ) { pagerState, page, offsetDistance, onNextPageRequested ->
         listOf<@Composable () -> Unit>(
@@ -99,14 +114,7 @@ fun EditPostScreen(
                 )
             },
             {
-                PostTypeContent(
-                    pageOffsetDistance = offsetDistance,
-                    viewModel,
-                    onNextPageRequested
-                )
-            },
-            {
-                PostTypeAuthor(
+                EditPostContent(
                     pageOffsetDistance = offsetDistance,
                     crowd,
                     viewModel,
@@ -115,6 +123,12 @@ fun EditPostScreen(
                 )
             },
         )
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.cleanupMediaDrafts()
+        }
     }
 }
 
@@ -141,7 +155,7 @@ fun EditPostTypeSelect(
             }
         }
         val onTryChangePostType: (PostType) -> Unit = {
-            if (viewModel.postContent.isNotEmpty() &&
+            if ((viewModel.postContent.isNotEmpty() || viewModel.postMedia.isNotEmpty()) &&
                 it != viewModel.postType) {
                 pendingPostTypeChange = it
             } else {
@@ -153,26 +167,23 @@ fun EditPostTypeSelect(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            PostTypeDescriptionButton(
-                type = PostType.NOTE,
+            TypeDescriptionButton(
                 icon = R.drawable.icon_note_post,
                 title = "Note",
                 description = "Quick, text-centric with additional media",
-                onTypeChanged = onTryChangePostType
+                onClick = { onTryChangePostType(PostType.NOTE) }
             )
-            PostTypeDescriptionButton(
-                type = PostType.REEL,
+            TypeDescriptionButton(
                 icon = R.drawable.icon_media_post_alt,
                 title = "Reel",
-                description = "Artsy, image-centric with additional text",
-                onTypeChanged = onTryChangePostType
+                description = "Refined, image-centric with additional text",
+                onClick = { onTryChangePostType(PostType.REEL) }
             )
-            PostTypeDescriptionButton(
-                type = PostType.LINK,
+            TypeDescriptionButton(
                 icon = R.drawable.icon_link_post,
                 title = "Link",
-                description = "Delegated, outside sites, musics or videos",
-                onTypeChanged = onTryChangePostType
+                description = "Delegated, outside site, music or video",
+                onClick = { onTryChangePostType(PostType.LINK) }
             )
         }
 
@@ -185,60 +196,9 @@ fun EditPostTypeSelect(
         }
     }
 }
-@Composable
-fun PostTypeDescriptionButton(
-    type: PostType,
-    icon: Int,
-    title: String,
-    description: String,
-    onTypeChanged: (PostType) -> Unit
-) {
-    TypeDescriptionButton(
-        icon = icon,
-        title = title,
-        description = description,
-        onClick = { onTypeChanged(type) }
-    )
-}
 
 @Composable
-fun PostTypeContent(
-    pageOffsetDistance: Float,
-    viewModel: EditPostViewModel,
-    onNextPageRequested: () -> Unit,
-) {
-    PagerScaffoldContent(pageOffsetDistance) {
-        Text("Then, add the content you want to")
-
-        val onPostContentChanced: (String) -> Unit = {
-            if (viewModel.hasLoadedPost)
-                viewModel.postContent = it
-        }
-
-        when(viewModel.postType) {
-            PostType.NOTE -> {}
-            PostType.REEL -> {}
-            PostType.LINK -> {
-                OutlinedTextField(
-                    value = viewModel.postContent,
-                    onValueChange = onPostContentChanced,
-                    label = { Text("Link") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-
-
-        Button(onClick = onNextPageRequested) {
-            Text("Next")
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PostTypeAuthor(
+fun EditPostContent(
     pageOffsetDistance: Float,
     crowd: List<PersonaEntity>,
     viewModel: EditPostViewModel,
@@ -246,90 +206,56 @@ fun PostTypeAuthor(
     rootNavController: NavController,
 ) {
     PagerScaffoldContent(pageOffsetDistance) {
-        Text("Finally, who wrote this")
+        Text("Then, add the content you want")
 
-        var personaId by remember { mutableIntStateOf(0) }
-
-        var showBottomSheet by remember { mutableStateOf(false) }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = { showBottomSheet = true })
-        ) {
-            PersonaProfilePicture(
-                profilePic =
-                    if (crowd.isEmpty() || viewModel.postAuthorId == null)
-                        null
-                    else
-                        crowd[personaId].profilePic,
-                modifier = Modifier
-                    .size(64.dp)
-                    .padding(4.dp)
-            )
-            Text(
-                text =
-                    if (crowd.isEmpty() || viewModel.postAuthorId == null)
-                        "Choose persona"
-                    else
-                        crowd[personaId].name
-            )
-            Image(
-                painter = painterResource(R.drawable.icon_expand),
-                contentDescription = null,
-                modifier = Modifier.size(32.dp)
-            )
-        }
-
-        val sheetState = rememberModalBottomSheetState()
-        val scope = rememberCoroutineScope()
-        if (showBottomSheet) {
-            EditPostCrowdModal(
-                sheetState,
-                crowd,
-                onDismissRequest = {
-                    scope.launch {
-                        sheetState.hide()
-                    }.invokeOnCompletion {
-                        showBottomSheet = false
-                    }
-                },
-                onPersonaSelected = { index ->
-                    personaId = index
-                    if (viewModel.hasLoadedPost)
-                        viewModel.postAuthorId = crowd[personaId].id
-                }
-            )
-        }
-
-	/*
-        Text("And in what mood")
-
-        OutlinedTextField(
-            value = viewModel.postMood,
-            onValueChange = {
-                if (viewModel.hasLoadedPost)
-                    viewModel.postMood = it
-            },
-            label = { Text("Feeling") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+        EditPostAuthorSelect(
+            crowd,
+            viewModel
         )
-        */
+
+        val onPostContentChanced: (String) -> Unit = {
+            if (viewModel.hasLoadedPost)
+                viewModel.postContent = it
+        }
+
+        when(viewModel.postType) {
+            PostType.NOTE -> {
+                EditPostNoteContent(
+                    viewModel,
+                    onPostContentChanced,
+                    rootShowSnackbar
+                )
+            }
+            PostType.REEL -> {
+                EditPostReelContent(
+                    viewModel,
+                    onPostContentChanced,
+                    rootShowSnackbar
+                )
+            }
+            PostType.LINK -> {
+                OutlinedTextField(
+                    value = viewModel.postContent,
+                    onValueChange = onPostContentChanced,
+                    label = { Text("Paste Link Here") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
         ) {
             EditPostFinishButton(
-                archiving = false,
+                archiving = true,
                 viewModel,
                 rootShowSnackbar,
                 rootNavController
             )
             EditPostFinishButton(
-                archiving = true,
+                archiving = false,
                 viewModel,
                 rootShowSnackbar,
                 rootNavController
@@ -339,7 +265,72 @@ fun PostTypeAuthor(
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditPostCrowdModal(
+fun EditPostAuthorSelect(
+    crowd: List<PersonaEntity>,
+    viewModel: EditPostViewModel,
+) {
+    val selectedPersona = crowd.find { it.id == viewModel.postAuthorId }
+
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    OutlinedButton(
+        shape = RoundedCornerShape(6.dp),
+        contentPadding = PaddingValues(4.dp),
+        border = BorderStroke(width = 1.dp, color = Color.Gray),
+        onClick = { showBottomSheet = true },
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                PersonaProfilePicture(
+                    profilePic = selectedPersona?.profilePic,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(54.dp)
+                )
+                Text(
+                    text = selectedPersona?.name ?: "Select Author"
+                )
+            }
+            Image(
+                painter = painterResource(R.drawable.icon_expand),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .size(32.dp)
+            )
+        }
+    }
+
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    if (showBottomSheet) {
+        EditPostAuthorSelectModal(
+            sheetState,
+            crowd,
+            onDismissRequest = {
+                scope.launch {
+                    sheetState.hide()
+                }.invokeOnCompletion {
+                    showBottomSheet = false
+                }
+            },
+            onPersonaSelected = { index ->
+                if (viewModel.hasLoadedPost)
+                    viewModel.postAuthorId = crowd[index].id
+            }
+        )
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditPostAuthorSelectModal(
     sheetState: SheetState,
     crowd: List<PersonaEntity>,
     onDismissRequest: () -> Unit,
@@ -379,6 +370,217 @@ fun EditPostCrowdModal(
 }
 
 @Composable
+fun EditPostNoteContent(
+    viewModel: EditPostViewModel,
+    onPostContentChanced: (String) -> Unit,
+    rootShowSnackbar: (String) -> Unit,
+) {
+    OutlinedTextField(
+        value = viewModel.postContent,
+        onValueChange = onPostContentChanced,
+        label = { Text("What's up?") },
+        maxLines = 8,
+        minLines = 6,
+        modifier = Modifier.fillMaxWidth(),
+    )
+
+    EditPostMediaList(
+        large = false,
+        viewModel,
+        onNotifyError = rootShowSnackbar
+    )
+}
+@Composable
+fun EditPostReelContent(
+    viewModel: EditPostViewModel,
+    onPostContentChanced: (String) -> Unit,
+    rootShowSnackbar: (String) -> Unit,
+) {
+    EditPostMediaList(
+        large = true,
+        viewModel,
+        onNotifyError = rootShowSnackbar,
+    )
+
+    OutlinedTextField(
+        value = viewModel.postContent,
+        onValueChange = onPostContentChanced,
+        label = { Text("Write Caption") },
+        maxLines = 4,
+        minLines = 1,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditPostMediaList(
+    large: Boolean,
+    viewModel: EditPostViewModel,
+    onNotifyError: (String) -> Unit,
+) {
+    val picker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia(),
+        onResult = { uris: List<Uri> ->
+            uris.forEach { uri ->
+                val newMedia = viewModel.importMedia(uri)
+                if(newMedia == null) {
+                    onNotifyError("ERROR: Couldn't open selected image.")
+                    return@rememberLauncherForActivityResult
+                }
+
+                if (viewModel.hasLoadedPost)
+                    viewModel.postMedia += newMedia
+            }
+        }
+    )
+
+    var pendingMediaForManipulation by remember { mutableStateOf<String?>(null) }
+
+    val context = LocalContext.current
+    LazyRow(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        items(viewModel.postMedia) { media ->
+            Box(
+                modifier = Modifier.border(
+                    border = BorderStroke(width = 1.dp, color = Color.Gray),
+                    shape = RoundedCornerShape(6.dp)
+                )
+            ) {
+                AsyncImage(
+                    model = File(context.cacheDir, draftsDir + media),
+                    contentDescription = null,
+                    contentScale =
+                        if (large)
+                            ContentScale.FillHeight
+                        else
+                            ContentScale.Crop,
+                    modifier =
+                        (if (large)
+                            Modifier.height(250.dp)
+                        else
+                            Modifier.size(100.dp))
+                            .clip(RoundedCornerShape(6.dp))
+                )
+                Image(
+                    painter = painterResource(R.drawable.icon_more),
+                    contentDescription = "Options",
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(48.dp)
+                        .clickable(onClick = { pendingMediaForManipulation = media })
+                )
+            }
+        }
+
+        item {
+            OutlinedButton(
+                shape = RoundedCornerShape(6.dp),
+                border = BorderStroke(width = 1.dp, color = Color.Gray),
+                modifier = Modifier.size(if (large) 250.dp else 100.dp),
+                onClick = {
+                    picker.launch(PickVisualMediaRequest(
+                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                    ))
+                },
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.icon_camera),
+                        contentDescription = null,
+                        modifier = Modifier.size(if (large) 64.dp else 32.dp)
+                    )
+                    Text(
+                        text = "Add Media",
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+
+    val sheetState = rememberModalBottomSheetState()
+    val coroutineScope = rememberCoroutineScope()
+    if (pendingMediaForManipulation != null) {
+        val onDismissRequest: () -> Unit = {
+            coroutineScope.launch {
+                sheetState.hide()
+            }.invokeOnCompletion {
+                pendingMediaForManipulation = null
+            }
+        }
+
+        ModalBottomSheet(
+            sheetState = sheetState,
+            onDismissRequest = onDismissRequest,
+            containerColor = Color.Black
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CleanIconButton(
+                    action = "Delete",
+                    icon = R.drawable.icon_delete,
+                    color = Color.Red,
+                    onClick = {
+                        if (viewModel.hasLoadedPost)
+                            viewModel.postMedia -= pendingMediaForManipulation!!
+
+                        onDismissRequest()
+                    },
+                )
+
+                val lastTraitIdInList = (viewModel.postMedia.size - 1)
+                val mediaId = viewModel.postMedia.indexOf(pendingMediaForManipulation!!)
+                val canMoveLeft = mediaId != lastTraitIdInList
+                val canMoveRight = mediaId != 0
+
+                if (canMoveLeft || canMoveRight)
+                    Image(
+                        painter = painterResource(R.drawable.divider_horizontal),
+                        contentDescription = null,
+                        modifier = Modifier.size(54.dp),
+                    )
+
+                if (canMoveLeft)
+                    CleanIconButton(
+                        action = "Move Left",
+                        icon = R.drawable.icon_arrow_left,
+                        onClick = {
+                            if (viewModel.hasLoadedPost) {
+                                viewModel.postMedia = viewModel.postMedia.toMutableList().apply {
+                                    val media = removeAt(mediaId)
+                                    add(mediaId + 1, media)
+                                }
+                            }
+                            onDismissRequest()
+                        }
+                    )
+                if (canMoveRight)
+                    CleanIconButton(
+                        action = "Move Right",
+                        icon = R.drawable.icon_back,
+                        onClick = {
+                            if (viewModel.hasLoadedPost) {
+                                viewModel.postMedia = viewModel.postMedia.toMutableList().apply {
+                                    val media = removeAt(mediaId)
+                                    add(mediaId - 1, media)
+                                }
+                            }
+                            onDismissRequest()
+                        }
+                    )
+            }
+        }
+    }
+}
+
+@Composable
 fun EditPostFinishButton(
     archiving: Boolean,
     viewModel: EditPostViewModel,
@@ -386,7 +588,7 @@ fun EditPostFinishButton(
     rootNavController: NavController,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    Button(onClick = {
+    val onClick = {
         coroutineScope.launch {
             if (viewModel.postType == PostType.REEL) {
                 if (viewModel.postMedia.isEmpty()){
@@ -405,12 +607,10 @@ fun EditPostFinishButton(
                 return@launch
             }
 
-            /* TODO: post media import
             if (!viewModel.commitMedia()) {
                 rootShowSnackbar("ERROR: Couldn't import media.")
                 return@launch
             }
-            */
 
             if (viewModel.post != null) {
                 viewModel.updatePost(viewModel.post!!)
@@ -422,15 +622,23 @@ fun EditPostFinishButton(
 
             rootNavController.popBackStack()
         }
-    }) {
-        Text(
-            if (archiving)
-                "Archive Post"
-            else
+    }
+
+    if (archiving)
+        OutlinedButton(
+            border = BorderStroke(width = 1.dp, color = Color.Gray),
+            onClick = { onClick() }
+        ) {
+            Text("Archive Post")
+        }
+    else {
+        Button(onClick = { onClick() }) {
+            Text(
                 if (viewModel.post != null)
                     "Edit Post"
                 else
                     "Create Post"
-        )
+            )
+        }
     }
 }
