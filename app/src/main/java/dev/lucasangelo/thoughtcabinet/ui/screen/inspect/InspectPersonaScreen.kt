@@ -4,10 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalGridApi
 import androidx.compose.foundation.layout.Grid
 import androidx.compose.foundation.layout.GridFlow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,8 +19,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,7 +38,8 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -45,7 +51,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
-import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaTrait
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
@@ -63,11 +68,14 @@ import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaTraitRoute
 import dev.lucasangelo.thoughtcabinet.util.darken
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlin.compareTo
+import kotlin.rem
+import kotlin.text.compareTo
 
 @Serializable
 data class InspectPersonaRoute(val personaId: Long)
 
-@OptIn(ExperimentalGridApi::class)
+@OptIn(ExperimentalGridApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun InspectPersonaScreen(
     personaId: Long,
@@ -82,7 +90,7 @@ fun InspectPersonaScreen(
     val database = application.database
     val viewModel: InspectPersonaViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { InspectPersonaViewModel(dao = database.dao) }
+            initializer { InspectPersonaViewModel(dao = database.dao, application) }
         }
     )
 
@@ -91,6 +99,8 @@ fun InspectPersonaScreen(
     }
 
     var openPersonaDeleteAlertDialog by remember { mutableStateOf(false) }
+
+    var pendingTraitInfoForManipulation by remember { mutableStateOf<Triple<Long, Int, PersonaTrait>?>(null) }
     var pendingTraitForDeletion by remember { mutableStateOf<PersonaTrait?>(null) }
 
     val listState = rememberLazyListState()
@@ -162,7 +172,6 @@ fun InspectPersonaScreen(
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         viewModel.persona?.let { persona ->
-
                             persona.traits.forEachIndexed { traitId, trait ->
                                 PersonaTraitTile(
                                     trait.type,
@@ -170,36 +179,24 @@ fun InspectPersonaScreen(
                                     backgroundColor = Color(persona.colorTheme),
                                     rootShowSnackbar = rootShowSnackbar
                                 ) {
-                                    Box(Modifier.align(Alignment.TopEnd)) {
-                                        var expanded by remember { mutableStateOf(false) }
-                                        Image(
-                                            painter = painterResource(R.drawable.icon_more),
-                                            contentDescription = "Options",
-                                            modifier = Modifier
-                                                .size(48.dp)
-                                                .background(
-                                                    brush = Brush.radialGradient(
-                                                        colors = listOf(
-                                                            Color.Black.copy(0.5f),
-                                                            Color.Transparent
-                                                        ),
-                                                        center = Offset(Float.POSITIVE_INFINITY, 0f),
-                                                        radius = 125f
-                                                    )
+                                    Image(
+                                        painter = painterResource(R.drawable.icon_more),
+                                        contentDescription = "Options",
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .size(48.dp)
+                                            .background(
+                                                brush = Brush.radialGradient(
+                                                    colors = listOf(
+                                                        Color.Black.copy(0.5f),
+                                                        Color.Transparent
+                                                    ),
+                                                    center = Offset(Float.POSITIVE_INFINITY, 0f),
+                                                    radius = 125f
                                                 )
-                                                .clickable(onClick = { expanded = !expanded })
-                                        )
-                                        PersonaDropdownMenu(
-                                            expanded,
-                                            onDismissRequest = { expanded = false },
-                                            onDeletionRequest = { pendingTraitForDeletion = trait },
-                                            rootNavController,
-                                            persona,
-                                            personaId,
-                                            traitId,
-                                            viewModel
-                                        )
-                                    }
+                                            )
+                                            .clickable(onClick = { pendingTraitInfoForManipulation = Triple(personaId, traitId, trait) })
+                                    )
                                 }
                             }
                         }
@@ -235,7 +232,8 @@ fun InspectPersonaScreen(
             onDismiss = { openPersonaDeleteAlertDialog = false },
             onConfirm = {
                 coroutineScope.launch {
-                    viewModel.persona?.let { viewModel.deletePersona(it) }
+                    if (!viewModel.hasLoadedPersona) return@launch
+                    viewModel.deletePersona(viewModel.persona!!)
                     rootNavController.popBackStack()
                     rootShowSnackbar("Persona deleted successfully!")
                 }
@@ -243,16 +241,27 @@ fun InspectPersonaScreen(
         )
     }
 
+    val sheetState = rememberModalBottomSheetState()
+    if (pendingTraitInfoForManipulation != null) {
+        InspectPersonaTraitManipulationModal(
+            sheetState,
+            info = pendingTraitInfoForManipulation!!,
+            onDismissRequest = { pendingTraitInfoForManipulation = null },
+            onDeletionRequest = { pendingTraitForDeletion = pendingTraitInfoForManipulation!!.third },
+            rootNavController,
+            viewModel
+        )
+
+    }
     if (pendingTraitForDeletion != null) {
         DeleteConfirmationDialog(
             text = "If you delete this trait, you won't be able to recover it later.",
             onDismiss = { pendingTraitForDeletion = null },
             onConfirm = {
-                viewModel.persona.let {
+                viewModel.persona?.let {
                     viewModel.deleteTrait(
-                        context,
                         trait = pendingTraitForDeletion!!,
-                        at = it!!
+                        at = it
                     )
                     rootShowSnackbar("Trait deleted successfully!")
                 }
@@ -260,95 +269,139 @@ fun InspectPersonaScreen(
         )
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PersonaDropdownMenu(
-    expanded: Boolean,
+fun InspectPersonaTraitManipulationModal(
+    sheetState: SheetState,
+    info: Triple<Long, Int, PersonaTrait>,
     onDismissRequest: () -> Unit,
     onDeletionRequest: () -> Unit,
     rootNavController: NavController,
-    persona: PersonaEntity,
-    personaId: Long,
-    traitId: Int,
     viewModel: InspectPersonaViewModel,
 ) {
-    DropdownMenu(
-        expanded,
+    if (!viewModel.hasLoadedPersona) return
+    val persona = viewModel.persona!!
+    val personaId = info.first
+    val traitId = info.second
+
+    ModalBottomSheet(
+        sheetState = sheetState,
         onDismissRequest = onDismissRequest,
-        containerColor = Color.Black,
+        containerColor = Color.Black
     ) {
-        DropdownMenuItem(
-            text = { Text("Edit") },
-            onClick = {
-                onDismissRequest()
-                rootNavController.navigate(
-                    EditPersonaTraitRoute(personaId, traitId)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            InspectPersonaTraitManipulationButton(
+                action = "Edit",
+                icon = R.drawable.icon_edit,
+                onClick = {
+                    rootNavController.navigate(
+                        EditPersonaTraitRoute(personaId, traitId)
+                    )
+                    onDismissRequest()
+                }
+            )
+            InspectPersonaTraitManipulationButton(
+                action = "Delete",
+                icon = R.drawable.icon_delete,
+                color = Color.Red,
+                onClick = {
+                    onDeletionRequest()
+                    onDismissRequest()
+                },
+            )
+
+            val lastTraitIdInList = (persona.traits.size - 1)
+            val canMoveUp = traitId >= 2
+            val canMoveLeft = traitId % 2 == 0 && traitId != lastTraitIdInList
+            val canMoveRight = traitId % 2 == 1
+            val canMoveDown = traitId <= lastTraitIdInList - 2
+
+            if (canMoveUp || canMoveLeft || canMoveRight || canMoveDown)
+                Image(
+                    painter = painterResource(R.drawable.divider_horizontal),
+                    contentDescription = null,
+                    modifier = Modifier.size(54.dp),
                 )
-            }
+
+            if (canMoveUp)
+                InspectPersonaTraitManipulationButton(
+                    action = "Move Up",
+                    icon = R.drawable.icon_arrow_up,
+                    onClick = {
+                        onDismissRequest()
+                        viewModel.moveTrait(
+                            fromIndex = traitId,
+                            toIndex = traitId - 2,
+                            at = persona
+                        )
+                    }
+                )
+            if (canMoveLeft)
+                InspectPersonaTraitManipulationButton(
+                    action = "Move Left",
+                    icon = R.drawable.icon_arrow_left,
+                    onClick = {
+                        onDismissRequest()
+                        viewModel.moveTrait(
+                            fromIndex = traitId,
+                            toIndex = traitId + 1,
+                            at = persona
+                        )
+                    }
+                )
+            if (canMoveRight)
+                InspectPersonaTraitManipulationButton(
+                    action = "Move Right",
+                    icon = R.drawable.icon_back,
+                    onClick = {
+                        onDismissRequest()
+                        viewModel.moveTrait(
+                            fromIndex = traitId,
+                            toIndex = traitId - 1,
+                            at = persona
+                        )
+                    }
+                )
+            if (canMoveDown)
+                InspectPersonaTraitManipulationButton(
+                    action = "Move Down",
+                    icon = R.drawable.icon_arrow_down,
+                    onClick = {
+                        onDismissRequest()
+                        viewModel.moveTrait(
+                            fromIndex = traitId,
+                            toIndex = traitId + 2,
+                            at = persona
+                        )
+                    }
+                )
+        }
+    }
+}
+@Composable
+fun InspectPersonaTraitManipulationButton(
+    action: String,
+    icon: Int,
+    color: Color = Color.White,
+    onClick: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Image(
+            painter = painterResource(icon),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(color),
+            modifier = Modifier.size(54.dp)
         )
-        DropdownMenuItem(
-            text = { Text("Delete", color = Color.Red.darken(0.25f)) },
-            onClick = {
-                onDismissRequest()
-                onDeletionRequest()
-            }
+        Text(
+            text = action,
+            color = color
         )
-
-        val lastTraitIdInList = (persona.traits.size - 1)
-        val canMoveUp = traitId >= 2
-        val canMoveLeft = traitId % 2 == 0 && traitId != lastTraitIdInList
-        val canMoveRight = traitId % 2 == 1
-        val canMoveDown = traitId <= lastTraitIdInList - 2
-
-        if (canMoveUp || canMoveLeft || canMoveRight || canMoveDown)
-            HorizontalDivider()
-
-        if (canMoveUp)
-            DropdownMenuItem(
-                text = { Text("Move Up") },
-                onClick = {
-                    onDismissRequest()
-                    viewModel.moveTrait(
-                        fromIndex = traitId,
-                        toIndex = traitId - 2,
-                        at = persona
-                    )
-                }
-            )
-        if (canMoveLeft)
-            DropdownMenuItem(
-                text = { Text("Move Left") },
-                onClick = {
-                    onDismissRequest()
-                    viewModel.moveTrait(
-                        fromIndex = traitId,
-                        toIndex = traitId + 1,
-                        at = persona
-                    )
-                }
-            )
-        if (canMoveRight)
-            DropdownMenuItem(
-                text = { Text("Move Right") },
-                onClick = {
-                    onDismissRequest()
-                    viewModel.moveTrait(
-                        fromIndex = traitId,
-                        toIndex = traitId - 1,
-                        at = persona
-                    )
-                }
-            )
-        if (canMoveDown)
-            DropdownMenuItem(
-                text = { Text("Move Down") },
-                onClick = {
-                    onDismissRequest()
-                    viewModel.moveTrait(
-                        fromIndex = traitId,
-                        toIndex = traitId + 2,
-                        at = persona
-                    )
-                }
-            )
     }
 }

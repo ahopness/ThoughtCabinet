@@ -99,22 +99,10 @@ fun EditPersonaTraitScreen(
                 EditPersonaTraitContent(
                     pageOffsetDistance = offsetDistance,
                     viewModel,
-                    //onNotifyError = rootShowSnackbar,
-                    //onNextPageRequested,
                     rootShowSnackbar,
                     rootNavController
                 )
             },
-            /*
-            {
-                EditPersonaTraitTypeSummary(
-                    pageOffsetDistance = offsetDistance,
-                    viewModel = viewModel,
-                    rootNavController = rootNavController,
-                    rootShowSnackbar = rootShowSnackbar,
-                )
-            },
-            */
         )
     }
 
@@ -210,8 +198,6 @@ fun TraitTypeDescriptionButton(
 fun EditPersonaTraitContent(
     pageOffsetDistance: Float,
     viewModel: EditPersonaTraitViewModel,
-    //onNotifyError: (String) -> Unit,
-    //onNextPageRequested: () -> Unit,
     rootShowSnackbar: (String) -> Unit,
     rootNavController: NavController,
 ) {
@@ -250,11 +236,6 @@ fun EditPersonaTraitContent(
                 )
         }
 
-        /*
-        Button(onClick = onNextPageRequested) {
-            Text("Next")
-        }
-        */
         EditPersonaFinishButton(
             viewModel,
             rootShowSnackbar,
@@ -346,37 +327,6 @@ fun EditPersonaTraitContentImagePicker(
         )
     }
 }
-
-/*
-@Composable
-fun EditPersonaTraitTypeSummary(
-    pageOffsetDistance: Float,
-    viewModel: EditPersonaTraitViewModel,
-    rootShowSnackbar: (String) -> Unit,
-    rootNavController: NavController,
-) {
-    PagerScaffoldContent(pageOffsetDistance) {
-        Text("Looks good?")
-
-        PersonaTraitTile(
-            type = viewModel.traitType,
-            content = viewModel.traitContent,
-            mediaInCache = viewModel.hasMediaDraft,
-            backgroundColor = viewModel.personaColorTheme,
-            rootShowSnackbar = rootShowSnackbar,
-            modifier = Modifier
-                .size(206.dp)
-                .shadow(elevation = 8.dp)
-        )
-
-        EditPersonaFinishButton(
-            viewModel,
-            rootShowSnackbar,
-            rootNavController
-        )
-    }
-}
- */
 @Composable
 fun EditPersonaFinishButton(
     viewModel: EditPersonaTraitViewModel,
@@ -393,7 +343,12 @@ fun EditPersonaFinishButton(
             }
 
             if (viewModel.traitContent.trim().isEmpty()) {
-                rootShowSnackbar("Your trait cannot be empty!")
+                rootShowSnackbar("ERROR: Your trait cannot be empty!")
+                return@launch
+            }
+
+            if (!viewModel.commitMedia()) {
+                rootShowSnackbar("ERROR: Couldn't import media.")
                 return@launch
             }
 
@@ -403,10 +358,6 @@ fun EditPersonaFinishButton(
             } else {
                 viewModel.insertTrait(currentPersona)
                 rootShowSnackbar("Trait added successfully!")
-            }
-
-            if (!viewModel.commitMedia()) {
-                rootShowSnackbar("ERROR: Couldn't import media.")
             }
 
             rootNavController.popBackStack()

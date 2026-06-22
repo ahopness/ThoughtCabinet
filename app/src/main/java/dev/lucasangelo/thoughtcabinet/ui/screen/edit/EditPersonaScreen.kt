@@ -89,14 +89,6 @@ fun EditPersonaScreen(
         pageCount = 3,
     ) { pagerState, page, offsetDistance, onNextPageRequested ->
         listOf<@Composable () -> Unit>(
-            /*
-            {
-                EditPersonaIntroduction(
-                    pageOffsetDistance = offsetDistance,
-                    onNextPageRequested = onNextPageRequested,
-                )
-            },
-            */
             {
                 EditPersonaProfilePicture(
                     pageOffsetDistance = offsetDistance,
@@ -121,16 +113,6 @@ fun EditPersonaScreen(
                     rootNavController
                 )
             },
-            /*
-            {
-                EditPersonaSummary(
-                    pageOffsetDistance = offsetDistance,
-                    viewModel = viewModel,
-                    rootNavController = rootNavController,
-                    rootShowSnackbar = rootShowSnackbar
-                )
-            }
-            */
         )
     }
 
@@ -296,7 +278,6 @@ fun EditPersonaTextFields(
 fun EditPersonaColorPicker(
     pageOffsetDistance: Float,
     viewModel: EditPersonaViewModel,
-    //onNextPageRequested: () -> Unit,
     rootShowSnackbar: (String) -> Unit,
     rootNavController: NavController,
 ) {
@@ -340,11 +321,6 @@ fun EditPersonaColorPicker(
             }
         }
 
-        /*
-        Button(onClick = onNextPageRequested) {
-            Text("Next")
-        }
-        */
         EditPersonaFinishButton(
             viewModel,
             rootShowSnackbar,
@@ -352,49 +328,6 @@ fun EditPersonaColorPicker(
         )
     }
 }
-
-/*
-@Composable
-fun EditPersonaSummary(
-    pageOffsetDistance: Float,
-    viewModel: EditPersonaViewModel,
-    rootShowSnackbar: (String) -> Unit,
-    rootNavController: NavController,
-) {
-    PagerScaffoldContent(pageOffsetDistance) {
-        Text("Looks good?")
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            PersonaProfilePicture(
-                profilePic = viewModel.personaProfilePic,
-                inCache = viewModel.hasNewProfilePicDraft,
-                modifier = Modifier.size(114.dp)
-            )
-            Column {
-                Text(
-                    text = viewModel.personaName.ifEmpty { "(Empty)" },
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = viewModel.personaBio.ifEmpty { "(Empty)" },
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-
-        EditPersonaFinishButton(
-            viewModel,
-            rootShowSnackbar,
-            rootNavController
-        )
-    }
-}
-*/
 @Composable
 fun EditPersonaFinishButton(
     viewModel: EditPersonaViewModel,
@@ -405,8 +338,15 @@ fun EditPersonaFinishButton(
     Button(onClick = {
         coroutineScope.launch {
             if (viewModel.personaName.trim().isEmpty()) {
-                rootShowSnackbar("Your persona needs at least a name!")
+                rootShowSnackbar("ERROR: Your persona needs at least a name!")
                 return@launch
+            }
+
+            if (!viewModel.commitProfilePic()) {
+                coroutineScope.launch {
+                    rootShowSnackbar("ERROR: Couldn't import profile picture.")
+                    return@launch
+                }
             }
 
             if (viewModel.persona != null) {
@@ -415,10 +355,6 @@ fun EditPersonaFinishButton(
             } else {
                 viewModel.insertPersona()
                 rootShowSnackbar("Persona created successfully!")
-            }
-
-            if (!viewModel.commitProfilePic()) {
-                coroutineScope.launch { rootShowSnackbar("ERROR: Couldn't import profile picture.") }
             }
 
             rootNavController.popBackStack()

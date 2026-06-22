@@ -1,9 +1,11 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.inspect
 
+import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppDao
@@ -17,12 +19,18 @@ import dev.lucasangelo.thoughtcabinet.util.traitsDir
 import kotlinx.coroutines.launch
 import java.time.Instant
 
-class InspectPersonaViewModel(private val dao: AppDao) : ViewModel() {
+class InspectPersonaViewModel(
+    private val dao: AppDao,
+    application: Application
+) : AndroidViewModel(application) {
+    var hasLoadedPersona by mutableStateOf(false)
+        private set
     var persona by mutableStateOf<PersonaEntity?>(null)
         private set
     fun fetchPersona(id: Long) {
         viewModelScope.launch {
             persona = dao.getPersona(id)
+            hasLoadedPersona = true
         }
     }
 
@@ -32,9 +40,10 @@ class InspectPersonaViewModel(private val dao: AppDao) : ViewModel() {
         }
     }
 
-    fun deleteTrait(context: Context, trait: PersonaTrait, at: PersonaEntity) {
+    fun deleteTrait(trait: PersonaTrait, at: PersonaEntity) {
         viewModelScope.launch {
             if (trait.type == PersonaTraitType.MEDIA) {
+                val context = getApplication<Application>()
                 deleteInternalStorageFile(context.filesDir, traitsDir + trait.content)
             }
 
