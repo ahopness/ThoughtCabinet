@@ -246,7 +246,13 @@ fun InspectPersonaScreen(
         InspectPersonaTraitManipulationModal(
             sheetState,
             info = pendingTraitInfoForManipulation!!,
-            onDismissRequest = { pendingTraitInfoForManipulation = null },
+            onDismissRequest = {
+                coroutineScope.launch {
+                    sheetState.hide()
+                }.invokeOnCompletion {
+                    pendingTraitInfoForManipulation = null
+                }
+            },
             onDeletionRequest = { pendingTraitForDeletion = pendingTraitInfoForManipulation!!.third },
             rootNavController,
             viewModel
