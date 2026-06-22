@@ -30,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -268,6 +269,7 @@ fun EditPersonaTraitContentImagePicker(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clip(RoundedCornerShape(6.dp))
                     .border(
                         border = BorderStroke(width = 1.dp, color = Color.Gray),
                         shape = RoundedCornerShape(6.dp)

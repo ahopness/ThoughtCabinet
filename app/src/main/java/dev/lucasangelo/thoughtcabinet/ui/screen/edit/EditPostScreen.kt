@@ -291,8 +291,8 @@ fun EditPostAuthorSelect(
                 PersonaProfilePicture(
                     profilePic = selectedPersona?.profilePic,
                     modifier = Modifier
+                        .size(64.dp)
                         .padding(6.dp)
-                        .size(54.dp)
                 )
                 Text(
                     text = selectedPersona?.name ?: "Select Author"
@@ -342,7 +342,7 @@ fun EditPostAuthorSelectModal(
         containerColor = Color.Black
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(28.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             crowd.forEachIndexed { index, entity ->
                 Row(
@@ -358,7 +358,7 @@ fun EditPostAuthorSelectModal(
                 ) {
                     PersonaProfilePicture(
                         profilePic = entity.profilePic,
-                        modifier = Modifier.size(42.dp)
+                        modifier = Modifier.size(54.dp)
                     )
                     Text(
                         text = entity.name,
@@ -450,7 +450,7 @@ fun EditPostMediaList(
                 )
             ) {
                 AsyncImage(
-                    model = File(context.cacheDir, draftsDir + media),
+                    model = File(context.cacheDir, draftsDir + media), // TODO: add cache checks for editing posts
                     contentDescription = null,
                     contentScale =
                         if (large)

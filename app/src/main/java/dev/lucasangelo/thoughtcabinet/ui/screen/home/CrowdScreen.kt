@@ -1,6 +1,8 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -83,16 +86,17 @@ fun CrowdScreen(
                                 .fillMaxWidth(),
                         )
                 }
-
-            if (crowd.isNotEmpty())
+            else
                 item {
                     Grid(
                         config = {
                             repeat(2){ column(0.5f) }
-                            gap(0.dp)
+                            gap(12.dp)
                             flow = GridFlow.Row
                         },
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp),
                     ) {
                         crowd.forEach { persona ->
                             PersonaTile(
@@ -129,7 +133,6 @@ fun CrowdScreen(
         }
     }
 }
-
 @Composable
 fun PersonaTile(
     title: String,
@@ -142,6 +145,10 @@ fun PersonaTile(
         modifier = Modifier
             .aspectRatio(1f/1f)
             .background(color = backgroundColor.darken())
+            .border(
+                border = BorderStroke(width = 1.dp, color = Color.Gray),
+                shape = RoundedCornerShape(6.dp)
+            )
             .clickable(onClick = onClick)
     ) {
         Column(
@@ -149,11 +156,11 @@ fun PersonaTile(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(12.dp)
+                .padding(16.dp)
         ) {
             content()
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(4.dp))
 
             Text(
                 text = title,

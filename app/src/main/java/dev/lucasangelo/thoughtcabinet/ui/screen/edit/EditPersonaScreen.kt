@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -78,13 +80,14 @@ fun EditPersonaScreen(
         viewModel.fetchPersona(personaId)
     }
 
+    val animatedPersonaColorTheme by animateColorAsState(viewModel.personaColorTheme.darken())
     PagerScaffold(
         title =
             if (viewModel.persona != null)
                 "Edit Your Persona"
             else
                 "Create A Persona",
-        backgroundColor = viewModel.personaColorTheme.darken(),
+        backgroundColor = animatedPersonaColorTheme,
         onGoBackRequest = { rootNavController.popBackStack() },
         pageCount = 1,
     ) { pagerState, page, offsetDistance, onNextPageRequested ->
@@ -200,7 +203,8 @@ fun EditPersonaProfilePicture(
         PersonaProfilePicture(
             profilePic = viewModel.personaProfilePic,
             inCache = viewModel.hasNewProfilePicDraft,
-            modifier = Modifier.size(100.dp)
+            useBorder = true,
+            modifier = Modifier.size(120.dp)
         )
 
         Column(
@@ -259,17 +263,26 @@ fun EditPersonaColorPicker(
             .fillMaxWidth()
             .height(32.dp)
 
-        HueSlider(
-            controller = colorPickerController,
-            initialColor = viewModel.personaColorTheme,
-            modifier = slidersModifier
-        )
+        /* NOTE: doesn't work, always set the color to red for some reason
+        LaunchedEffect(viewModel.hasLoadedPersona) {
+            if (viewModel.hasLoadedPersona)
+                colorPickerController.selectByColor(viewModel.personaColorTheme, fromUser = false)
+        }
+         */
 
-        BrightnessSlider(
-            controller = colorPickerController,
-            initialColor = viewModel.personaColorTheme,
-            modifier = slidersModifier
-        )
+        if (viewModel.hasLoadedPersona) { // NOTE: looks janky but works, idk know how to make the transition smoother
+            HueSlider(
+                controller = colorPickerController,
+                initialColor = viewModel.personaColorTheme,
+                modifier = slidersModifier
+            )
+
+            BrightnessSlider(
+                controller = colorPickerController,
+                initialColor = viewModel.personaColorTheme,
+                modifier = slidersModifier
+            )
+        }
 
         LaunchedEffect(colorPickerController) {
             snapshotFlow { colorPickerController.selectedColor.value }

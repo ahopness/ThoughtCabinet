@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -25,6 +26,7 @@ import java.io.File
 fun PersonaProfilePicture(
     profilePic: String?,
     inCache: Boolean = false,
+    useBorder: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -44,12 +46,19 @@ fun PersonaProfilePicture(
             contentScale = ContentScale.Crop,
             modifier = modifier
                 .fillMaxSize()
+                .scale(0.8f)
                 .aspectRatio(1f / 1f)
                 .clip(CircleShape)
-                .border(
-                    border = BorderStroke(width = 1.dp, color = Color.Gray),
-                    shape = CircleShape
+                .then( other =
+                    if (useBorder)
+                        Modifier.border(
+                            border = BorderStroke(width = 1.dp, color = Color.Gray),
+                            shape = CircleShape
+                        )
+                    else
+                        Modifier
                 )
+
         )
     }
 }

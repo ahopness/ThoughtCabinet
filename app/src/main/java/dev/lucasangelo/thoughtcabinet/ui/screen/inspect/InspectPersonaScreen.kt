@@ -1,15 +1,19 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.inspect
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalGridApi
 import androidx.compose.foundation.layout.Grid
 import androidx.compose.foundation.layout.GridFlow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,10 +21,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -34,14 +37,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
@@ -49,9 +55,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.PersonaTrait
+import dev.lucasangelo.thoughtcabinet.data.PersonaTraitType
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanIconButton
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
@@ -61,17 +69,18 @@ import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationActionItem
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationBar
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationExpandableItem
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
-import dev.lucasangelo.thoughtcabinet.ui.component.PersonaTraitTile
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaTraitRoute
+import dev.lucasangelo.thoughtcabinet.util.LinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.darken
+import dev.lucasangelo.thoughtcabinet.util.draftsDir
+import dev.lucasangelo.thoughtcabinet.util.fetchLinkMetadata
+import dev.lucasangelo.thoughtcabinet.util.traitsDir
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlin.compareTo
-import kotlin.rem
-import kotlin.text.compareTo
+import java.io.File
 
 @Serializable
 data class InspectPersonaRoute(val personaId: Long)
@@ -118,7 +127,7 @@ fun InspectPersonaScreen(
                         profilePic = viewModel.persona?.profilePic,
                         modifier = modifier
                             .scale(
-                                lerp(.9f, .6f, collapsedFraction())
+                                lerp(1f, .8f, collapsedFraction())
                             )
                             .clickable(onClick = {
                                 coroutineScope
@@ -167,10 +176,12 @@ fun InspectPersonaScreen(
                     Grid(
                         config = {
                             repeat(2){ column(0.5f) }
-                            gap(0.dp)
+                            gap(12.dp)
                             flow = GridFlow.Row
                         },
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp),
                     ) {
                         viewModel.persona?.let { persona ->
                             persona.traits.forEachIndexed { traitId, trait ->
@@ -186,16 +197,6 @@ fun InspectPersonaScreen(
                                         modifier = Modifier
                                             .align(Alignment.TopEnd)
                                             .size(48.dp)
-                                            .background(
-                                                brush = Brush.radialGradient(
-                                                    colors = listOf(
-                                                        Color.Black.copy(0.5f),
-                                                        Color.Transparent
-                                                    ),
-                                                    center = Offset(Float.POSITIVE_INFINITY, 0f),
-                                                    radius = 125f
-                                                )
-                                            )
                                             .clickable(onClick = { pendingTraitInfoForManipulation = Triple(personaId, traitId, trait) })
                                     )
                                 }
@@ -265,10 +266,11 @@ fun InspectPersonaScreen(
             text = "If you delete this trait, you won't be able to recover it later.",
             onDismiss = { pendingTraitForDeletion = null },
             onConfirm = {
+                val traitToDelete = pendingTraitForDeletion!! // NOTE: coroutine causes race condition, taking a snapshot right before to avoid a NullPointerException
                 coroutineScope.launch {
                     viewModel.persona?.let {
                         viewModel.deleteTrait(
-                            trait = pendingTraitForDeletion!!,
+                            trait = traitToDelete,
                             at = it
                         )
                         rootShowSnackbar("Trait deleted successfully!")
@@ -387,5 +389,107 @@ fun InspectPersonaTraitManipulationModal(
                     }
                 )
         }
+    }
+}
+
+@Composable
+fun PersonaTraitTile(
+    type: PersonaTraitType,
+    content: String,
+    mediaInCache: Boolean = false,
+    backgroundColor: Color,
+    rootShowSnackbar: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    extras: @Composable BoxScope.() -> Unit = {},
+) {
+    Box(
+        modifier = modifier
+            .aspectRatio(1f/1f)
+            .background(backgroundColor.darken(0.8f))
+            .border(
+                border = BorderStroke(width = 1.dp, color = Color.Gray),
+                shape = RoundedCornerShape(6.dp)
+            )
+
+    ) {
+        val context = LocalContext.current
+        val uriHandler = LocalUriHandler.current
+        when(type) {
+            PersonaTraitType.TEXT ->
+                Text(
+                    text = "\"$content\"",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    fontStyle = FontStyle.Italic,
+                    fontFamily = FontFamily.Serif,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            PersonaTraitType.MEDIA ->
+                AsyncImage(
+                    model = File(
+                        if (mediaInCache) context.cacheDir else context.filesDir,
+                        (if (mediaInCache) draftsDir else traitsDir) + content
+                    ),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .aspectRatio(1f / 1f)
+                )
+            PersonaTraitType.LINK ->
+                Box(Modifier.clickable(onClick = {
+                    try {
+                        uriHandler.openUri(content)
+                    } catch (e: Exception) {
+                        rootShowSnackbar("ERROR: Could not open URL: $content")
+                    }
+                })) {
+                    var linkMetadata by remember(content) { mutableStateOf<LinkMetadata?>(null) }
+
+                    LaunchedEffect(content) {
+                        linkMetadata = fetchLinkMetadata(content)
+                    }
+
+                    linkMetadata.let {
+                        AsyncImage(
+                            model = it?.imageUrl,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .aspectRatio(1f / 1f)
+                                .alpha(0.5f)
+                        )
+
+                        Text(
+                            text = '[' + (linkMetadata?.title ?: linkMetadata?.description ?: "LOADING...") + ']',
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+
+                        Image(
+                            painter = painterResource(R.drawable.icon_redirect),
+                            contentDescription = "Open Link",
+                            modifier = Modifier
+                                .size(54.dp)
+                                .align(Alignment.BottomStart)
+                                .background(
+                                    brush = Brush.radialGradient(
+                                        colors = listOf(
+                                            Color.Black.copy(0.5f),
+                                            Color.Transparent
+                                        ),
+                                        center = Offset(0f, Float.POSITIVE_INFINITY),
+                                        radius = 125f
+                                    )
+                                )
+                        )
+                    }
+
+                }
+        }
+
+        extras()
     }
 }
