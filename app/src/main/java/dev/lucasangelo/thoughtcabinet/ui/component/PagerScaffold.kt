@@ -65,29 +65,30 @@ fun PagerScaffold(
                 )[page]()
             }
 
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .background(Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(0.5f))
-                    ))
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .safeDrawingPadding()
-                    .padding(bottom = 32.dp),
-            ) {
-                repeat(pagerState.pageCount) { iteration ->
-                    val color = if (pagerState.currentPage == iteration) Color.LightGray else Color.DarkGray
-                    Box(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .size(8.dp)
-                    )
+            if (pageCount > 1)
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .background(Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(0.5f))
+                        ))
+                        .wrapContentHeight()
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .safeDrawingPadding()
+                        .padding(bottom = 32.dp),
+                ) {
+                    repeat(pagerState.pageCount) { iteration ->
+                        val color = if (pagerState.currentPage == iteration) Color.LightGray else Color.DarkGray
+                        Box(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clip(CircleShape)
+                                .background(color)
+                                .size(8.dp)
+                        )
+                    }
                 }
-            }
         }
     }
 }

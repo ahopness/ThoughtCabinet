@@ -86,29 +86,13 @@ fun EditPersonaScreen(
                 "Create A Persona",
         backgroundColor = viewModel.personaColorTheme.darken(),
         onGoBackRequest = { rootNavController.popBackStack() },
-        pageCount = 3,
+        pageCount = 1,
     ) { pagerState, page, offsetDistance, onNextPageRequested ->
         listOf<@Composable () -> Unit>(
             {
-                EditPersonaProfilePicture(
+                EditPersonaContent(
                     pageOffsetDistance = offsetDistance,
                     viewModel,
-                    onNotifyError = rootShowSnackbar,
-                    onNextPageRequested,
-                )
-            },
-            {
-                EditPersonaTextFields(
-                    pageOffsetDistance = offsetDistance,
-                    viewModel,
-                    onNextPageRequested,
-                )
-            },
-            {
-                EditPersonaColorPicker(
-                    pageOffsetDistance = offsetDistance,
-                    viewModel,
-                    //onNextPageRequested,
                     rootShowSnackbar,
                     rootNavController
                 )
@@ -154,11 +138,37 @@ Instead of a profile page, personas have a board which you can add personality t
 */
 
 @Composable
-fun EditPersonaProfilePicture(
+fun EditPersonaContent(
     pageOffsetDistance: Float,
     viewModel: EditPersonaViewModel,
+    rootShowSnackbar: (String) -> Unit,
+    rootNavController: NavController,
+) {
+    PagerScaffoldContent(pageOffsetDistance) {
+        EditPersonaProfilePicture(
+            viewModel,
+            onNotifyError = rootShowSnackbar
+        )
+
+        EditPersonaColorPicker(
+            viewModel
+        )
+
+        EditPersonaTextFields(
+            viewModel
+        )
+
+        EditPersonaFinishButton(
+            viewModel,
+            rootShowSnackbar,
+            rootNavController
+        )
+    }
+}
+@Composable
+fun EditPersonaProfilePicture(
+    viewModel: EditPersonaViewModel,
     onNotifyError: (String) -> Unit,
-    onNextPageRequested: () -> Unit,
 ) {
     val onProfilePicChanged: (String?) -> Unit = {
         if (viewModel.hasLoadedPersona)
@@ -182,152 +192,125 @@ fun EditPersonaProfilePicture(
 
     var openAlertDialog by remember { mutableStateOf(false) }
 
-    PagerScaffoldContent(pageOffsetDistance) {
-        Text("First, choose a profile picture")
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        PersonaProfilePicture(
+            profilePic = viewModel.personaProfilePic,
+            inCache = viewModel.hasNewProfilePicDraft,
+            modifier = Modifier.size(100.dp)
+        )
 
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            PersonaProfilePicture(
-                profilePic = viewModel.personaProfilePic,
-                inCache = viewModel.hasNewProfilePicDraft,
-                modifier = Modifier.size(114.dp)
-            )
-
-            Spacer(Modifier.height(32.dp))
-
             OutlinedButton(
-                border = BorderStroke(1.dp, Color.LightGray),
+                border = BorderStroke(1.dp, Color.Gray),
                 onClick = {
                     picker.launch(PickVisualMediaRequest(
                             ActivityResultContracts.PickVisualMedia.ImageOnly
                         ))
                 },
-            ) { Text("Import From Library") }
+            ) {
+                Text(
+                    if (viewModel.personaProfilePic != null)
+                        "Replace Profile Pictire"
+                    else
+                        "Add Profile Pictire"
+                )
+            }
 
-            if (viewModel.personaProfilePic != null) {
-                Spacer(Modifier.height(8.dp))
-
+            if (viewModel.personaProfilePic != null)
                 OutlinedButton(
-                    border = BorderStroke(1.dp, Color.LightGray),
+                    border = BorderStroke(1.dp, Color.Gray),
                     onClick = { openAlertDialog = true },
                 ) { Text("Clear Current") }
-            }
         }
 
-        Button(onClick = onNextPageRequested) {
-            Text("Next")
-        }
-    }
-
-    if (openAlertDialog) {
-        DeleteConfirmationDialog(
-            text = "If you delete the profile picture now you won't be able to recover it later.",
-            onDismiss = { openAlertDialog = false },
-            onConfirm = { onProfilePicChanged(null) }
-        )
-    }
-}
-
-@Composable
-fun EditPersonaTextFields(
-    pageOffsetDistance: Float,
-    viewModel: EditPersonaViewModel,
-    onNextPageRequested: () -> Unit,
-) {
-    PagerScaffoldContent(pageOffsetDistance) {
-        Text("Then, write some information")
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            OutlinedTextField(
-                value = viewModel.personaName,
-                onValueChange = {
-                    if (viewModel.hasLoadedPersona)
-                    viewModel.personaName = it
-                },
-                label = { Text("Persona's Name") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+        if (openAlertDialog) {
+            DeleteConfirmationDialog(
+                text = "If you delete the profile picture now you won't be able to recover it later.",
+                onDismiss = { openAlertDialog = false },
+                onConfirm = { onProfilePicChanged(null) }
             )
-            Spacer(Modifier.height(16.dp))
-            OutlinedTextField(
-                value = viewModel.personaBio,
-                onValueChange = {
-                    if (viewModel.hasLoadedPersona)
-                        viewModel.personaBio = it
-                },
-                label = { Text("Persona's Bio") },
-                maxLines = 6,
-                minLines = 3,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(onClick = onNextPageRequested) { Text("Next") }
         }
     }
 }
-
 @Composable
 fun EditPersonaColorPicker(
-    pageOffsetDistance: Float,
     viewModel: EditPersonaViewModel,
-    rootShowSnackbar: (String) -> Unit,
-    rootNavController: NavController,
 ) {
-    PagerScaffoldContent(pageOffsetDistance) {
-        Text("Finally, pick a color theme")
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val colorPickerController = rememberColorPickerController()
-
-            val slidersModifier = Modifier
-                .fillMaxWidth()
-                .height(32.dp)
-                .border(
-                    width = 2.dp,
-                    color = Color.LightGray,
-                    shape = RoundedCornerShape(6.dp)
-                )
-
-            HueSlider(
-                controller = colorPickerController,
-                initialColor = viewModel.personaColorTheme,
-                modifier = slidersModifier
+    val spacing = 16.dp
+    Column(
+        verticalArrangement = Arrangement.spacedBy(spacing),
+        modifier = Modifier
+            .border(
+                border = BorderStroke(width = 1.dp, color = Color.Gray),
+                shape = RoundedCornerShape(6.dp)
             )
-            Spacer(Modifier.height(24.dp))
-            BrightnessSlider(
-                controller = colorPickerController,
-                initialColor = viewModel.personaColorTheme,
-                modifier = slidersModifier
-            )
+            .padding(spacing)
+    ) {
+        val colorPickerController = rememberColorPickerController()
 
-            LaunchedEffect(colorPickerController) {
-                snapshotFlow { colorPickerController.selectedColor.value }
-                    .distinctUntilChanged()
-                    .filter { it != Color.Transparent } // NOTE: color reset bug fix
-                    .collect({
-                        if (viewModel.hasLoadedPersona)
-                            viewModel.personaColorTheme = it
-                    })
-            }
-        }
+        val slidersModifier = Modifier
+            .fillMaxWidth()
+            .height(32.dp)
 
-        EditPersonaFinishButton(
-            viewModel,
-            rootShowSnackbar,
-            rootNavController
+        HueSlider(
+            controller = colorPickerController,
+            initialColor = viewModel.personaColorTheme,
+            modifier = slidersModifier
         )
+
+        BrightnessSlider(
+            controller = colorPickerController,
+            initialColor = viewModel.personaColorTheme,
+            modifier = slidersModifier
+        )
+
+        LaunchedEffect(colorPickerController) {
+            snapshotFlow { colorPickerController.selectedColor.value }
+                .distinctUntilChanged()
+                .filter { it != Color.Transparent } // NOTE: color reset bug fix
+                .collect({
+                    if (viewModel.hasLoadedPersona)
+                        viewModel.personaColorTheme = it
+                })
+        }
     }
 }
+@Composable
+fun EditPersonaTextFields(
+    viewModel: EditPersonaViewModel,
+) {
+    OutlinedTextField(
+        value = viewModel.personaName,
+        onValueChange = {
+            if (viewModel.hasLoadedPersona)
+            viewModel.personaName = it
+        },
+        label = { Text("Persona's Name") },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth()
+    )
+
+
+    OutlinedTextField(
+        value = viewModel.personaBio,
+        onValueChange = {
+            if (viewModel.hasLoadedPersona)
+                viewModel.personaBio = it
+        },
+        label = { Text("Persona's Bio") },
+        maxLines = 6,
+        minLines = 3,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
 @Composable
 fun EditPersonaFinishButton(
     viewModel: EditPersonaViewModel,

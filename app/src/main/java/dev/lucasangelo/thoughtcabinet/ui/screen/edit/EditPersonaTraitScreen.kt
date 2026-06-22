@@ -6,15 +6,19 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -31,6 +35,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -146,26 +152,23 @@ fun EditPersonaTraitTypeSelect(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            TraitTypeDescriptionButton(
-                type = PersonaTraitType.TEXT,
+            TypeDescriptionButton(
                 icon = R.drawable.icon_text,
                 title = "Text",
                 description = "Values, goals, quotes: Motivation",
-                onTypeChanged = onTryChangeTraitType
+                onClick = { onTryChangeTraitType(PersonaTraitType.TEXT) }
             )
-            TraitTypeDescriptionButton(
-                type = PersonaTraitType.MEDIA,
+            TypeDescriptionButton(
                 icon = R.drawable.icon_media,
                 title = "Media",
                 description = "Aesthetics, memories: Identity",
-                onTypeChanged = onTryChangeTraitType
+                onClick = { onTryChangeTraitType(PersonaTraitType.MEDIA) }
             )
-            TraitTypeDescriptionButton(
-                type = PersonaTraitType.LINK,
+            TypeDescriptionButton(
                 icon = R.drawable.icon_link,
                 title = "Link",
                 description = "Songs, videos, wikis: Logic",
-                onTypeChanged = onTryChangeTraitType
+                onClick = { onTryChangeTraitType(PersonaTraitType.LINK) }
             )
         }
 
@@ -177,21 +180,6 @@ fun EditPersonaTraitTypeSelect(
             )
         }
     }
-}
-@Composable
-fun TraitTypeDescriptionButton(
-    type: PersonaTraitType,
-    icon: Int,
-    title: String,
-    description: String,
-    onTypeChanged: (PersonaTraitType) -> Unit
-) {
-    TypeDescriptionButton(
-        icon,
-        title,
-        description,
-        onClick = { onTypeChanged(type) }
-    )
 }
 
 @Composable
@@ -214,7 +202,7 @@ fun EditPersonaTraitContent(
                 OutlinedTextField(
                     value = viewModel.traitContent,
                     onValueChange = onTraitContentChanced,
-                    label = { Text("Text") },
+                    label = { Text("What's up?") },
                     maxLines = 6,
                     minLines = 4,
                     modifier = Modifier.fillMaxWidth()
@@ -230,7 +218,7 @@ fun EditPersonaTraitContent(
                 OutlinedTextField(
                     value = viewModel.traitContent,
                     onValueChange = onTraitContentChanced,
-                    label = { Text("Link") },
+                    label = { Text("Paste Link Here") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -265,14 +253,12 @@ fun EditPersonaTraitContentImagePicker(
         }
     )
 
-    var openAlertDialog by remember { mutableStateOf(false) }
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         val context = LocalContext.current
-        if (traitContent.isNotEmpty())
+        if (traitContent.isNotEmpty()) {
             AsyncImage(
                 model = File(
                     if (viewModel.hasMediaDraft) context.cacheDir else context.filesDir,
@@ -282,49 +268,49 @@ fun EditPersonaTraitContentImagePicker(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(elevation = 8.dp)
-            )
-        else
-            Image(
-                painter = painterResource(R.drawable.icon_camera),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(72.dp)
+                    .border(
+                        border = BorderStroke(width = 1.dp, color = Color.Gray),
+                        shape = RoundedCornerShape(6.dp)
+                    )
             )
 
-        Row(
-            horizontalArrangement =
-                if (traitContent.isEmpty()) Arrangement.Center else Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
             OutlinedButton(
-                border = BorderStroke(1.dp, Color.LightGray),
+                border = BorderStroke(1.dp, Color.Gray),
                 onClick = {
                     picker.launch(PickVisualMediaRequest(
                         ActivityResultContracts.PickVisualMedia.ImageOnly
                     ))
                 },
             ) {
-                Text("Import From Library")
+                Text("Replace Media")
             }
-            if (traitContent.isNotEmpty()) {
-                OutlinedButton(
-                    border = BorderStroke(1.dp, Color.LightGray),
-                    onClick = { openAlertDialog = true },
+        } else {
+            OutlinedButton(
+                shape = RoundedCornerShape(6.dp),
+                border = BorderStroke(width = 1.dp, color = Color.Gray),
+                modifier = Modifier.size(150.dp),
+                onClick = {
+                    picker.launch(PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        ))
+                },
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
                 ) {
-                    Text("Clear Current")
+                    Image(
+                        painter = painterResource(R.drawable.icon_camera),
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp)
+                    )
+                    Text(
+                        text = "Add Media",
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
-    }
-
-    if (openAlertDialog) {
-        DeleteConfirmationDialog(
-            text = "If you delete the media now you won't be able to recover it later.",
-            onDismiss = { openAlertDialog = false },
-            onConfirm = { onTraitContentChanced("") }
-        )
     }
 }
 @Composable

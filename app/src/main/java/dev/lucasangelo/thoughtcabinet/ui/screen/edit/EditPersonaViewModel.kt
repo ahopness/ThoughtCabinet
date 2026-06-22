@@ -51,36 +51,6 @@ class EditPersonaViewModel(
         }
     }
 
-    fun updatePersona(from: PersonaEntity) {
-        viewModelScope.launch {
-            dao.updatePersona(PersonaEntity(
-                id = from.id,
-                createdAt = from.createdAt,
-                updatedAt = Instant.now(),
-                name = personaName.trim(),
-                bio = personaBio.trim(),
-                profilePic = personaProfilePic,
-                colorTheme = personaColorTheme.toArgb(),
-                traits = from.traits,
-                metadata = from.metadata,
-            ))
-        }
-    }
-    fun insertPersona() {
-        viewModelScope.launch {
-            dao.insertPersona(PersonaEntity(
-                createdAt = Instant.now(),
-                updatedAt = null,
-                name = personaName.trim(),
-                bio = personaBio.trim(),
-                profilePic = personaProfilePic,
-                colorTheme = personaColorTheme.toArgb(),
-                traits = emptyList(),
-                metadata = emptyMap(),
-            ))
-        }
-    }
-
     var hasNewProfilePicDraft by mutableStateOf(false)
         private set
     fun importProfilePic(uri: Uri) : String? {
@@ -114,4 +84,30 @@ class EditPersonaViewModel(
     }
     fun cleanupProfilePicDrafts() =
         cleanupDrafts(getApplication<Application>())
+
+    suspend fun updatePersona(from: PersonaEntity) {
+        dao.updatePersona(PersonaEntity(
+            id = from.id,
+            createdAt = from.createdAt,
+            updatedAt = Instant.now(),
+            name = personaName.trim(),
+            bio = personaBio.trim(),
+            profilePic = personaProfilePic,
+            colorTheme = personaColorTheme.toArgb(),
+            traits = from.traits,
+            metadata = from.metadata,
+        ))
+    }
+    suspend fun insertPersona() {
+        dao.insertPersona(PersonaEntity(
+            createdAt = Instant.now(),
+            updatedAt = null,
+            name = personaName.trim(),
+            bio = personaBio.trim(),
+            profilePic = personaProfilePic,
+            colorTheme = personaColorTheme.toArgb(),
+            traits = emptyList(),
+            metadata = emptyMap(),
+        ))
+    }
 }

@@ -1,6 +1,8 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CircleShape
@@ -42,9 +44,12 @@ fun PersonaProfilePicture(
             contentScale = ContentScale.Crop,
             modifier = modifier
                 .fillMaxSize()
-                .shadow(elevation = 6.dp, shape = CircleShape)
-                .clip(CircleShape)
                 .aspectRatio(1f / 1f)
+                .clip(CircleShape)
+                .border(
+                    border = BorderStroke(width = 1.dp, color = Color.Gray),
+                    shape = CircleShape
+                )
         )
     }
 }

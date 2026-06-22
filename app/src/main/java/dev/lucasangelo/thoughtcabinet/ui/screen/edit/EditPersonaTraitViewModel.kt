@@ -63,42 +63,6 @@ class EditPersonaTraitViewModel(
         }
     }
 
-    fun updateTrait(from: PersonaTrait, at: PersonaEntity) {
-        viewModelScope.launch {
-            val newTraits = at.traits.map { trait ->
-                if (trait == from) {
-                    PersonaTrait(
-                        type = traitType,
-                        content = traitContent,
-                        metadata = from.metadata
-                    )
-                } else {
-                    trait
-                }
-            }
-            val updatedPersona = at.copy(
-                traits = newTraits,
-                updatedAt = Instant.now()
-            )
-            dao.updatePersona(updatedPersona)
-        }
-    }
-    fun insertTrait(at: PersonaEntity) {
-        viewModelScope.launch {
-            val newTrait = PersonaTrait(
-                type = traitType,
-                content = traitContent,
-                metadata = emptyMap()
-            )
-            val newTraits = at.traits + newTrait
-            val updatedPersona = at.copy(
-                traits = newTraits,
-                updatedAt = Instant.now()
-            )
-            dao.updatePersona(updatedPersona)
-        }
-    }
-
     var hasMediaDraft by mutableStateOf(false)
         private set
     fun importMedia(uri: Uri) : String? {
@@ -132,4 +96,36 @@ class EditPersonaTraitViewModel(
     }
     fun cleanupMediaDrafts() =
         cleanupDrafts(getApplication<Application>())
+
+    suspend fun updateTrait(from: PersonaTrait, at: PersonaEntity) {
+        val newTraits = at.traits.map { trait ->
+            if (trait == from) {
+                PersonaTrait(
+                    type = traitType,
+                    content = traitContent,
+                    metadata = from.metadata
+                )
+            } else {
+                trait
+            }
+        }
+        val updatedPersona = at.copy(
+            traits = newTraits,
+            updatedAt = Instant.now()
+        )
+        dao.updatePersona(updatedPersona)
+    }
+    suspend fun insertTrait(at: PersonaEntity) {
+        val newTrait = PersonaTrait(
+            type = traitType,
+            content = traitContent,
+            metadata = emptyMap()
+        )
+        val newTraits = at.traits + newTrait
+        val updatedPersona = at.copy(
+            traits = newTraits,
+            updatedAt = Instant.now()
+        )
+        dao.updatePersona(updatedPersona)
+    }
 }

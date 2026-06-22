@@ -40,23 +40,21 @@ class InspectPersonaViewModel(
         }
     }
 
-    fun deleteTrait(trait: PersonaTrait, at: PersonaEntity) {
-        viewModelScope.launch {
-            if (trait.type == PersonaTraitType.MEDIA) {
-                val context = getApplication<Application>()
-                deleteInternalStorageFile(context.filesDir, traitsDir + trait.content)
-            }
-
-            val newTraits = at.traits - trait
-
-            val updatedPersona = at.copy(
-                traits = newTraits,
-                updatedAt = Instant.now()
-            )
-            dao.updatePersona(updatedPersona)
-
-            persona = updatedPersona
+    suspend fun deleteTrait(trait: PersonaTrait, at: PersonaEntity) {
+        if (trait.type == PersonaTraitType.MEDIA) {
+            val context = getApplication<Application>()
+            deleteInternalStorageFile(context.filesDir, traitsDir + trait.content)
         }
+
+        val newTraits = at.traits - trait
+
+        val updatedPersona = at.copy(
+            traits = newTraits,
+            updatedAt = Instant.now()
+        )
+        dao.updatePersona(updatedPersona)
+
+        persona = updatedPersona
     }
     fun moveTrait(fromIndex: Int, toIndex: Int, at: PersonaEntity) {
         if (fromIndex !in at.traits.indices || toIndex !in at.traits.indices) return

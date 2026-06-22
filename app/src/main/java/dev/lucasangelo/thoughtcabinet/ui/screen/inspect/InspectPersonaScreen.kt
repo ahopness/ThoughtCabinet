@@ -52,6 +52,7 @@ import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.PersonaTrait
+import dev.lucasangelo.thoughtcabinet.ui.component.CleanIconButton
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingExtendedTopBar
@@ -264,12 +265,14 @@ fun InspectPersonaScreen(
             text = "If you delete this trait, you won't be able to recover it later.",
             onDismiss = { pendingTraitForDeletion = null },
             onConfirm = {
-                viewModel.persona?.let {
-                    viewModel.deleteTrait(
-                        trait = pendingTraitForDeletion!!,
-                        at = it
-                    )
-                    rootShowSnackbar("Trait deleted successfully!")
+                coroutineScope.launch {
+                    viewModel.persona?.let {
+                        viewModel.deleteTrait(
+                            trait = pendingTraitForDeletion!!,
+                            at = it
+                        )
+                        rootShowSnackbar("Trait deleted successfully!")
+                    }
                 }
             }
         )
@@ -298,7 +301,7 @@ fun InspectPersonaTraitManipulationModal(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            InspectPersonaTraitManipulationButton(
+            CleanIconButton(
                 action = "Edit",
                 icon = R.drawable.icon_edit,
                 onClick = {
@@ -308,7 +311,7 @@ fun InspectPersonaTraitManipulationModal(
                     onDismissRequest()
                 }
             )
-            InspectPersonaTraitManipulationButton(
+            CleanIconButton(
                 action = "Delete",
                 icon = R.drawable.icon_delete,
                 color = Color.Red,
@@ -332,82 +335,57 @@ fun InspectPersonaTraitManipulationModal(
                 )
 
             if (canMoveUp)
-                InspectPersonaTraitManipulationButton(
+                CleanIconButton(
                     action = "Move Up",
                     icon = R.drawable.icon_arrow_up,
                     onClick = {
-                        onDismissRequest()
                         viewModel.moveTrait(
                             fromIndex = traitId,
                             toIndex = traitId - 2,
                             at = persona
                         )
+                        onDismissRequest()
                     }
                 )
             if (canMoveLeft)
-                InspectPersonaTraitManipulationButton(
+                CleanIconButton(
                     action = "Move Left",
                     icon = R.drawable.icon_arrow_left,
                     onClick = {
-                        onDismissRequest()
                         viewModel.moveTrait(
                             fromIndex = traitId,
                             toIndex = traitId + 1,
                             at = persona
                         )
+                        onDismissRequest()
                     }
                 )
             if (canMoveRight)
-                InspectPersonaTraitManipulationButton(
+                CleanIconButton(
                     action = "Move Right",
                     icon = R.drawable.icon_back,
                     onClick = {
-                        onDismissRequest()
                         viewModel.moveTrait(
                             fromIndex = traitId,
                             toIndex = traitId - 1,
                             at = persona
                         )
+                        onDismissRequest()
                     }
                 )
             if (canMoveDown)
-                InspectPersonaTraitManipulationButton(
+                CleanIconButton(
                     action = "Move Down",
                     icon = R.drawable.icon_arrow_down,
                     onClick = {
-                        onDismissRequest()
                         viewModel.moveTrait(
                             fromIndex = traitId,
                             toIndex = traitId + 2,
                             at = persona
                         )
+                        onDismissRequest()
                     }
                 )
         }
-    }
-}
-@Composable
-fun InspectPersonaTraitManipulationButton(
-    action: String,
-    icon: Int,
-    color: Color = Color.White,
-    onClick: () -> Unit,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-    ) {
-        Image(
-            painter = painterResource(icon),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(color),
-            modifier = Modifier.size(54.dp)
-        )
-        Text(
-            text = action,
-            color = color
-        )
     }
 }
