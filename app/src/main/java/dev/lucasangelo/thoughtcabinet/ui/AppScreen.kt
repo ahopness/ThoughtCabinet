@@ -96,7 +96,7 @@ fun AppScreen() {
                 val routeObject : EditPostRoute = backStackEntry.toRoute()
                 EditPostScreen(
                     routeObject.id,
-                    routeObject.childOf,
+                    routeObject.repostOf,
                     crowd,
                     navController,
                     showSnackbar

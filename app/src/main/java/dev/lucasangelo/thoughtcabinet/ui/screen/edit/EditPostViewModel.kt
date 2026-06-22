@@ -24,6 +24,7 @@ class EditPostViewModel(
 ) : AndroidViewModel(application) {
     // NOTE: using Two-Way Data Binding here for simplicity’s sake
     // might change in the future, I just don't wanna write a bunch of setters for such a simple screen rn
+    var postIsRepostOf by mutableStateOf<Long?>(null)
     var postType by mutableStateOf<PostType>(PostType.NOTE)
     var postContent by mutableStateOf("")
     var postMedia by mutableStateOf<List<String>>(emptyList())
@@ -53,9 +54,7 @@ class EditPostViewModel(
         private set
     var post by mutableStateOf<PostEntity?>(null)
         private set
-    var postParent by mutableStateOf<Long?>(null)
-        private set
-    fun fetchPost(id: Long?, childOf: Long?) {
+    fun fetchPost(id: Long?, repostOf: Long?) {
         viewModelScope.launch {
             post = if (id != null) dao.getPost(id) else null
             post?.let {
@@ -66,7 +65,7 @@ class EditPostViewModel(
                 postMood = it.mood
             }
 
-            postParent = childOf
+            postIsRepostOf = repostOf
 
             hasLoadedPost = true
         }
@@ -76,7 +75,7 @@ class EditPostViewModel(
         viewModelScope.launch {
             dao.updatePost(PostEntity(
                 id = from.id,
-                childOf = from.childOf,
+                repostOf = from.repostOf,
                 createdAt = from.createdAt,
                 updatedAt = Instant.now(),
                 authorId = postAuthorId ?: 0L,
@@ -85,16 +84,16 @@ class EditPostViewModel(
                 media = postMedia,
                 mood = postMood.trim(),
                 liked = from.liked,
+                bookmarked = from.bookmarked,
                 archived = from.archived,
                 metadata = from.metadata
             ))
         }
     }
-    fun insertPost(asChildOf: Long?) {
+    fun insertPost(asRepostOf: Long?, isArchived: Boolean) {
         viewModelScope.launch {
             dao.updatePost(PostEntity(
-                id = 0,
-                childOf = asChildOf,
+                repostOf = asRepostOf,
                 createdAt = Instant.now(),
                 updatedAt = null,
                 authorId = postAuthorId!!,
@@ -103,7 +102,8 @@ class EditPostViewModel(
                 media = postMedia,
                 mood = postMood.trim(),
                 liked = false,
-                archived = false,
+                bookmarked = false,
+                archived = isArchived,
                 metadata = emptyMap()
             ))
         }

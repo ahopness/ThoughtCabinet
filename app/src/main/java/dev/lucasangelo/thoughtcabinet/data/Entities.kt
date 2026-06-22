@@ -10,7 +10,7 @@ import java.time.Instant
 @Entity
 data class PersonaEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Long,
+    val id: Long = 0,
 
     val createdAt: Instant,
     val updatedAt: Instant?,
@@ -43,7 +43,7 @@ enum class PersonaTraitType {
         ForeignKey(
             entity = PostEntity::class,
             parentColumns = ["id"],
-            childColumns = ["childOf"],
+            childColumns = ["repostOf"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
@@ -54,15 +54,15 @@ enum class PersonaTraitType {
         ),
     ],
     indices = [
-        Index("childOf"),
+        Index("repostOf"),
         Index("authorId"),
     ]
 )
 data class PostEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Long,
+    val id: Long = 0,
 
-    val childOf: Long?, // NOTE: can be repost or comment, depends on post type
+    val repostOf: Long?,
 
     val createdAt: Instant,
     val updatedAt: Instant?,
@@ -77,14 +77,47 @@ data class PostEntity(
     val mood: String,
 
     val liked: Boolean,
-    val archived: Boolean, // TODO: bookmarks and archives
+    val bookmarked: Boolean,
+    val archived: Boolean,
 
     val metadata: Map<String, String>,
 )
 enum class PostType {
     NOTE,
-    ARTICLE,
-    MEDIA,
+    REEL,
     LINK,
-    COMMENT,
 }
+
+@Entity(
+    foreignKeys = [
+        ForeignKey(
+            entity = PostEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["postId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = PersonaEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["authorId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+    ],
+    indices = [
+        Index("postId"),
+        Index("authorId"),
+    ]
+)
+data class CommentEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+
+    val postId: Long,
+    val authorId: Long,
+
+    val content: String,
+
+    val liked: Boolean,
+
+    val metadata: Map<String, String>,
+)

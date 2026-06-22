@@ -22,16 +22,29 @@ interface AppDao {
 
     @Insert
     suspend fun insertPost(post: PostEntity): Long
-    @Query("SELECT * FROM PostEntity WHERE type != 'COMMENT'")
-    fun getAllFeedPosts(): Flow<List<PostEntity>>
-    @Query("SELECT * FROM PostEntity WHERE type = 'COMMENT' AND childOf = :id")
-    fun getAllCommentsOf(id: Long): Flow<List<PostEntity>>
-    @Query("SELECT * FROM PostEntity WHERE authorId = :authorId")
-    fun getAllPostsBy(authorId: Long): Flow<List<PostEntity>>
     @Query("SELECT * FROM PostEntity WHERE id = :id")
     suspend fun getPost(id: Long): PostEntity?
+    @Query("SELECT * FROM PostEntity WHERE archived = 0")
+    fun getAllPosts(): Flow<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity WHERE archived = 1")
+    fun getAllArchivedPosts(): Flow<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity WHERE bookmarked = 1")
+    fun getAllBookmarkedPosts(): Flow<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity WHERE authorId = :authorId")
+    fun getAllPostsBy(authorId: Long): Flow<List<PostEntity>>
     @Update
     suspend fun updatePost(persona: PostEntity)
     @Delete
     suspend fun deletePost(persona: PostEntity)
+
+    @Insert
+    suspend fun insertComment(comment: CommentEntity): Long
+    @Query("SELECT * FROM CommentEntity WHERE postId = :postId")
+    fun getAllCommentsOf(postId: Long): Flow<List<CommentEntity>>
+    @Query("SELECT * FROM CommentEntity WHERE authorId = :authorId")
+    fun getAllCommentsBy(authorId: Long): Flow<List<CommentEntity>>
+    @Update
+    suspend fun updateComment(comment: CommentEntity)
+    @Delete
+    suspend fun deleteComment(comment: CommentEntity)
 }

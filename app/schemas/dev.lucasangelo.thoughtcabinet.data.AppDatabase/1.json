@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "ddac21863496b7736801490bcb5512e7",
+    "identityHash": "007bea97101f0b81c1d4a20dee5b5eb0",
     "entities": [
       {
         "tableName": "PersonaEntity",
@@ -70,7 +70,7 @@
       },
       {
         "tableName": "PostEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `childOf` INTEGER, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER, `authorId` INTEGER NOT NULL, `type` TEXT NOT NULL, `content` TEXT NOT NULL, `media` TEXT NOT NULL, `mood` TEXT NOT NULL, `liked` INTEGER NOT NULL, `archived` INTEGER NOT NULL, `metadata` TEXT NOT NULL, FOREIGN KEY(`childOf`) REFERENCES `PostEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`authorId`) REFERENCES `PersonaEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `repostOf` INTEGER, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER, `authorId` INTEGER NOT NULL, `type` TEXT NOT NULL, `content` TEXT NOT NULL, `media` TEXT NOT NULL, `mood` TEXT NOT NULL, `liked` INTEGER NOT NULL, `bookmarked` INTEGER NOT NULL, `archived` INTEGER NOT NULL, `metadata` TEXT NOT NULL, FOREIGN KEY(`repostOf`) REFERENCES `PostEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`authorId`) REFERENCES `PersonaEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -79,8 +79,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "childOf",
-            "columnName": "childOf",
+            "fieldPath": "repostOf",
+            "columnName": "repostOf",
             "affinity": "INTEGER"
           },
           {
@@ -131,6 +131,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "bookmarked",
+            "columnName": "bookmarked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "archived",
             "columnName": "archived",
             "affinity": "INTEGER",
@@ -151,13 +157,13 @@
         },
         "indices": [
           {
-            "name": "index_PostEntity_childOf",
+            "name": "index_PostEntity_repostOf",
             "unique": false,
             "columnNames": [
-              "childOf"
+              "repostOf"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PostEntity_childOf` ON `${TABLE_NAME}` (`childOf`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PostEntity_repostOf` ON `${TABLE_NAME}` (`repostOf`)"
           },
           {
             "name": "index_PostEntity_authorId",
@@ -175,7 +181,99 @@
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
-              "childOf"
+              "repostOf"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "PersonaEntity",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "authorId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "CommentEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `postId` INTEGER NOT NULL, `authorId` INTEGER NOT NULL, `content` TEXT NOT NULL, `liked` INTEGER NOT NULL, `metadata` TEXT NOT NULL, FOREIGN KEY(`postId`) REFERENCES `PostEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`authorId`) REFERENCES `PersonaEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "postId",
+            "columnName": "postId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authorId",
+            "columnName": "authorId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "liked",
+            "columnName": "liked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "metadata",
+            "columnName": "metadata",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_CommentEntity_postId",
+            "unique": false,
+            "columnNames": [
+              "postId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CommentEntity_postId` ON `${TABLE_NAME}` (`postId`)"
+          },
+          {
+            "name": "index_CommentEntity_authorId",
+            "unique": false,
+            "columnNames": [
+              "authorId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CommentEntity_authorId` ON `${TABLE_NAME}` (`authorId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "PostEntity",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "postId"
             ],
             "referencedColumns": [
               "id"
@@ -197,7 +295,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ddac21863496b7736801490bcb5512e7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '007bea97101f0b81c1d4a20dee5b5eb0')"
     ]
   }
 }

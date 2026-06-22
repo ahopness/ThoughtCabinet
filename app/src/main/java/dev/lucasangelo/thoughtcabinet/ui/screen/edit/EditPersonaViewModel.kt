@@ -69,7 +69,6 @@ class EditPersonaViewModel(
     fun insertPersona() {
         viewModelScope.launch {
             dao.insertPersona(PersonaEntity(
-                id = 0,
                 createdAt = Instant.now(),
                 updatedAt = null,
                 name = personaName.trim(),

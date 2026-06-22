@@ -12,7 +12,8 @@ import androidx.room.TypeConverters
 @Database(
     entities = [
         PersonaEntity::class,
-        PostEntity::class
+        PostEntity::class,
+        CommentEntity::class
     ],
     version = 1,
     autoMigrations = [],
