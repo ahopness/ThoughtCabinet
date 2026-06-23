@@ -40,10 +40,6 @@ import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.util.darken
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-
-@Serializable
-object CrowdRoute
 
 @OptIn(ExperimentalGridApi::class)
 @Composable

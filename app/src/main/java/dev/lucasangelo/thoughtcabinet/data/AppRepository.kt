@@ -150,7 +150,6 @@ class AppRepository(
         postType: PostType,
         postContent: String,
         postMedia: List<String>,
-        postMood: String
     ) {
         dao.insertPost(PostEntity(
             repostOf = asRepostOf,
@@ -160,7 +159,6 @@ class AppRepository(
             type = postType,
             content = postContent.trim(),
             media = postMedia,
-            mood = postMood.trim(),
             liked = false,
             bookmarked = false,
             archived = isArchived,
@@ -183,15 +181,13 @@ class AppRepository(
         postType: PostType,
         postContent: String,
         postMedia: List<String>,
-        postMood: String
     ) {
         dao.updatePost(from.copy(
             updatedAt = Instant.now(),
-            authorId = postAuthorId ?: 0L,
+            authorId = postAuthorId,
             type = postType,
             content = postContent.trim(),
             media = postMedia,
-            mood = postMood.trim(),
             archived = isArchived
         ))
     }

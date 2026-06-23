@@ -32,7 +32,6 @@ class EditPostViewModel(
     var postType by mutableStateOf(PostType.NOTE)
     var postContent by mutableStateOf("")
     var postMedia by mutableStateOf<List<String>>(emptyList())
-    var postMood by mutableStateOf("")
 
     // NOTE: can cause a race condition, might replace this if it ever causes too much trouble
     var personaColorTheme by mutableStateOf(Color.Black)
@@ -66,7 +65,6 @@ class EditPostViewModel(
                 postType = it.type
                 postContent = it.content
                 postMedia = it.media
-                postMood = it.mood
             }
 
             postIsRepostOf = repostOf
@@ -94,22 +92,17 @@ class EditPostViewModel(
             return@withContext null
         }
     }
-    suspend fun commitMedia() : Boolean = withContext(Dispatchers.IO) {
+    suspend fun commitMedia() = withContext(Dispatchers.IO) {
         if (postMedia.isEmpty() || !hasMediaDraft)
-            return@withContext true
+            return@withContext
 
         val context = getApplication<Application>()
         postMedia.forEach { media ->
-            var commitedMedia = copyInInternalStorage(
+            copyInInternalStorage(
                 context.cacheDir, draftsDir + media,
                 context.filesDir, mediaDir + media
             )
-
-            if (commitedMedia == null)
-                return@withContext false
         }
-
-        return@withContext true
     }
     fun cleanupMediaDrafts() = viewModelScope.launch {
         cleanupDrafts(getApplication<Application>())
@@ -123,7 +116,6 @@ class EditPostViewModel(
             postType,
             postContent,
             postMedia,
-            postMood
         )
     }
     fun insertPost(asRepostOf: Long?, isArchived: Boolean) = viewModelScope.launch {
@@ -134,7 +126,6 @@ class EditPostViewModel(
             postType,
             postContent,
             postMedia,
-            postMood
         )
     }
 }

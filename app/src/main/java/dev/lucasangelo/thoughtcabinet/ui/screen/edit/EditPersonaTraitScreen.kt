@@ -65,7 +65,6 @@ fun EditPersonaTraitScreen(
     val context = LocalContext.current
 
     val application = context.applicationContext as MainApplication
-    val database = application.database
     val viewModel: EditPersonaTraitViewModel = viewModel(
         factory = viewModelFactory {
             initializer { EditPersonaTraitViewModel(application.repository, application) }
@@ -332,10 +331,7 @@ fun EditPersonaFinishButton(
                 return@launch
             }
 
-            if (!viewModel.commitMedia()) {
-                rootShowSnackbar("ERROR: Couldn't import media.")
-                return@launch
-            }
+            viewModel.commitMedia()
 
             if (viewModel.trait != null) {
                 viewModel.updateTrait(viewModel.trait!!, currentPersona)

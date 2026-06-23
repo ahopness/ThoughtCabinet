@@ -96,10 +96,16 @@ fun EditPostScreen(
     val animatedPersonaColorTheme by animateColorAsState(viewModel.personaColorTheme.darken())
     PagerScaffold(
         title =
-            if (id != null)
-                "Edit Your Post"
+            if (repostOf != null) // NOTE: fugly :( but works :)
+                if (id != null)
+                    "Edit Your Repost"
+                else
+                    "Create A Repost"
             else
-                "Create A Post",
+                if (id != null)
+                    "Edit Your Post"
+                else
+                    "Create A Post",
         backgroundColor = animatedPersonaColorTheme,
         canGoBack = true,
         onGoBackRequest = { rootNavController.popBackStack() },
@@ -623,10 +629,7 @@ fun EditPostFinishButton(
                 return@launch
             }
 
-            if (!viewModel.commitMedia()) {
-                rootShowSnackbar("ERROR: Couldn't import media.")
-                return@launch
-            }
+            viewModel.commitMedia()
 
             if (viewModel.post != null) {
                 viewModel.updatePost(viewModel.post!!, archiving)

@@ -44,7 +44,7 @@ enum class PersonaTraitType {
             entity = PostEntity::class,
             parentColumns = ["id"],
             childColumns = ["repostOf"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.SET_NULL
         ),
         ForeignKey(
             entity = PersonaEntity::class,
@@ -73,8 +73,6 @@ data class PostEntity(
 
     val content: String,
     val media: List<String>,
-
-    val mood: String,
 
     val liked: Boolean,
     val bookmarked: Boolean,

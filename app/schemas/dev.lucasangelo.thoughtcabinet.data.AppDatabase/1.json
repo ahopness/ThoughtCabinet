@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "007bea97101f0b81c1d4a20dee5b5eb0",
+    "identityHash": "4a813a4a3f391a290fc0b232224bb66c",
     "entities": [
       {
         "tableName": "PersonaEntity",
@@ -70,7 +70,7 @@
       },
       {
         "tableName": "PostEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `repostOf` INTEGER, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER, `authorId` INTEGER NOT NULL, `type` TEXT NOT NULL, `content` TEXT NOT NULL, `media` TEXT NOT NULL, `mood` TEXT NOT NULL, `liked` INTEGER NOT NULL, `bookmarked` INTEGER NOT NULL, `archived` INTEGER NOT NULL, `metadata` TEXT NOT NULL, FOREIGN KEY(`repostOf`) REFERENCES `PostEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`authorId`) REFERENCES `PersonaEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `repostOf` INTEGER, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER, `authorId` INTEGER NOT NULL, `type` TEXT NOT NULL, `content` TEXT NOT NULL, `media` TEXT NOT NULL, `liked` INTEGER NOT NULL, `bookmarked` INTEGER NOT NULL, `archived` INTEGER NOT NULL, `metadata` TEXT NOT NULL, FOREIGN KEY(`repostOf`) REFERENCES `PostEntity`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL , FOREIGN KEY(`authorId`) REFERENCES `PersonaEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -115,12 +115,6 @@
           {
             "fieldPath": "media",
             "columnName": "media",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "mood",
-            "columnName": "mood",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -178,7 +172,7 @@
         "foreignKeys": [
           {
             "table": "PostEntity",
-            "onDelete": "CASCADE",
+            "onDelete": "SET NULL",
             "onUpdate": "NO ACTION",
             "columns": [
               "repostOf"
@@ -295,7 +289,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '007bea97101f0b81c1d4a20dee5b5eb0')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4a813a4a3f391a290fc0b232224bb66c')"
     ]
   }
 }

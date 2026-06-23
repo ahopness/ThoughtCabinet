@@ -81,17 +81,15 @@ class EditPersonaTraitViewModel(
             return@withContext null
         }
     }
-    suspend fun commitMedia() : Boolean = withContext(Dispatchers.IO) {
+    suspend fun commitMedia() = withContext(Dispatchers.IO) {
         if (traitContent.isEmpty() || !hasMediaDraft)
-            return@withContext true
+            return@withContext
 
         val context = getApplication<Application>()
-        var commitedMedia = copyInInternalStorage(
+        copyInInternalStorage(
             context.cacheDir, draftsDir + traitContent,
             context.filesDir, traitsDir + traitContent
         )
-
-        commitedMedia != null
     }
     fun cleanupMediaDrafts() = viewModelScope.launch {
         cleanupDrafts(getApplication<Application>())

@@ -68,17 +68,15 @@ class EditPersonaViewModel(
             return@withContext null
         }
     }
-    suspend fun commitProfilePic() : Boolean = withContext(Dispatchers.IO) {
+    suspend fun commitProfilePic() = withContext(Dispatchers.IO) {
         if (personaProfilePic.isNullOrEmpty() || !hasNewProfilePicDraft)
-            return@withContext true
+            return@withContext
 
         val context = getApplication<Application>()
-        val commitedProfilePic = copyInInternalStorage(
+        copyInInternalStorage(
             context.cacheDir, draftsDir + personaProfilePic,
             context.filesDir, profilePicDir + personaProfilePic
         )
-
-        commitedProfilePic != null
     }
     fun cleanupProfilePicDrafts() = viewModelScope.launch {
         cleanupDrafts(getApplication<Application>())

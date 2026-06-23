@@ -71,31 +71,53 @@ val postIconSize = 54.dp
 fun Post(
     postEntity: PostEntity,
     authorEntity: PersonaEntity,
+    repostChain: Map<PersonaEntity, PostEntity>,
     onDeletionRequest: (PostEntity) -> Unit,
     onLikeRequested: (PostEntity) -> Unit,
     rootNavController: NavController,
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Color(authorEntity.colorTheme).darken())
+        modifier = modifier.fillMaxWidth()
     ) {
+        repostChain.entries.reversed().forEachIndexed { index, entry ->
+            val backgroundColor = Color(entry.key.colorTheme).darken()
+            PostHeader(
+                entry.key,
+                entry.value,
+                showOptions = false,
+                onDeletionRequest = onDeletionRequest,
+                rootNavController = rootNavController,
+                modifier = Modifier.background(backgroundColor)
+            )
+
+            PostContent(
+                entry.value,
+                rootNavController,
+                modifier = Modifier.background(backgroundColor)
+            )
+        }
+
+        val backgroundColor = Color(authorEntity.colorTheme).darken()
         PostHeader(
             authorEntity,
             postEntity,
-            onDeletionRequest,
-            rootNavController
+            onDeletionRequest = onDeletionRequest,
+            rootNavController = rootNavController,
+            modifier = Modifier.background(backgroundColor)
         )
 
         PostContent(
             postEntity,
-            rootNavController
+            rootNavController,
+            modifier = Modifier.background(backgroundColor)
         )
 
         PostActions(
             postEntity,
-            onLikeRequested
+            onLikeRequested,
+            rootNavController,
+            modifier = Modifier.background(backgroundColor)
         )
     }
 }
@@ -105,15 +127,17 @@ fun Post(
 fun PostHeader(
     authorEntity: PersonaEntity,
     postEntity: PostEntity,
+    showOptions: Boolean = true,
     onDeletionRequest: (PostEntity) -> Unit,
     rootNavController: NavController,
+    modifier: Modifier,
 ) {
-    var showManipulationModal by remember { mutableStateOf(false) }
+    var showOptionsModal by remember { mutableStateOf(false) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(postItemSpacing)
     ) {
@@ -121,6 +145,7 @@ fun PostHeader(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(postItemSpacing)
         ) {
+
             PersonaProfilePicture(
                 authorEntity.profilePic,
                 modifier = Modifier
@@ -140,13 +165,15 @@ fun PostHeader(
                 )
             }
         }
-        Image(
-            painter = painterResource(R.drawable.icon_more),
-            contentDescription = "More",
-            modifier = Modifier
-                .size(48.dp)
-                .clickable(onClick = { showManipulationModal = true })
-        )
+
+        if (showOptions)
+            Image(
+                painter = painterResource(R.drawable.icon_more),
+                contentDescription = "More",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clickable(onClick = { showOptionsModal = true })
+            )
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -155,10 +182,10 @@ fun PostHeader(
         coroutineScope.launch {
             sheetState.hide()
         }.invokeOnCompletion {
-            showManipulationModal = false
+            showOptionsModal = false
         }
     }
-    if (showManipulationModal) {
+    if (showOptionsModal) {
         ModalBottomSheet(
             sheetState = sheetState,
             onDismissRequest = onDismissRequest,
@@ -191,6 +218,7 @@ fun PostHeader(
 fun PostContent(
     postEntity: PostEntity,
     rootNavController: NavController,
+    modifier: Modifier,
 ) {
     val onMediaClicked: (List<String>, Int) -> Unit = { list, startAt ->
         rootNavController.navigate(InspectMediaListRoute(list, startAt))
@@ -200,13 +228,15 @@ fun PostContent(
         PostType.NOTE -> {
             PostContentNote(
                 postEntity,
-                onMediaClicked
+                onMediaClicked,
+                modifier
             )
         }
         PostType.REEL -> {
             PostContentReel(
                 postEntity,
-                onMediaClicked
+                onMediaClicked,
+                modifier
             )
         }
         PostType.LINK -> {
@@ -221,9 +251,10 @@ fun PostContent(
 fun PostContentNote(
     postEntity: PostEntity,
     onMediaClicked: (List<String>, Int) -> Unit,
+    modifier: Modifier,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Text(
             text = postEntity.content,
@@ -257,10 +288,11 @@ fun PostContentNote(
 fun PostContentReel(
     postEntity: PostEntity,
     onMediaClicked: (List<String>, Int) -> Unit,
+    modifier: Modifier,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(postItemSpacing*2),
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         val context = LocalContext.current
         LazyRow(
@@ -287,7 +319,7 @@ fun PostContentReel(
 }
 @Composable
 fun PostContentLink(
-    postEntity: PostEntity
+    postEntity: PostEntity,
 ) {
     val uriHandler = LocalUriHandler.current
     Box(
@@ -340,11 +372,13 @@ fun PostContentLink(
 fun PostActions(
     postEntity: PostEntity,
     onLikeRequested: (PostEntity) -> Unit,
+    rootNavController: NavController,
+    modifier: Modifier,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(postItemSpacing)
     ) {
@@ -367,7 +401,11 @@ fun PostActions(
         Image(
             painter = painterResource(R.drawable.icon_repost),
             contentDescription = "Comment",
-            modifier = Modifier.size(postIconSize)
+            modifier = Modifier
+                .size(postIconSize)
+                .clickable(onClick = {
+                    rootNavController.navigate(EditPostRoute(null, postEntity.id))
+                })
         )
         Image(
             painter = painterResource(R.drawable.icon_share),

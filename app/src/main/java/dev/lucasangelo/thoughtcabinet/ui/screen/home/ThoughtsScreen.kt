@@ -14,6 +14,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -35,13 +37,8 @@ import dev.lucasangelo.thoughtcabinet.ui.component.Post
 import dev.lucasangelo.thoughtcabinet.ui.component.SimpleFloatingExtendedTopBar
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
-import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectMediaListRoute
-import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaViewModel
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-
-@Serializable
-object ThoughtsRoute
+import kotlin.collections.buildMap
 
 @Composable
 fun ThoughtsScreen(
@@ -99,9 +96,21 @@ fun ThoughtsScreen(
                 items(thoughts) { thought ->
                     val postAuthorEntity = crowdMap[thought.authorId] ?: return@items
 
+                    val repostChain: Map<PersonaEntity, PostEntity> = remember(thought.id, thoughts) {
+                        buildMap {
+                            var current = thought
+                            while (current.repostOf != null) {
+                                val repost = thoughts.firstOrNull { it.id == current.repostOf } ?: break
+                                put(crowdMap[repost.authorId]!!, repost)
+                                current = repost
+                            }
+                        }
+                    }
+
                     Post(
                         postEntity = thought,
                         authorEntity = postAuthorEntity, // NOTE: might result in NullPointerException (?) but i hope not so cuz im deleting posts on cascade when i kill a persona, gotta watch out for cosmic rays tho
+                        repostChain,
                         onDeletionRequest = { post -> viewModel.deletePost(post) },
                         onLikeRequested = { post -> viewModel.likePost(post) },
                         rootNavController,
