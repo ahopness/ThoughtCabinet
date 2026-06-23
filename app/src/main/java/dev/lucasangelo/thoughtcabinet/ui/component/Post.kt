@@ -135,6 +135,7 @@ fun PostHeader(
     modifier: Modifier,
 ) {
     var showOptionsModal by remember { mutableStateOf(false) }
+    var showDeletionRequest by remember { mutableStateOf(false) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -208,11 +209,18 @@ fun PostHeader(
                 icon = R.drawable.icon_delete,
                 color = Color.Red,
                 onClick = {
-                    onDeletionRequest(postEntity)
+                    showDeletionRequest = true
                     onDismissRequest()
                 },
             )
         }
+    }
+    if (showDeletionRequest) {
+        DeleteConfirmationDialog(
+            text = "If you delete this post now you won't be able to recover it later.",
+            onDismiss = { showDeletionRequest = false },
+            onConfirm = { onDeletionRequest(postEntity) }
+        )
     }
 }
 
