@@ -448,7 +448,7 @@ fun PersonaTraitTile(
                     var linkMetadata by remember(content) { mutableStateOf<LinkMetadata?>(null) }
 
                     LaunchedEffect(content) {
-                        linkMetadata = fetchLinkMetadata(content)
+                        linkMetadata = fetchLinkMetadata(content, context)
                     }
 
                     AsyncImage(

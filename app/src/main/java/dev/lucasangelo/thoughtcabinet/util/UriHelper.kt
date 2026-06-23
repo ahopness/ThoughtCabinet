@@ -12,6 +12,7 @@ val draftsDir = "drafts/"
 val profilePicDir = "profile-pictures/"
 val traitsDir = "persona-traits/"
 val mediaDir = "post-media/"
+val linkMetadataDir = "links-metadata/"
 
 suspend fun getFileExtension(
     context: Context,

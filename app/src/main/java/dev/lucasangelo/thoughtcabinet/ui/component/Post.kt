@@ -357,8 +357,9 @@ fun PostContentLink(
     ) {
         var linkMetadata by remember(postEntity.content) { mutableStateOf<LinkMetadata?>(null) }
 
+        val context = LocalContext.current
         LaunchedEffect(postEntity.content) {
-            linkMetadata = fetchLinkMetadata(postEntity.content)
+            linkMetadata = fetchLinkMetadata(postEntity.content, context)
         }
 
         AsyncImage(

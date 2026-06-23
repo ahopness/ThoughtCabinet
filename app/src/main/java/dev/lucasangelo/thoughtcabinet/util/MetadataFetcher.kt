@@ -1,12 +1,18 @@
 package dev.lucasangelo.thoughtcabinet.util
 
+import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.File
 import java.net.URL
 import java.util.Collections.emptyMap
 import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
 
+@Serializable
 data class LinkMetadata(
     val title: String?,
     val imageUrl: String?,
@@ -14,9 +20,19 @@ data class LinkMetadata(
 )
 
 val cachedLinkMetadata = ConcurrentHashMap<String, LinkMetadata>()
-suspend fun fetchLinkMetadata(urlString: String): LinkMetadata = withContext(Dispatchers.IO) {
+suspend fun fetchLinkMetadata(urlString: String, context: Context): LinkMetadata = withContext(Dispatchers.IO) {
     try {
-        cachedLinkMetadata[urlString]?.let { return@withContext it }
+        cachedLinkMetadata[urlString]?.let {
+            return@withContext it
+        }
+
+        val cacheFile = File(context.cacheDir, linkMetadataDir + urlString.hashCode())
+        cacheFile.parentFile?.mkdirs()
+        if (cacheFile.exists()) {
+            val metadata: LinkMetadata = Json.decodeFromString(cacheFile.readText())
+            cachedLinkMetadata[urlString] = metadata
+            return@withContext metadata
+        }
 
         val url = URL(urlString)
         val connection = url.openConnection()
@@ -32,7 +48,10 @@ suspend fun fetchLinkMetadata(urlString: String): LinkMetadata = withContext(Dis
 
         val metadata = LinkMetadata(title, imageUrl, description)
 
+        cacheFile.writeText(Json.encodeToString(metadata))
+
         cachedLinkMetadata[urlString] = metadata
+
         return@withContext metadata
     } catch (e: Exception) {
         return@withContext LinkMetadata(null, null, null)
