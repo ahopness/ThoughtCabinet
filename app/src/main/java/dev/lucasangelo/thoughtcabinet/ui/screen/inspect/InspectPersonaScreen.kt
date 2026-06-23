@@ -38,9 +38,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -189,7 +188,8 @@ fun InspectPersonaScreen(
                                     trait.type,
                                     trait.content,
                                     backgroundColor = Color(persona.colorTheme),
-                                    rootShowSnackbar = rootShowSnackbar
+                                    rootShowSnackbar = rootShowSnackbar,
+                                    rootNavController = rootNavController
                                 ) {
                                     Image(
                                         painter = painterResource(R.drawable.icon_more),
@@ -399,6 +399,7 @@ fun PersonaTraitTile(
     mediaInCache: Boolean = false,
     backgroundColor: Color,
     rootShowSnackbar: (String) -> Unit,
+    rootNavController: NavController,
     modifier: Modifier = Modifier,
     extras: @Composable BoxScope.() -> Unit = {},
 ) {
@@ -406,6 +407,7 @@ fun PersonaTraitTile(
         modifier = modifier
             .aspectRatio(1f/1f)
             .background(backgroundColor.darken(0.8f))
+            .clip(RoundedCornerShape(6.dp))
             .border(
                 border = BorderStroke(width = 1.dp, color = Color.Gray),
                 shape = RoundedCornerShape(6.dp)
@@ -435,59 +437,52 @@ fun PersonaTraitTile(
                     modifier = Modifier
                         .fillMaxSize()
                         .aspectRatio(1f / 1f)
+                        .clickable(onClick = {
+                            rootNavController.navigate(InspectMediaListRoute(listOf(content), 0, traitsDir))
+                        })
                 )
             PersonaTraitType.LINK ->
-                Box(Modifier.clickable(onClick = {
-                    try {
-                        uriHandler.openUri(content)
-                    } catch (e: Exception) {
-                        rootShowSnackbar("ERROR: Could not open URL: $content")
-                    }
-                })) {
+                Box(
+                    modifier = Modifier.clickable(onClick = {
+                        try {
+                            uriHandler.openUri(content)
+                        } catch (e: Exception) {
+                            rootShowSnackbar("ERROR: Could not open URL: $content")
+                        }
+                    })
+                ) {
                     var linkMetadata by remember(content) { mutableStateOf<LinkMetadata?>(null) }
 
                     LaunchedEffect(content) {
                         linkMetadata = fetchLinkMetadata(content)
                     }
 
-                    linkMetadata.let {
-                        AsyncImage(
-                            model = it?.imageUrl,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .aspectRatio(1f / 1f)
-                                .alpha(0.5f)
-                        )
+                    AsyncImage(
+                        model = linkMetadata?.imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .aspectRatio(1f / 1f)
+                            .alpha(0.5f)
+                    )
 
-                        Text(
-                            text = '[' + (linkMetadata?.title ?: linkMetadata?.description ?: "LOADING...") + ']',
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                    Text(
+                        text = '[' + (linkMetadata?.title ?: linkMetadata?.description ?: "LOADING...") + ']',
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
 
-                        Image(
-                            painter = painterResource(R.drawable.icon_redirect),
-                            contentDescription = "Open Link",
-                            modifier = Modifier
-                                .size(54.dp)
-                                .align(Alignment.BottomStart)
-                                .background(
-                                    brush = Brush.radialGradient(
-                                        colors = listOf(
-                                            Color.Black.copy(0.5f),
-                                            Color.Transparent
-                                        ),
-                                        center = Offset(0f, Float.POSITIVE_INFINITY),
-                                        radius = 125f
-                                    )
-                                )
-                        )
-                    }
-
+                    Image(
+                        painter = painterResource(R.drawable.icon_redirect),
+                        contentDescription = "Open Link",
+                        modifier = Modifier
+                            .size(54.dp)
+                            .align(Alignment.BottomStart)
+                    )
                 }
+
         }
 
         extras()

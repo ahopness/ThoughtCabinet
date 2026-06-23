@@ -41,7 +41,7 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize()
         ) { page ->
             when(page) {
-                0 -> ThoughtsScreen(rootNavController, thoughtsListState, thoughts)
+                0 -> ThoughtsScreen(rootNavController, thoughtsListState, thoughts, crowd)
                 1 -> CrowdScreen(rootNavController, crowdListState, crowd)
             }
         }

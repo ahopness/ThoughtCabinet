@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,9 +61,10 @@ import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
-import dev.lucasangelo.thoughtcabinet.ui.component.TypeDescriptionButton
+import dev.lucasangelo.thoughtcabinet.ui.component.CleanDescriptionButton
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
+import dev.lucasangelo.thoughtcabinet.util.mediaDir
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.io.File
@@ -167,19 +169,19 @@ fun EditPostTypeSelect(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            TypeDescriptionButton(
+            CleanDescriptionButton(
                 icon = R.drawable.icon_note_post,
                 title = "Note",
                 description = "Quick, text-centric with additional media",
                 onClick = { onTryChangePostType(PostType.NOTE) }
             )
-            TypeDescriptionButton(
+            CleanDescriptionButton(
                 icon = R.drawable.icon_media_post_alt,
                 title = "Reel",
                 description = "Refined, image-centric with additional text",
                 onClick = { onTryChangePostType(PostType.REEL) }
             )
-            TypeDescriptionButton(
+            CleanDescriptionButton(
                 icon = R.drawable.icon_link_post,
                 title = "Link",
                 description = "Delegated, outside site, music or video",
@@ -237,7 +239,7 @@ fun EditPostContent(
                 OutlinedTextField(
                     value = viewModel.postContent,
                     onValueChange = onPostContentChanced,
-                    label = { Text("Paste Link Here") },
+                    label = { Text("Paste your link here") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -434,9 +436,17 @@ fun EditPostMediaList(
         }
     )
 
+    val context = LocalContext.current
+    val cachedMedias = remember { mutableStateMapOf<String, Boolean>() }
+    LaunchedEffect(viewModel.postMedia) {
+        viewModel.postMedia.forEach {
+            val mediaFile = File(context.cacheDir, draftsDir + it)
+            cachedMedias[it] = mediaFile.exists()
+        }
+    }
+
     var pendingMediaForManipulation by remember { mutableStateOf<String?>(null) }
 
-    val context = LocalContext.current
     LazyRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(24.dp),
@@ -450,7 +460,11 @@ fun EditPostMediaList(
                 )
             ) {
                 AsyncImage(
-                    model = File(context.cacheDir, draftsDir + media), // TODO: add cache checks for editing posts
+                    model =
+                        if (cachedMedias[media] == true)
+                            File(context.cacheDir, draftsDir + media)
+                        else
+                            File(context.filesDir, mediaDir + media),
                     contentDescription = null,
                     contentScale =
                         if (large)

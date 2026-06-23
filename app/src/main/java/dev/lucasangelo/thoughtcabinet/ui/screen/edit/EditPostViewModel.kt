@@ -139,7 +139,7 @@ class EditPostViewModel(
         ))
     }
     suspend fun insertPost(asRepostOf: Long?, isArchived: Boolean) {
-        dao.updatePost(PostEntity(
+        dao.insertPost(PostEntity(
             repostOf = asRepostOf,
             createdAt = Instant.now(),
             updatedAt = null,

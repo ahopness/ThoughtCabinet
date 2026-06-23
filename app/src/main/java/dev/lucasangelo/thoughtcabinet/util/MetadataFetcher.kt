@@ -3,6 +3,8 @@ package dev.lucasangelo.thoughtcabinet.util
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.URL
+import java.util.Collections.emptyMap
+import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
 
 data class LinkMetadata(
@@ -11,8 +13,11 @@ data class LinkMetadata(
     val description: String?
 )
 
+val cachedLinkMetadata = ConcurrentHashMap<String, LinkMetadata>()
 suspend fun fetchLinkMetadata(urlString: String): LinkMetadata = withContext(Dispatchers.IO) {
     try {
+        cachedLinkMetadata[urlString]?.let { return@withContext it }
+
         val url = URL(urlString)
         val connection = url.openConnection()
 
@@ -25,9 +30,12 @@ suspend fun fetchLinkMetadata(urlString: String): LinkMetadata = withContext(Dis
         val imageUrl = extractMetaTag(html, "og:image")
         val description = extractMetaTag(html, "og:description") ?: extractMetaTagByName(html, "description")
 
-        LinkMetadata(title, imageUrl, description)
+        val metadata = LinkMetadata(title, imageUrl, description)
+
+        cachedLinkMetadata[urlString] = metadata
+        return@withContext metadata
     } catch (e: Exception) {
-        LinkMetadata(null, null, null)
+        return@withContext LinkMetadata(null, null, null)
     }
 }
 

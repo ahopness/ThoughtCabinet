@@ -24,13 +24,13 @@ interface AppDao {
     suspend fun insertPost(post: PostEntity): Long
     @Query("SELECT * FROM PostEntity WHERE id = :id")
     suspend fun getPost(id: Long): PostEntity?
-    @Query("SELECT * FROM PostEntity WHERE archived = 0")
+    @Query("SELECT * FROM PostEntity WHERE archived = 0 ORDER BY createdAt DESC")
     fun getAllPosts(): Flow<List<PostEntity>>
-    @Query("SELECT * FROM PostEntity WHERE archived = 1")
+    @Query("SELECT * FROM PostEntity WHERE archived = 1 ORDER BY createdAt DESC")
     fun getAllArchivedPosts(): Flow<List<PostEntity>>
-    @Query("SELECT * FROM PostEntity WHERE bookmarked = 1")
+    @Query("SELECT * FROM PostEntity WHERE bookmarked = 1 ORDER BY createdAt DESC")
     fun getAllBookmarkedPosts(): Flow<List<PostEntity>>
-    @Query("SELECT * FROM PostEntity WHERE authorId = :authorId")
+    @Query("SELECT * FROM PostEntity WHERE authorId = :authorId ORDER BY createdAt DESC")
     fun getAllPostsBy(authorId: Long): Flow<List<PostEntity>>
     @Update
     suspend fun updatePost(persona: PostEntity)

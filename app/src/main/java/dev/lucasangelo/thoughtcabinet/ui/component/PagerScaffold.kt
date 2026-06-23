@@ -3,6 +3,8 @@ package dev.lucasangelo.thoughtcabinet.ui.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
@@ -90,5 +94,30 @@ fun PagerScaffold(
                     }
                 }
         }
+    }
+}
+
+@Composable
+fun PagerScaffoldContent(
+    pageOffsetDistance: Float,
+    modifier: Modifier = Modifier,
+    defaultSpacing: Dp = 32.dp,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Box(modifier.fillMaxSize()) {
+        val distance = pageOffsetDistance.coerceIn(0f, 1f)
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(defaultSpacing),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(defaultSpacing)
+                .graphicsLayer {
+                    translationY = 200 * distance
+                    alpha = 1f * (1f - distance)
+                },
+            content = content
+        )
     }
 }

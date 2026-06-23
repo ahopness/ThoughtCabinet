@@ -96,7 +96,7 @@ fun CrowdScreen(
                         },
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(12.dp),
+                            .padding(horizontal = 12.dp),
                     ) {
                         crowd.forEach { persona ->
                             PersonaTile(
@@ -129,7 +129,7 @@ fun CrowdScreen(
                     }
                 }
 
-            item { Spacer(Modifier.height(floatingNavigationBarPadding)) }
+            item { Spacer(Modifier.height(floatingNavigationBarPadding + 16.dp)) }
         }
     }
 }

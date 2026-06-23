@@ -36,6 +36,8 @@ import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaTraitRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaTraitScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPostRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPostScreen
+import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectMediaListRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectMediaListScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaScreen
 import kotlinx.coroutines.launch
@@ -92,6 +94,15 @@ fun AppScreen() {
                 )
             }
 
+            composable<InspectMediaListRoute> { backStackEntry ->
+                val routeObject : InspectMediaListRoute = backStackEntry.toRoute()
+                InspectMediaListScreen(
+                    routeObject.list,
+                    routeObject.startAt,
+                    routeObject.mediaFolder,
+                    navController
+                )
+            }
             composable<EditPostRoute> { backStackEntry ->
                 val routeObject : EditPostRoute = backStackEntry.toRoute()
                 EditPostScreen(

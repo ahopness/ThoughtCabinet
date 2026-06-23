@@ -15,8 +15,13 @@ import dev.lucasangelo.thoughtcabinet.data.PersonaTraitType
 import dev.lucasangelo.thoughtcabinet.util.LinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.deleteInternalStorageFile
 import dev.lucasangelo.thoughtcabinet.util.fetchLinkMetadata
+import dev.lucasangelo.thoughtcabinet.util.mediaDir
 import dev.lucasangelo.thoughtcabinet.util.traitsDir
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
 
 class InspectPersonaViewModel(
@@ -34,13 +39,25 @@ class InspectPersonaViewModel(
         }
     }
 
-    fun deletePersona(persona: PersonaEntity) {
-        viewModelScope.launch {
-            dao.deletePersona(persona)
+    suspend fun deletePersona(persona: PersonaEntity) = withContext(Dispatchers.IO) {
+        val context = getApplication<Application>()
+
+        persona.traits.forEach {
+            if (it.type == PersonaTraitType.MEDIA)
+                deleteInternalStorageFile(context.filesDir, traitsDir + it.content)
         }
+
+        val posts = dao.getAllPostsBy(persona.id).first()
+        posts.forEach { post ->
+            post.media.forEach { media ->
+                deleteInternalStorageFile(context.filesDir, mediaDir + media)
+            }
+        }
+
+        dao.deletePersona(persona)
     }
 
-    suspend fun deleteTrait(trait: PersonaTrait, at: PersonaEntity) {
+    suspend fun deleteTrait(trait: PersonaTrait, at: PersonaEntity) = withContext(Dispatchers.IO) {
         if (trait.type == PersonaTraitType.MEDIA) {
             val context = getApplication<Application>()
             deleteInternalStorageFile(context.filesDir, traitsDir + trait.content)
