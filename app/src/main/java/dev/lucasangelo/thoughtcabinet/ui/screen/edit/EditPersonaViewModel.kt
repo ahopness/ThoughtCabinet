@@ -6,10 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import dev.lucasangelo.thoughtcabinet.data.AppDao
+import dev.lucasangelo.thoughtcabinet.data.AppRepository
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.util.cleanupDrafts
 import dev.lucasangelo.thoughtcabinet.util.copyInInternalStorage
@@ -20,11 +19,10 @@ import dev.lucasangelo.thoughtcabinet.util.profilePicDir
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.Instant
 import java.util.UUID
 
 class EditPersonaViewModel(
-    private val dao: AppDao,
+    private val repository: AppRepository,
     application: Application,
 ) : AndroidViewModel(application) {
     // NOTE: using Two-Way Data Binding here for simplicity’s sake
@@ -40,7 +38,7 @@ class EditPersonaViewModel(
         private set
     fun fetchPersona(id: Long?) {
         viewModelScope.launch {
-            persona = if (id != null) dao.getPersona(id) else null
+            persona = if (id != null) repository.getPersona(id) else null
             persona?.let {
                 personaName = it.name
                 personaBio = it.bio
@@ -86,28 +84,20 @@ class EditPersonaViewModel(
         cleanupDrafts(getApplication<Application>())
 
     suspend fun updatePersona(from: PersonaEntity) {
-        dao.updatePersona(PersonaEntity(
-            id = from.id,
-            createdAt = from.createdAt,
-            updatedAt = Instant.now(),
-            name = personaName.trim(),
-            bio = personaBio.trim(),
-            profilePic = personaProfilePic,
-            colorTheme = personaColorTheme.toArgb(),
-            traits = from.traits,
-            metadata = from.metadata,
-        ))
+        repository.updatePersona(
+            from,
+            personaName,
+            personaBio,
+            personaProfilePic,
+            personaColorTheme
+        )
     }
     suspend fun insertPersona() {
-        dao.insertPersona(PersonaEntity(
-            createdAt = Instant.now(),
-            updatedAt = null,
-            name = personaName.trim(),
-            bio = personaBio.trim(),
-            profilePic = personaProfilePic,
-            colorTheme = personaColorTheme.toArgb(),
-            traits = emptyList(),
-            metadata = emptyMap(),
-        ))
+        repository.insertPersona(
+            personaName,
+            personaBio,
+            personaProfilePic,
+            personaColorTheme
+        )
     }
 }

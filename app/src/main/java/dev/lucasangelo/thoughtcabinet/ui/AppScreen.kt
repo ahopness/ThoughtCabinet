@@ -55,10 +55,9 @@ fun AppScreen() {
     val context = LocalContext.current
 
     val application = context.applicationContext as MainApplication
-    val database = application.database
     val viewModel: AppViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { AppViewModel(dao = database.dao) }
+            initializer { AppViewModel(application.repository) }
         }
     )
 

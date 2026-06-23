@@ -55,10 +55,9 @@ fun ThoughtsScreen(
     val context = LocalContext.current
 
     val application = context.applicationContext as MainApplication
-    val database = application.database
     val viewModel: ThoughtsViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { ThoughtsViewModel(dao = database.dao, application) }
+            initializer { ThoughtsViewModel(application.repository, application) }
         }
     )
 

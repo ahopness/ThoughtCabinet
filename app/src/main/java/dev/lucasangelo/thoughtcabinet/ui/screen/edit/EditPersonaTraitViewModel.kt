@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import dev.lucasangelo.thoughtcabinet.data.AppDao
+import dev.lucasangelo.thoughtcabinet.data.AppRepository
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaTrait
 import dev.lucasangelo.thoughtcabinet.data.PersonaTraitType
@@ -21,12 +21,11 @@ import dev.lucasangelo.thoughtcabinet.util.traitsDir
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.Instant
 import java.util.UUID
 import kotlin.let
 
 class EditPersonaTraitViewModel(
-    private val dao: AppDao,
+    private val repository: AppRepository,
     application: Application
 ) : AndroidViewModel(application) {
     // NOTE: using Two-Way Data Binding here for simplicity’s sake
@@ -46,13 +45,13 @@ class EditPersonaTraitViewModel(
         private set
     fun fetchPersonaAndTrait(personaId: Long, traitId: Int?) {
         viewModelScope.launch {
-            persona = dao.getPersona(personaId)
+            persona = repository.getPersona(personaId)
 
             persona?.let { currentPersona ->
                 personaColorTheme = Color(currentPersona.colorTheme)
 
                 if (traitId != null)
-                    trait = currentPersona.traits[traitId]
+                    trait = repository.getTrait(currentPersona, traitId)
 
                 trait?.let { currentTrait ->
                     traitType = currentTrait.type
@@ -97,35 +96,9 @@ class EditPersonaTraitViewModel(
     fun cleanupMediaDrafts() =
         cleanupDrafts(getApplication<Application>())
 
-    suspend fun updateTrait(from: PersonaTrait, at: PersonaEntity) {
-        val newTraits = at.traits.map { trait ->
-            if (trait == from) {
-                PersonaTrait(
-                    type = traitType,
-                    content = traitContent,
-                    metadata = from.metadata
-                )
-            } else {
-                trait
-            }
-        }
-        val updatedPersona = at.copy(
-            traits = newTraits,
-            updatedAt = Instant.now()
-        )
-        dao.updatePersona(updatedPersona)
-    }
-    suspend fun insertTrait(at: PersonaEntity) {
-        val newTrait = PersonaTrait(
-            type = traitType,
-            content = traitContent,
-            metadata = emptyMap()
-        )
-        val newTraits = at.traits + newTrait
-        val updatedPersona = at.copy(
-            traits = newTraits,
-            updatedAt = Instant.now()
-        )
-        dao.updatePersona(updatedPersona)
-    }
+    suspend fun updateTrait(from: PersonaTrait, at: PersonaEntity) =
+        repository.updateTrait(from, at, traitType, traitContent)
+    suspend fun insertTrait(at: PersonaEntity) =
+        repository.insertTrait(at, traitType, traitContent)
+
 }

@@ -83,10 +83,9 @@ fun EditPostScreen(
     val context = LocalContext.current
 
     val application = context.applicationContext as MainApplication
-    val database = application.database
     val viewModel: EditPostViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { EditPostViewModel(database.dao, application) }
+            initializer { EditPostViewModel(application.repository, application) }
         }
     )
 
@@ -627,7 +626,7 @@ fun EditPostFinishButton(
             }
 
             if (viewModel.post != null) {
-                viewModel.updatePost(viewModel.post!!)
+                viewModel.updatePost(viewModel.post!!, archiving)
                 rootShowSnackbar("Post updated successfully!")
             } else {
                 viewModel.insertPost(viewModel.postIsRepostOf, archiving)

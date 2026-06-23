@@ -72,7 +72,7 @@ fun EditPersonaScreen(
     val database = application.database
     val viewModel: EditPersonaViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { EditPersonaViewModel(database.dao, application) }
+            initializer { EditPersonaViewModel(application.repository, application) }
         }
     )
 

@@ -9,6 +9,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppDao
+import dev.lucasangelo.thoughtcabinet.data.AppRepository
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaTrait
 import dev.lucasangelo.thoughtcabinet.data.PersonaTraitType
@@ -25,7 +26,7 @@ import kotlinx.coroutines.withContext
 import java.time.Instant
 
 class InspectPersonaViewModel(
-    private val dao: AppDao,
+    private val repository: AppRepository,
     application: Application
 ) : AndroidViewModel(application) {
     var hasLoadedPersona by mutableStateOf(false)
@@ -34,63 +35,20 @@ class InspectPersonaViewModel(
         private set
     fun fetchPersona(id: Long) {
         viewModelScope.launch {
-            persona = dao.getPersona(id)
+            persona = repository.getPersona(id)
             hasLoadedPersona = true
         }
     }
 
-    suspend fun deletePersona(persona: PersonaEntity) = withContext(Dispatchers.IO) {
-        val context = getApplication<Application>()
+    suspend fun deletePersona(persona: PersonaEntity) = repository.deletePersona(persona)
 
-        persona.traits.forEach {
-            if (it.type == PersonaTraitType.MEDIA)
-                deleteInternalStorageFile(context.filesDir, traitsDir + it.content)
-        }
-
-        val posts = dao.getAllPostsBy(persona.id).first()
-        posts.forEach { post ->
-            post.media.forEach { media ->
-                deleteInternalStorageFile(context.filesDir, mediaDir + media)
-            }
-        }
-
-        dao.deletePersona(persona)
-    }
-
-    suspend fun deleteTrait(trait: PersonaTrait, at: PersonaEntity) = withContext(Dispatchers.IO) {
-        if (trait.type == PersonaTraitType.MEDIA) {
-            val context = getApplication<Application>()
-            deleteInternalStorageFile(context.filesDir, traitsDir + trait.content)
-        }
-
-        val newTraits = at.traits - trait
-
-        val updatedPersona = at.copy(
-            traits = newTraits,
-            updatedAt = Instant.now()
-        )
-        dao.updatePersona(updatedPersona)
-
-        persona = updatedPersona
+    suspend fun deleteTrait(trait: PersonaTrait, at: PersonaEntity) {
+        persona = repository.deleteTrait(trait, at)
     }
     fun moveTrait(fromIndex: Int, toIndex: Int, at: PersonaEntity) {
-        if (fromIndex !in at.traits.indices || toIndex !in at.traits.indices) return
-        if (fromIndex == toIndex) return
-
         viewModelScope.launch {
-            val newTraits = at.traits.toMutableList().apply {
-                val trait = removeAt(fromIndex)
-                add(toIndex, trait)
-            }
-
-            val updatedPersona = at.copy(
-                traits = newTraits,
-                updatedAt = Instant.now()
-            )
-
-            dao.updatePersona(updatedPersona)
-
-            persona = updatedPersona
+            val updatedPersona = repository.moveTrait(fromIndex, toIndex, at)
+            updatedPersona?.let { persona = updatedPersona }
         }
     }
 }
