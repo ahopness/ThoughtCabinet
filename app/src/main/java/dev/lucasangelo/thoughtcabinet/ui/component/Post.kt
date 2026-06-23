@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalGridApi
 import androidx.compose.foundation.layout.Grid
 import androidx.compose.foundation.layout.GridFlow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -305,20 +306,30 @@ fun PostContentReel(
         modifier = modifier.fillMaxWidth()
     ) {
         val context = LocalContext.current
-        LazyRow(
-            modifier = Modifier.fillMaxWidth().aspectRatio(1f/1f)
-        ) {
-            itemsIndexed(postEntity.media) { index, media ->
-                AsyncImage(
-                    model = File(context.filesDir, mediaDir + media),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillHeight,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .clickable(onClick = { onMediaClicked(postEntity.media, index) })
-                )
+        if (postEntity.media.size > 1)
+            LazyRow(
+                modifier = Modifier.aspectRatio(1f/1f)
+            ) {
+                itemsIndexed(postEntity.media) { index, media ->
+                    AsyncImage(
+                        model = File(context.filesDir, mediaDir + media),
+                        contentDescription = null,
+                        contentScale = ContentScale.FillHeight,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .clickable(onClick = { onMediaClicked(postEntity.media, index) })
+                    )
+                }
             }
-        }
+        else
+            AsyncImage(
+                model = File(context.filesDir, mediaDir + postEntity.media[0]),
+                contentDescription = null,
+                contentScale = ContentScale.FillWidth,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = { onMediaClicked(postEntity.media, 0) })
+            )
 
         if (postEntity.content.isNotEmpty())
             Text(
