@@ -74,6 +74,7 @@ fun Post(
     repostChain: Map<PersonaEntity, PostEntity>,
     onDeletionRequest: (PostEntity) -> Unit,
     onLikeRequested: (PostEntity) -> Unit,
+    onBookmarkRequested: (PostEntity) -> Unit,
     rootNavController: NavController,
     modifier: Modifier = Modifier
 ) {
@@ -116,6 +117,7 @@ fun Post(
         PostActions(
             postEntity,
             onLikeRequested,
+            onBookmarkRequested,
             rootNavController,
             modifier = Modifier.background(backgroundColor)
         )
@@ -372,6 +374,7 @@ fun PostContentLink(
 fun PostActions(
     postEntity: PostEntity,
     onLikeRequested: (PostEntity) -> Unit,
+    onBookmarkRequested: (PostEntity) -> Unit,
     rootNavController: NavController,
     modifier: Modifier,
 ) {
@@ -406,6 +409,17 @@ fun PostActions(
                 .clickable(onClick = {
                     rootNavController.navigate(EditPostRoute(null, postEntity.id))
                 })
+        )
+        Image(
+            painter =
+                if (postEntity.bookmarked)
+                    painterResource(R.drawable.icon_bookmarked)
+                else
+                    painterResource(R.drawable.icon_bookmark),
+            contentDescription = "Bookmark",
+            modifier = Modifier
+                .size(postIconSize)
+                .clickable(onClick = { onBookmarkRequested(postEntity) })
         )
         Image(
             painter = painterResource(R.drawable.icon_share),

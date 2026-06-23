@@ -113,6 +113,7 @@ fun ThoughtsScreen(
                         repostChain,
                         onDeletionRequest = { post -> viewModel.deletePost(post) },
                         onLikeRequested = { post -> viewModel.likePost(post) },
+                        onBookmarkRequested = { post -> viewModel.bookmarkPost(post) },
                         rootNavController,
                         modifier = Modifier
                             .padding(horizontal = 12.dp)

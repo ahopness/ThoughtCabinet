@@ -18,4 +18,7 @@ class ThoughtsViewModel(
     fun likePost(post: PostEntity) = viewModelScope.launch {
         repository.likePost(post)
     }
+    fun bookmarkPost(post: PostEntity) = viewModelScope.launch {
+        repository.bookmarkPost(post)
+    }
 }

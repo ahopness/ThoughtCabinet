@@ -194,4 +194,7 @@ class AppRepository(
     suspend fun likePost(post: PostEntity) {
         dao.updatePost(post.copy(liked = !post.liked))
     }
+    suspend fun bookmarkPost(post: PostEntity) {
+        dao.updatePost(post.copy(bookmarked = !post.bookmarked))
+    }
 }
