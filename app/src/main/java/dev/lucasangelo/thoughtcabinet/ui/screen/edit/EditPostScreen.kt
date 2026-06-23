@@ -5,8 +5,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,10 +16,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -62,6 +66,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanDescriptionButton
+import dev.lucasangelo.thoughtcabinet.ui.component.pagerScaffoldContentSpacing
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
@@ -212,12 +217,17 @@ fun EditPostContent(
     rootShowSnackbar: (String) -> Unit,
     rootNavController: NavController,
 ) {
-    PagerScaffoldContent(pageOffsetDistance) {
+    PagerScaffoldContent(
+        pageOffsetDistance,
+        spacing = 0.dp
+    ) {
+        val defaultModifier = Modifier.padding(horizontal = pagerScaffoldContentSpacing)
         Text("Then, add the content you want")
 
         EditPostAuthorSelect(
             crowd,
-            viewModel
+            viewModel,
+            defaultModifier
         )
 
         val onPostContentChanced: (String) -> Unit = {
@@ -230,14 +240,16 @@ fun EditPostContent(
                 EditPostNoteContent(
                     viewModel,
                     onPostContentChanced,
-                    rootShowSnackbar
+                    rootShowSnackbar,
+                    defaultModifier
                 )
             }
             PostType.REEL -> {
                 EditPostReelContent(
                     viewModel,
                     onPostContentChanced,
-                    rootShowSnackbar
+                    rootShowSnackbar,
+                    defaultModifier
                 )
             }
             PostType.LINK -> {
@@ -246,14 +258,14 @@ fun EditPostContent(
                     onValueChange = onPostContentChanced,
                     label = { Text("Paste your link here") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = defaultModifier.fillMaxWidth(),
                 )
             }
         }
 
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+            modifier = defaultModifier.fillMaxWidth()
         ) {
             EditPostFinishButton(
                 archiving = true,
@@ -275,12 +287,14 @@ fun EditPostContent(
 fun EditPostAuthorSelect(
     crowd: List<PersonaEntity>,
     viewModel: EditPostViewModel,
+    modifier: Modifier = Modifier,
 ) {
     val selectedPersona = crowd.find { it.id == viewModel.postAuthorId }
 
     var showBottomSheet by remember { mutableStateOf(false) }
 
     OutlinedButton(
+        modifier = modifier,
         shape = RoundedCornerShape(6.dp),
         contentPadding = PaddingValues(4.dp),
         border = BorderStroke(width = 1.dp, color = Color.Gray),
@@ -381,6 +395,7 @@ fun EditPostNoteContent(
     viewModel: EditPostViewModel,
     onPostContentChanced: (String) -> Unit,
     rootShowSnackbar: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     OutlinedTextField(
         value = viewModel.postContent,
@@ -388,7 +403,7 @@ fun EditPostNoteContent(
         label = { Text("What's up?") },
         maxLines = 8,
         minLines = 6,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     )
 
     EditPostMediaList(
@@ -402,6 +417,7 @@ fun EditPostReelContent(
     viewModel: EditPostViewModel,
     onPostContentChanced: (String) -> Unit,
     rootShowSnackbar: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     EditPostMediaList(
         large = true,
@@ -415,7 +431,7 @@ fun EditPostReelContent(
         label = { Text("Write Caption") },
         maxLines = 4,
         minLines = 1,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     )
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -456,11 +472,14 @@ fun EditPostMediaList(
 
     var pendingMediaForManipulation by remember { mutableStateOf<String?>(null) }
 
+    val mediaSpacing = 24.dp
     LazyRow(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalArrangement = Arrangement.spacedBy(mediaSpacing),
         modifier = Modifier.fillMaxWidth(),
     ) {
+        item { Spacer(Modifier.width(pagerScaffoldContentSpacing - mediaSpacing)) }
+
         items(viewModel.postMedia) { media ->
             Box(
                 modifier = Modifier.border(
@@ -525,6 +544,8 @@ fun EditPostMediaList(
                 }
             }
         }
+
+        item { Spacer(Modifier.width(pagerScaffoldContentSpacing - mediaSpacing)) }
     }
 
     val sheetState = rememberModalBottomSheetState()

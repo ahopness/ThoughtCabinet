@@ -14,6 +14,7 @@ A chronology-based note app alternative to dopamine inducing social media and mi
 #######
 
 todos
+- button to clear link caches
 - 'share post' feature
 - white color theme
 - move all texts to a strings.xml

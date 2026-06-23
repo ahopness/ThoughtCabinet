@@ -101,11 +101,12 @@ fun PagerScaffold(
     }
 }
 
+val pagerScaffoldContentSpacing = 32.dp
 @Composable
 fun PagerScaffoldContent(
     pageOffsetDistance: Float,
     modifier: Modifier = Modifier,
-    defaultSpacing: Dp = 32.dp,
+    spacing: Dp = pagerScaffoldContentSpacing,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Box(modifier.fillMaxSize()) {
@@ -113,10 +114,10 @@ fun PagerScaffoldContent(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(defaultSpacing),
+            verticalArrangement = Arrangement.spacedBy(pagerScaffoldContentSpacing),
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(defaultSpacing)
+                .padding(spacing)
                 .graphicsLayer {
                     translationY = 200 * distance
                     alpha = 1f * (1f - distance)

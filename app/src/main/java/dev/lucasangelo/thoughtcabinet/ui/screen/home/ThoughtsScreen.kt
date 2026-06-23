@@ -127,7 +127,7 @@ fun ThoughtsScreen(
                     )
                 }
 
-            item { Spacer(Modifier.height(floatingNavigationBarPadding + 16.dp)) }
+            item { Spacer(Modifier.height(floatingNavigationBarPadding + 32.dp)) }
         }
     }
 }

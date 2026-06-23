@@ -11,6 +11,7 @@ import coil3.compose.AsyncImage
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
+import dev.lucasangelo.thoughtcabinet.util.swipeToDismiss
 import kotlinx.serialization.Serializable
 import java.io.File
 
@@ -36,12 +37,17 @@ fun InspectMediaListScreen(
         list.map { {
             PagerScaffoldContent(
                 pageOffsetDistance = offsetDistance,
-                defaultSpacing = 0.dp
+                spacing = 0.dp
             ) {
                 AsyncImage(
                     model = File(context.filesDir, mediaFolder + it),
                     contentDescription = null,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .swipeToDismiss({
+                            rootNavController.currentBackStackEntry?.savedStateHandle?.set("dismiss_via_swipe", true)
+                            rootNavController.popBackStack()
+                        })
                 )
             }
         } }

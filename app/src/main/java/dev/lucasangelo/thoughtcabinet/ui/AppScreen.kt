@@ -6,6 +6,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -93,15 +94,6 @@ fun AppScreen() {
                 )
             }
 
-            composable<InspectMediaListRoute> { backStackEntry ->
-                val routeObject : InspectMediaListRoute = backStackEntry.toRoute()
-                InspectMediaListScreen(
-                    routeObject.list,
-                    routeObject.startAt,
-                    routeObject.mediaFolder,
-                    navController
-                )
-            }
             composable<EditPostRoute> { backStackEntry ->
                 val routeObject : EditPostRoute = backStackEntry.toRoute()
                 EditPostScreen(
@@ -141,6 +133,28 @@ fun AppScreen() {
                     routeObject.traitId,
                     navController,
                     showSnackbar,
+                )
+            }
+
+            composable<InspectMediaListRoute>(
+                popExitTransition = {
+                    val dismissViaSwipe = initialState.savedStateHandle.get<Boolean>("dismiss_via_swipe") ?: false
+
+                    if (dismissViaSwipe)
+                        fadeOut(animationSpec = tween(250))
+                    else
+                        slideOutOfContainer(
+                            animationSpec = tween(200, easing = EaseIn),
+                            towards = AnimatedContentTransitionScope.SlideDirection.End
+                        )
+                }
+            ) { backStackEntry ->
+                val routeObject : InspectMediaListRoute = backStackEntry.toRoute()
+                InspectMediaListScreen(
+                    routeObject.list,
+                    routeObject.startAt,
+                    routeObject.mediaFolder,
+                    navController
                 )
             }
         }
