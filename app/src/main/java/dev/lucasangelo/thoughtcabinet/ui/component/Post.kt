@@ -17,11 +17,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -38,13 +44,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -269,7 +278,15 @@ fun PostContentNote(
     ) {
         Text(
             text = postEntity.content,
-            modifier = Modifier.padding(postItemSpacing*2)
+            modifier = Modifier
+                .padding(horizontal = postItemSpacing * 2)
+                .then(
+                    other =
+                        if (postEntity.media.isEmpty())
+                            Modifier.padding(vertical = postItemSpacing * 2)
+                        else
+                            Modifier.padding(bottom = postItemSpacing)
+                )
         )
 
         if (postEntity.media.isNotEmpty())
@@ -306,20 +323,47 @@ fun PostContentReel(
         modifier = modifier.fillMaxWidth()
     ) {
         val context = LocalContext.current
+        val pagerState = rememberPagerState(pageCount = { postEntity.media.size })
         if (postEntity.media.size > 1)
-            LazyRow(
-                modifier = Modifier.aspectRatio(1f/1f)
-            ) {
-                itemsIndexed(postEntity.media) { index, media ->
+            Box {
+                HorizontalPager(
+                    pagerState,
+                    modifier = Modifier.aspectRatio(1f/1f)
+                ) { page ->
                     AsyncImage(
-                        model = File(context.filesDir, mediaDir + media),
+                        model = File(context.filesDir, mediaDir + postEntity.media[page]),
                         contentDescription = null,
-                        contentScale = ContentScale.FillHeight,
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .fillMaxHeight()
-                            .clickable(onClick = { onMediaClicked(postEntity.media, index) })
+                            .fillMaxWidth()
+                            .clickable(onClick = { onMediaClicked(postEntity.media, page) })
                     )
                 }
+
+                if (postEntity.media.size > 1)
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .wrapContentHeight()
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 16.dp),
+                    ) {
+                        repeat(pagerState.pageCount) { iteration ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .clip(CircleShape)
+                                    .size(8.dp)
+                                    .background( color =
+                                        if (pagerState.currentPage == iteration)
+                                            Color.LightGray
+                                        else
+                                            Color.LightGray.copy(0.25f)
+                                    )
+                            )
+                        }
+                    }
             }
         else
             AsyncImage(
@@ -348,12 +392,12 @@ fun PostContentLink(
             .fillMaxWidth()
             .height(200.dp)
             .clickable(onClick = {
-            try {
-                uriHandler.openUri(postEntity.content)
-            } catch (e: Exception) {
+                try {
+                    uriHandler.openUri(postEntity.content)
+                } catch (e: Exception) {
 //                rootShowSnackbar("ERROR: Could not open URL: $postEntity.content")
-            }
-        })
+                }
+            })
     ) {
         var linkMetadata by remember(postEntity.content) { mutableStateOf<LinkMetadata?>(null) }
 

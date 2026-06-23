@@ -83,13 +83,17 @@ fun PagerScaffold(
                         .padding(bottom = 32.dp),
                 ) {
                     repeat(pagerState.pageCount) { iteration ->
-                        val color = if (pagerState.currentPage == iteration) Color.LightGray else Color.DarkGray
                         Box(
                             modifier = Modifier
                                 .padding(4.dp)
                                 .clip(CircleShape)
-                                .background(color)
                                 .size(8.dp)
+                                .background( color =
+                                    if (pagerState.currentPage == iteration)
+                                        Color.LightGray
+                                    else
+                                        Color.DarkGray
+                                )
                         )
                     }
                 }

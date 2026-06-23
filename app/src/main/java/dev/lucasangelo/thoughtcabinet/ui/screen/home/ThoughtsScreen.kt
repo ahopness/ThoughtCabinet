@@ -58,6 +58,7 @@ fun ThoughtsScreen(
         }
     )
 
+    val thoughtsMap = remember(thoughts) { thoughts.associateBy { it.id } }
     val crowdMap = remember(crowd) { crowd.associateBy { it.id } }
 
     CleanScaffold(
@@ -93,15 +94,16 @@ fun ThoughtsScreen(
                     )
                 }
             else
-                items(thoughts) { thought ->
+                items(thoughts, key = { it.id }) { thought ->
                     val postAuthorEntity = crowdMap[thought.authorId] ?: return@items
 
-                    val repostChain: Map<PersonaEntity, PostEntity> = remember(thought.id, thoughts) {
+                    val repostChain = remember(thought.id, thoughtsMap) {
                         buildMap {
                             var current = thought
                             while (current.repostOf != null) {
-                                val repost = thoughts.firstOrNull { it.id == current.repostOf } ?: break
-                                put(crowdMap[repost.authorId]!!, repost)
+                                val repost = thoughtsMap[current.repostOf] ?: break
+                                val author = crowdMap[repost.authorId] ?: break
+                                put(author, repost)
                                 current = repost
                             }
                         }
@@ -109,7 +111,7 @@ fun ThoughtsScreen(
 
                     Post(
                         postEntity = thought,
-                        authorEntity = postAuthorEntity, // NOTE: might result in NullPointerException (?) but i hope not so cuz im deleting posts on cascade when i kill a persona, gotta watch out for cosmic rays tho
+                        authorEntity = postAuthorEntity,
                         repostChain,
                         onDeletionRequest = { post -> viewModel.deletePost(post) },
                         onLikeRequested = { post -> viewModel.likePost(post) },
