@@ -419,18 +419,22 @@ fun EditPostMediaList(
     viewModel: EditPostViewModel,
     onNotifyError: (String) -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     val picker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
         onResult = { uris: List<Uri> ->
-            uris.forEach { uri ->
-                val newMedia = viewModel.importMedia(uri)
-                if(newMedia == null) {
-                    onNotifyError("ERROR: Couldn't open selected image.")
-                    return@rememberLauncherForActivityResult
-                }
+            coroutineScope.launch {
+                uris.forEach { uri ->
+                    val newMedia = viewModel.importMedia(uri)
+                    if(newMedia == null) {
+                        onNotifyError("ERROR: Couldn't open selected image.")
+                        return@launch
+                    }
 
-                if (viewModel.hasLoadedPost)
-                    viewModel.postMedia += newMedia
+                    if (viewModel.hasLoadedPost)
+                        viewModel.postMedia += newMedia
+                }
             }
         }
     )
@@ -518,7 +522,6 @@ fun EditPostMediaList(
     }
 
     val sheetState = rememberModalBottomSheetState()
-    val coroutineScope = rememberCoroutineScope()
     if (pendingMediaForManipulation != null) {
         val onDismissRequest: () -> Unit = {
             coroutineScope.launch {

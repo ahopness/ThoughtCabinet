@@ -33,22 +33,20 @@ class InspectPersonaViewModel(
         private set
     var persona by mutableStateOf<PersonaEntity?>(null)
         private set
-    fun fetchPersona(id: Long) {
-        viewModelScope.launch {
-            persona = repository.getPersona(id)
-            hasLoadedPersona = true
-        }
+    fun fetchPersona(id: Long) = viewModelScope.launch {
+        persona = repository.getPersona(id)
+        hasLoadedPersona = true
     }
 
-    suspend fun deletePersona(persona: PersonaEntity) = repository.deletePersona(persona)
+    fun deletePersona(persona: PersonaEntity) = viewModelScope.launch {
+        repository.deletePersona(persona)
+    }
 
-    suspend fun deleteTrait(trait: PersonaTrait, at: PersonaEntity) {
+    fun deleteTrait(trait: PersonaTrait, at: PersonaEntity) = viewModelScope.launch {
         persona = repository.deleteTrait(trait, at)
     }
-    fun moveTrait(fromIndex: Int, toIndex: Int, at: PersonaEntity) {
-        viewModelScope.launch {
-            val updatedPersona = repository.moveTrait(fromIndex, toIndex, at)
-            updatedPersona?.let { persona = updatedPersona }
-        }
+    fun moveTrait(fromIndex: Int, toIndex: Int, at: PersonaEntity) = viewModelScope.launch {
+        val updatedPersona = repository.moveTrait(fromIndex, toIndex, at)
+        updatedPersona?.let { persona = updatedPersona }
     }
 }

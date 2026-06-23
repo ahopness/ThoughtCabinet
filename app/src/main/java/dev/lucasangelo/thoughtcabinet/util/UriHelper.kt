@@ -3,6 +3,8 @@ package dev.lucasangelo.thoughtcabinet.util
 import android.content.Context
 import android.net.Uri
 import android.webkit.MimeTypeMap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
@@ -11,22 +13,22 @@ val profilePicDir = "profile-pictures/"
 val traitsDir = "persona-traits/"
 val mediaDir = "post-media/"
 
-fun getFileExtension(
+suspend fun getFileExtension(
     context: Context,
     uri: Uri
-) : String? {
-    val mimeType = context.contentResolver.getType(uri) ?: return null
-    return MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
+) : String? = withContext(Dispatchers.IO) {
+    val mimeType = context.contentResolver.getType(uri) ?: return@withContext null
+    return@withContext MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
 }
 
-fun copyUriToInternalStorage(
+suspend fun copyUriToInternalStorage(
     context: Context,
     uri: Uri,
     fileParentDir: File,
     fileName: String,
-) : File? {
+) : File? = withContext(Dispatchers.IO) {
     val inputStream = context.contentResolver.openInputStream(uri)
-        ?: return null
+        ?: return@withContext null
 
     val outputFile = File(fileParentDir, fileName)
     outputFile.parentFile?.mkdirs()
@@ -37,35 +39,35 @@ fun copyUriToInternalStorage(
         }
     }
 
-    return outputFile
+    return@withContext outputFile
 }
 
-fun copyInInternalStorage(
+suspend fun copyInInternalStorage(
     inputFileParentDir: File,
     inputFileName: String,
     outputFileParentDir: File,
     outputFileName: String,
-) : File? {
+) : File? = withContext(Dispatchers.IO) {
     val inputFile = File(inputFileParentDir, inputFileName)
-    if (!inputFile.exists()) return null
+    if (!inputFile.exists()) return@withContext null
 
     val outputFile = File(outputFileParentDir, outputFileName)
     outputFile.parentFile?.mkdirs()
 
-    return inputFile.copyTo(outputFile, overwrite = true)
+    return@withContext inputFile.copyTo(outputFile, overwrite = true)
 }
 
-fun deleteInternalStorageFile(
+suspend fun deleteInternalStorageFile(
     fileParentDir: File,
     fileName: String,
-) : Boolean {
+) : Boolean = withContext(Dispatchers.IO) {
     val file = File(fileParentDir, fileName)
-    return file.delete()
+    return@withContext file.delete()
 }
 
-fun cleanupDrafts(
+suspend fun cleanupDrafts(
     context: Context,
-) {
+) = withContext(Dispatchers.IO) {
     val drafts = File(context.cacheDir, draftsDir)
     drafts.listFiles()?.forEach { it.delete() }
 }

@@ -77,7 +77,7 @@ class EditPostViewModel(
 
     var hasMediaDraft by mutableStateOf(false)
         private set
-    fun importMedia(uri: Uri) : String? {
+    suspend fun importMedia(uri: Uri) : String? = withContext(Dispatchers.IO) {
         val context = getApplication<Application>()
 
         val newMedia = "${UUID.randomUUID()}.${getFileExtension(context, uri)}"
@@ -89,9 +89,9 @@ class EditPostViewModel(
         )
         if (copyResult != null) {
             hasMediaDraft = true
-            return newMedia
+            return@withContext newMedia
         } else {
-            return null
+            return@withContext null
         }
     }
     suspend fun commitMedia() : Boolean = withContext(Dispatchers.IO) {
@@ -111,10 +111,11 @@ class EditPostViewModel(
 
         return@withContext true
     }
-    fun cleanupMediaDrafts() =
+    fun cleanupMediaDrafts() = viewModelScope.launch {
         cleanupDrafts(getApplication<Application>())
+    }
 
-    suspend fun updatePost(from: PostEntity, isArchived: Boolean) =
+    fun updatePost(from: PostEntity, isArchived: Boolean) = viewModelScope.launch {
         repository.updatePost(
             from,
             isArchived,
@@ -124,7 +125,8 @@ class EditPostViewModel(
             postMedia,
             postMood
         )
-    suspend fun insertPost(asRepostOf: Long?, isArchived: Boolean) =
+    }
+    fun insertPost(asRepostOf: Long?, isArchived: Boolean) = viewModelScope.launch {
         repository.insertPost(
             asRepostOf,
             isArchived,
@@ -134,4 +136,5 @@ class EditPostViewModel(
             postMedia,
             postMood
         )
+    }
 }

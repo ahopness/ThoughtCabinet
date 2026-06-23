@@ -233,17 +233,20 @@ fun EditPersonaTraitContentImagePicker(
     onNotifyError: (String) -> Unit,
     onTraitContentChanced: (String) -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val picker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri: Uri? ->
-            if (uri != null) {
-                val newMedia = viewModel.importMedia(uri)
-                if(newMedia == null) {
-                    onNotifyError("ERROR: Couldn't open selected image.")
-                    return@rememberLauncherForActivityResult
-                }
+            coroutineScope.launch {
+                if (uri != null) {
+                    val newMedia = viewModel.importMedia(uri)
+                    if(newMedia == null) {
+                        onNotifyError("ERROR: Couldn't open selected image.")
+                        return@launch
+                    }
 
-                onTraitContentChanced(newMedia)
+                    onTraitContentChanced(newMedia)
+                }
             }
         }
     )

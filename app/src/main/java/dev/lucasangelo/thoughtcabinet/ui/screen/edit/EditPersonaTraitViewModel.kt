@@ -64,7 +64,7 @@ class EditPersonaTraitViewModel(
 
     var hasMediaDraft by mutableStateOf(false)
         private set
-    fun importMedia(uri: Uri) : String? {
+    suspend fun importMedia(uri: Uri) : String? = withContext(Dispatchers.IO) {
         val context = getApplication<Application>()
 
         val newMedia = "${UUID.randomUUID()}.${getFileExtension(context, uri)}"
@@ -76,9 +76,9 @@ class EditPersonaTraitViewModel(
         )
         if (copyResult != null) {
             hasMediaDraft = true
-            return newMedia
+            return@withContext newMedia
         } else {
-            return null
+            return@withContext null
         }
     }
     suspend fun commitMedia() : Boolean = withContext(Dispatchers.IO) {
@@ -93,12 +93,15 @@ class EditPersonaTraitViewModel(
 
         commitedMedia != null
     }
-    fun cleanupMediaDrafts() =
+    fun cleanupMediaDrafts() = viewModelScope.launch {
         cleanupDrafts(getApplication<Application>())
+    }
 
-    suspend fun updateTrait(from: PersonaTrait, at: PersonaEntity) =
+    fun updateTrait(from: PersonaTrait, at: PersonaEntity) = viewModelScope.launch {
         repository.updateTrait(from, at, traitType, traitContent)
-    suspend fun insertTrait(at: PersonaEntity) =
+    }
+    fun insertTrait(at: PersonaEntity) = viewModelScope.launch {
         repository.insertTrait(at, traitType, traitContent)
+    }
 
 }

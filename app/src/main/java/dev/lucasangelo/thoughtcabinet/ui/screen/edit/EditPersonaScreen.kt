@@ -178,17 +178,20 @@ fun EditPersonaProfilePicture(
             viewModel.personaProfilePic = it
     }
 
+    val coroutineScope = rememberCoroutineScope()
     val picker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri: Uri? ->
-            if (uri != null) {
-                val newProfilePic = viewModel.importProfilePic(uri)
-                if(newProfilePic == null) {
-                    onNotifyError("ERROR: Couldn't open selected image.")
-                    return@rememberLauncherForActivityResult
-                }
+            coroutineScope.launch {
+                if (uri != null) {
+                    val newProfilePic = viewModel.importProfilePic(uri)
+                    if(newProfilePic == null) {
+                        onNotifyError("ERROR: Couldn't open selected image.")
+                        return@launch
+                    }
 
-                onProfilePicChanged(newProfilePic)
+                    onProfilePicChanged(newProfilePic)
+                }
             }
         }
     )

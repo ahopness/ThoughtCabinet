@@ -2,15 +2,20 @@ package dev.lucasangelo.thoughtcabinet.ui.screen.home
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.lucasangelo.thoughtcabinet.data.AppRepository
 import dev.lucasangelo.thoughtcabinet.data.PostEntity
+import kotlinx.coroutines.launch
 
 class ThoughtsViewModel(
     private val repository: AppRepository,
     application: Application
 ) : AndroidViewModel(application) {
-    suspend fun deletePost(post: PostEntity) =
+    fun deletePost(post: PostEntity) = viewModelScope.launch {
         repository.deletePost(post)
-    suspend fun likePost(post: PostEntity) =
+    }
+    fun likePost(post: PostEntity) = viewModelScope.launch {
         repository.likePost(post)
+    }
 }

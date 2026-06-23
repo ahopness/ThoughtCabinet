@@ -128,8 +128,7 @@ fun InspectPersonaScreen(
                                 lerp(1f, .8f, collapsedFraction())
                             )
                             .clickable(onClick = {
-                                coroutineScope
-                                    .launch { listState.animateScrollToItem(0) }
+                                coroutineScope.launch { listState.animateScrollToItem(0) }
                             })
                     )
                 },
@@ -232,12 +231,10 @@ fun InspectPersonaScreen(
             text = "If you delete this persona, all of their posts will be deleted as well and you won't be able recover neither.",
             onDismiss = { openPersonaDeleteAlertDialog = false },
             onConfirm = {
-                coroutineScope.launch {
-                    if (!viewModel.hasLoadedPersona) return@launch
-                    viewModel.deletePersona(viewModel.persona!!)
-                    rootNavController.popBackStack()
-                    rootShowSnackbar("Persona deleted successfully!")
-                }
+                if (!viewModel.hasLoadedPersona) return@DeleteConfirmationDialog
+                viewModel.deletePersona(viewModel.persona!!)
+                rootNavController.popBackStack()
+                rootShowSnackbar("Persona deleted successfully!")
             }
         )
     }
@@ -265,15 +262,13 @@ fun InspectPersonaScreen(
             text = "If you delete this trait, you won't be able to recover it later.",
             onDismiss = { pendingTraitForDeletion = null },
             onConfirm = {
-                val traitToDelete = pendingTraitForDeletion!! // NOTE: coroutine causes race condition, taking a snapshot right before to avoid a NullPointerException
-                coroutineScope.launch {
-                    viewModel.persona?.let {
-                        viewModel.deleteTrait(
-                            trait = traitToDelete,
-                            at = it
-                        )
-                        rootShowSnackbar("Trait deleted successfully!")
-                    }
+                val traitToDelete = pendingTraitForDeletion!! // NOTE: viewmodel coroutine causes race condition, taking a snapshot right before to avoid a NullPointerException
+                viewModel.persona?.let {
+                    viewModel.deleteTrait(
+                        trait = traitToDelete,
+                        at = it
+                    )
+                    rootShowSnackbar("Trait deleted successfully!")
                 }
             }
         )

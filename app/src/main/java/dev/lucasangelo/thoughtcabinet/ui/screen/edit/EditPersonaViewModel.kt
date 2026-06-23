@@ -51,7 +51,7 @@ class EditPersonaViewModel(
 
     var hasNewProfilePicDraft by mutableStateOf(false)
         private set
-    fun importProfilePic(uri: Uri) : String? {
+    suspend fun importProfilePic(uri: Uri) : String? = withContext(Dispatchers.IO)  {
         val context = getApplication<Application>()
 
         val newProfilePic = "${UUID.randomUUID()}.${getFileExtension(context, uri)}"
@@ -63,9 +63,9 @@ class EditPersonaViewModel(
         )
         if (copyResult != null) {
             hasNewProfilePicDraft = true
-            return newProfilePic
+            return@withContext newProfilePic
         } else {
-            return null
+            return@withContext null
         }
     }
     suspend fun commitProfilePic() : Boolean = withContext(Dispatchers.IO) {
@@ -80,10 +80,11 @@ class EditPersonaViewModel(
 
         commitedProfilePic != null
     }
-    fun cleanupProfilePicDrafts() =
+    fun cleanupProfilePicDrafts() = viewModelScope.launch {
         cleanupDrafts(getApplication<Application>())
+    }
 
-    suspend fun updatePersona(from: PersonaEntity) {
+    fun updatePersona(from: PersonaEntity) = viewModelScope.launch {
         repository.updatePersona(
             from,
             personaName,
@@ -92,7 +93,7 @@ class EditPersonaViewModel(
             personaColorTheme
         )
     }
-    suspend fun insertPersona() {
+    fun insertPersona() = viewModelScope.launch {
         repository.insertPersona(
             personaName,
             personaBio,

@@ -102,12 +102,8 @@ fun ThoughtsScreen(
                     Post(
                         postEntity = thought,
                         authorEntity = postAuthorEntity, // NOTE: might result in NullPointerException (?) but i hope not so cuz im deleting posts on cascade when i kill a persona, gotta watch out for cosmic rays tho
-                        onDeletionRequest = { post -> coroutineScope.launch {
-                            viewModel.deletePost(post)
-                        } },
-                        onLikeRequested = { post -> coroutineScope.launch {
-                            viewModel.likePost(post)
-                        } },
+                        onDeletionRequest = { post -> viewModel.deletePost(post) },
+                        onLikeRequested = { post -> viewModel.likePost(post) },
                         rootNavController,
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
