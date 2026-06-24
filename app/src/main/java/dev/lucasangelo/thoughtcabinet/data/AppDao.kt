@@ -32,6 +32,8 @@ interface AppDao {
     fun getAllBookmarkedPosts(): Flow<List<PostEntity>>
     @Query("SELECT * FROM PostEntity WHERE authorId = :authorId ORDER BY createdAt DESC")
     fun getAllPostsBy(authorId: Long): Flow<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity WHERE content LIKE '%' || :query || '%' ORDER BY createdAt DESC")
+    fun searchPosts(query: String): Flow<List<PostEntity>>
     @Update
     suspend fun updatePost(persona: PostEntity)
     @Delete
