@@ -66,9 +66,16 @@ suspend fun deleteInternalStorageFile(
     return@withContext file.delete()
 }
 
-suspend fun cleanupDrafts(
+suspend fun cleanupFolder(
     context: Context,
+    folder: String
 ) = withContext(Dispatchers.IO) {
-    val drafts = File(context.cacheDir, draftsDir)
+    val drafts = File(context.cacheDir, folder)
     drafts.listFiles()?.forEach { it.delete() }
 }
+suspend fun cleanupDrafts(
+    context: Context,
+) = cleanupFolder(context, draftsDir)
+suspend fun cleanupLinkMetadata(
+    context: Context,
+) = cleanupFolder(context, linkMetadataDir)

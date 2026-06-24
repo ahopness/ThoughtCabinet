@@ -90,7 +90,6 @@ fun AppScreen() {
         ) {
             composable<HomeRoute> {
                 HomeScreen(
-                    navController,
                     thoughtsListState,
                     crowdListState,
                     thoughtsMap,
@@ -133,6 +132,8 @@ fun AppScreen() {
                 val routeObject :InspectPersonaRoute = backStackEntry.toRoute()
                 InspectPersonaScreen(
                     routeObject.personaId,
+                    thoughtsMap,
+                    crowdMap,
                     navController,
                     showSnackbar,
                 )
@@ -155,19 +156,7 @@ fun AppScreen() {
                 )
             }
 
-            composable<InspectMediaListRoute>(
-                popExitTransition = {
-                    val dismissViaSwipe = initialState.savedStateHandle.get<Boolean>("dismiss_via_swipe") ?: false
-
-                    if (dismissViaSwipe)
-                        fadeOut(animationSpec = tween(250))
-                    else
-                        slideOutOfContainer(
-                            animationSpec = tween(200, easing = EaseIn),
-                            towards = AnimatedContentTransitionScope.SlideDirection.End
-                        )
-                }
-            ) { backStackEntry ->
+            composable<InspectMediaListRoute> { backStackEntry ->
                 val routeObject : InspectMediaListRoute = backStackEntry.toRoute()
                 InspectMediaListScreen(
                     routeObject.list,
