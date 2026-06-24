@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e3c958596a95b14d3f9b5d0c52fda1e2",
+    "identityHash": "8bf24252f840251306a2b43d5fb2062e",
     "entities": [
       {
         "tableName": "PersonaEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER, `name` TEXT NOT NULL, `bio` TEXT NOT NULL, `profilePic` TEXT, `colorTheme` INTEGER NOT NULL, `traits` TEXT NOT NULL, `metadata` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER, `name` TEXT NOT NULL, `bio` TEXT NOT NULL, `profilePic` TEXT, `colorTheme` INTEGER NOT NULL, `traits` TEXT NOT NULL, `blocked` INTEGER NOT NULL, `metadata` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -52,6 +52,12 @@
             "fieldPath": "traits",
             "columnName": "traits",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "blocked",
+            "columnName": "blocked",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -300,7 +306,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e3c958596a95b14d3f9b5d0c52fda1e2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8bf24252f840251306a2b43d5fb2062e')"
     ]
   }
 }

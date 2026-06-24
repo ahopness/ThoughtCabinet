@@ -1,5 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
+import android.graphics.Picture
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,7 +38,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.draw
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -45,6 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostEntity
@@ -54,10 +60,13 @@ import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectMediaListRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostRoute
 import dev.lucasangelo.thoughtcabinet.util.LinkMetadata
+import dev.lucasangelo.thoughtcabinet.util.createBitmapFromPicture
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.fetchLinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.formatInstant
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
+import dev.lucasangelo.thoughtcabinet.util.saveBitmapToCache
+import dev.lucasangelo.thoughtcabinet.util.shareImage
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -67,61 +76,117 @@ val postIconSize = 54.dp
 @Composable
 fun Post(
     isStandalone: Boolean,
-    postEntity: PostEntity,
-    authorEntity: PersonaEntity,
-    repostChain: Map<PersonaEntity, PostEntity>,
-    onDeletionRequest: (PostEntity) -> Unit,
-    onLikeRequested: (PostEntity) -> Unit,
-    onBookmarkRequested: (PostEntity) -> Unit,
+    postId: Long,
+    thoughts: Map<Long, PostEntity>,
+    crowd: Map<Long, PersonaEntity>,
+    onPostDeleted: () -> Unit = {},
     onCommentRequested: (PostEntity) -> Unit,
     rootNavController: NavController,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        repostChain.entries.reversed().forEachIndexed { index, entry ->
-            val backgroundColor = Color(entry.key.colorTheme).darken()
+    val coroutineScope = rememberCoroutineScope()
+
+    val context = LocalContext.current
+    val application = context.applicationContext as MainApplication
+    val repository = application.repository
+
+    // NOTE: direct calls to repository is a bad practice, doing it anyway because it's only for simple tasks
+    val onDeletionRequest: (PostEntity) -> Unit = { coroutineScope.launch {
+        repository.deletePost(it)
+        onPostDeleted()
+    } }
+    val onBlockPersonaRequest: (PersonaEntity) -> Unit = { coroutineScope.launch {
+        repository.blockPersona(it)
+    } }
+    val onLikeRequested: (PostEntity) -> Unit = { coroutineScope.launch {
+        repository.likePost(it)
+    } }
+    val onBookmarkRequested: (PostEntity) -> Unit = { coroutineScope.launch {
+        repository.bookmarkPost(it)
+    } }
+
+    val postEntity = thoughts[postId] ?: return
+    val authorEntity = crowd[postEntity.authorId] ?: return
+    val repostChain = remember(postId, thoughts.values) {
+        buildMap {
+            var current = postEntity
+            while (current.repostOf != null) {
+                val repost = thoughts[current.repostOf] ?: break
+                val author = crowd[repost.authorId] ?: break
+                put(author, repost)
+                current = repost
+            }
+        }
+    }
+
+    val picture = remember { Picture() }
+    val captureModifier = Modifier.drawWithCache {
+        val width = size.width.toInt()
+        val height = size.height.toInt()
+
+        onDrawWithContent {
+            val pictureCanvas = androidx.compose.ui.graphics.Canvas(
+                picture.beginRecording(width, height)
+            )
+            draw(this, layoutDirection, pictureCanvas, size) {
+                this@onDrawWithContent.drawContent()
+            }
+            picture.endRecording()
+
+            drawIntoCanvas { canvas ->
+                canvas.nativeCanvas.drawPicture(picture)
+            }
+        }
+    }
+
+    Column(modifier.fillMaxWidth()) {
+        var backgroundColor by remember { mutableStateOf(Color.Black) }
+        Column(captureModifier) {
+            repostChain.entries.reversed().forEach { entry ->
+                val repostBackgroundColor = Color(entry.key.colorTheme).darken()
+                PostHeader(
+                    entry.key,
+                    entry.value,
+                    showOptions = false,
+                    onDeletionRequest,
+                    onBlockPersonaRequest,
+                    rootNavController,
+                    onClickRoute =
+                        if (!isStandalone)
+                            InspectPostRoute(postEntity.id)
+                        else
+                            InspectPostRoute(entry.value.id),
+                    modifier = Modifier.background(repostBackgroundColor)
+                )
+
+                PostContent(
+                    entry.value,
+                    rootNavController,
+                    modifier = Modifier.background(repostBackgroundColor)
+                )
+            }
+
+            backgroundColor = Color(authorEntity.colorTheme).darken()
             PostHeader(
-                entry.key,
-                entry.value,
-                showOptions = false,
+                authorEntity,
+                postEntity,
                 onDeletionRequest = onDeletionRequest,
+                onBlockPersonaRequest = onBlockPersonaRequest,
                 rootNavController = rootNavController,
                 onClickRoute =
                     if (!isStandalone)
                         InspectPostRoute(postEntity.id)
                     else
-                        InspectPostRoute(entry.value.id),
+                        null,
                 modifier = Modifier.background(backgroundColor)
             )
 
             PostContent(
-                entry.value,
+                postEntity,
                 rootNavController,
                 modifier = Modifier.background(backgroundColor)
             )
         }
-
-        val backgroundColor = Color(authorEntity.colorTheme).darken()
-        PostHeader(
-            authorEntity,
-            postEntity,
-            onDeletionRequest = onDeletionRequest,
-            rootNavController = rootNavController,
-            onClickRoute =
-                if (!isStandalone)
-                    InspectPostRoute(postEntity.id)
-                else
-                    null,
-            modifier = Modifier.background(backgroundColor)
-        )
-
-        PostContent(
-            postEntity,
-            rootNavController,
-            modifier = Modifier.background(backgroundColor)
-        )
 
         PostActions(
             isStandalone,
@@ -130,6 +195,7 @@ fun Post(
             onBookmarkRequested,
             onCommentRequested,
             rootNavController,
+            picture,
             modifier = Modifier.background(backgroundColor)
         )
     }
@@ -142,6 +208,7 @@ fun PostHeader(
     postEntity: PostEntity,
     showOptions: Boolean = true,
     onDeletionRequest: (PostEntity) -> Unit,
+    onBlockPersonaRequest: (PersonaEntity) -> Unit,
     rootNavController: NavController,
     onClickRoute: Any?,
     modifier: Modifier,
@@ -210,25 +277,45 @@ fun PostHeader(
             onDismissRequest = onDismissRequest,
             containerColor = Color.Black
         ) {
-            CleanIconButton(
-                action = "Edit",
-                icon = R.drawable.icon_edit,
-                onClick = {
-                    rootNavController.navigate(
-                        EditPostRoute(postEntity.id, postEntity.repostOf)
-                    )
-                    onDismissRequest()
-                }
-            )
-            CleanIconButton(
-                action = "Delete",
-                icon = R.drawable.icon_delete,
-                color = Color.Red,
-                onClick = {
-                    showDeletionRequest = true
-                    onDismissRequest()
-                },
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CleanIconButton(
+                    action = "Edit",
+                    icon = R.drawable.icon_edit,
+                    onClick = {
+                        rootNavController.navigate(
+                            EditPostRoute(postEntity.id, postEntity.repostOf)
+                        )
+                        onDismissRequest()
+                    }
+                )
+                CleanIconButton(
+                    action = "Delete",
+                    icon = R.drawable.icon_delete,
+                    color = Color.Red,
+                    onClick = {
+                        showDeletionRequest = true
+                        onDismissRequest()
+                    },
+                )
+
+                Image(
+                    painter = painterResource(R.drawable.divider_horizontal),
+                    contentDescription = null,
+                    modifier = Modifier.size(54.dp),
+                )
+
+                CleanIconButton(
+                    action = if (authorEntity.blocked) "Unblock Persona" else "Block Persona",
+                    icon = R.drawable.icon_block,
+    //                color = Color.Red,
+                    onClick = {
+                        onBlockPersonaRequest(authorEntity)
+                        onDismissRequest()
+                    },
+                )
+            }
         }
     }
     if (showDeletionRequest) {
@@ -300,7 +387,10 @@ fun PostContentNote(
         if (postEntity.media.isNotEmpty())
             Grid(
                 config = {
-                    repeat(2){ column(0.5f) }
+                    if (postEntity.media.size == 1)
+                        repeat(1){ column(1f) }
+                    else
+                        repeat(2){ column(0.5f) }
                     gap(0.dp)
                     flow = GridFlow.Row
                 },
@@ -453,8 +543,12 @@ fun PostActions(
     onBookmarkRequested: (PostEntity) -> Unit,
     onCommentRequested: (PostEntity) -> Unit,
     rootNavController: NavController,
+    picture: Picture,
     modifier: Modifier,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -476,14 +570,14 @@ fun PostActions(
                     painterResource(R.drawable.icon_hearted)
                 else
                     painterResource(R.drawable.icon_heart),
-            contentDescription = "Comment",
+            contentDescription = "Like",
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = { onLikeRequested(postEntity) })
         )
         Image(
             painter = painterResource(R.drawable.icon_repost),
-            contentDescription = "Comment",
+            contentDescription = "Repost",
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = {
@@ -505,8 +599,18 @@ fun PostActions(
         )
         Image(
             painter = painterResource(R.drawable.icon_share),
-            contentDescription = "Comment",
-            modifier = Modifier.size(postIconSize)
+            contentDescription = "Share",
+            modifier = Modifier
+                .size(postIconSize)
+                .clickable(onClick = { coroutineScope.launch {
+                    shareImage(
+                        context,
+                        uri = saveBitmapToCache(
+                            context,
+                            bitmap = createBitmapFromPicture(picture)
+                        )
+                    )
+                } } )
         )
     }
 }

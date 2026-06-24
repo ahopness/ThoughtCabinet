@@ -56,7 +56,6 @@ data class FloatingExtendedTopBarActionItem(
 fun BoxScope.FloatingExtendedTopBar(
     title: String,
     description: String = "",
-    fadeTitle: Boolean = true,
     canGoBack: Boolean,
     onGoBackRequest: () -> Unit = { },
     iconContent: @Composable (Modifier, () -> Float) -> Unit,
@@ -162,19 +161,10 @@ fun BoxScope.FloatingExtendedTopBar(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
-                        .width(lerp(
-                            360.dp,
-                            130.dp,
-                            collapsedFraction.value
-                        ))
-                        .then( other =
-                            if (fadeTitle)
-                                Modifier.alpha(lerp(1f, 0f, collapsedFraction.value))
-                            else
-                                Modifier
-                        ),
+                        .alpha(lerp(1f, 0f, collapsedFraction.value)),
                     onTextLayout = {
-                        titleLineHeight = it.getLineBottom(0) / maxOf(1, it.lineCount)
+                        titleLineHeight =
+                            it.getLineBottom(0) / maxOf(1, it.lineCount)
                     }
                 )
                 if (description.isNotEmpty()) {
@@ -185,7 +175,7 @@ fun BoxScope.FloatingExtendedTopBar(
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .width(360.dp)
-                            .alpha(lerp(1f, 0f,collapsedFraction.value))
+                            .alpha(lerp(1f, 0f, collapsedFraction.value))
                     )
                 }
             }

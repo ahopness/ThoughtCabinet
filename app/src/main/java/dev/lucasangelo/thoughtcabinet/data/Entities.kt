@@ -22,6 +22,8 @@ data class PersonaEntity(
 
     val traits: List<PersonaTrait>,
 
+    val blocked: Boolean,
+
     val metadata: Map<String, String>,
 )
 @Serializable

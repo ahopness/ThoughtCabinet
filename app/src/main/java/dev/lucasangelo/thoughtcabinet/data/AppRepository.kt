@@ -30,6 +30,7 @@ class AppRepository(
             profilePic = personaProfilePic,
             colorTheme = personaColorTheme.toArgb(),
             traits = emptyList(),
+            blocked = false,
             metadata = emptyMap(),
         ))
     }
@@ -64,6 +65,9 @@ class AppRepository(
             profilePic = personaProfilePic,
             colorTheme = personaColorTheme.toArgb(),
         ))
+    }
+    suspend fun blockPersona(persona: PersonaEntity) {
+        dao.updatePersona(persona.copy(blocked = !persona.blocked))
     }
     //endregion
 
@@ -169,6 +173,10 @@ class AppRepository(
     }
     suspend fun getPost(id: Long) = dao.getPost(id)
     fun getAllPosts() = dao.getAllPosts()
+    fun getAllValidPosts() = dao.getAllValidPosts()
+    fun getAllBookmarkedPosts() = dao.getAllBookmarkedPosts()
+    fun getAllArchivedPosts() = dao.getAllArchivedPosts()
+    fun getAllPostsFromBlockedPersonas() = dao.getAllPostsFromBlockedPersonas()
     fun getAllPostsBy(authorId: Long) = dao.getAllPostsBy(authorId)
     fun searchPosts(query: String) = dao.searchPosts(query)
     suspend fun deletePost(post: PostEntity) = withContext(Dispatchers.IO) {

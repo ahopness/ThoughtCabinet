@@ -95,6 +95,8 @@ fun AppScreen() {
                     crowdListState,
                     thoughtsMap,
                     crowdMap,
+                    navController,
+                    showSnackbar
                 )
             }
             composable<SearchRoute> {
