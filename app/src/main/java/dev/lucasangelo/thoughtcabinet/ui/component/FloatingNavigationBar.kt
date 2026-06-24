@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import dev.lucasangelo.thoughtcabinet.util.overlayTransparencyColor
 
 // NOTE: inspired by https://github.com/elyesmansour/compose-floating-tab-bar
 
@@ -71,7 +72,7 @@ fun BoxScope.FloatingNavigationBar(
                 .fillMaxWidth()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(0.5f))
+                        colors = listOf(Color.Transparent, overlayTransparencyColor)
                     )
                 )
         ) {

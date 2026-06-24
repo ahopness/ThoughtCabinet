@@ -45,7 +45,8 @@ fun InspectMediaListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .swipeToDismiss({
-                            rootNavController.currentBackStackEntry?.savedStateHandle?.set("dismiss_via_swipe", true)
+                            rootNavController.getBackStackEntry<InspectMediaListRoute>()
+                                .savedStateHandle["dismiss_via_swipe"] = true
                             rootNavController.popBackStack()
                         })
                 )

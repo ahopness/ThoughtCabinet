@@ -65,7 +65,8 @@ fun ThoughtsScreen(
                         painter = painterResource(R.drawable.logo),
                         contentDescription = null,
                         contentScale = ContentScale.Inside,
-                        modifier = modifier.clickable(onClick = {
+                        modifier = modifier
+                            .clickable(onClick = {
                             coroutineScope.launch { listState.animateScrollToItem(0) }
                         })
                     )

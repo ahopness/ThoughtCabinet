@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -42,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.util.overlayTransparencyColor
 import kotlin.math.roundToInt
 
 val floatingExtendedTopBarPadding = 420.dp
@@ -56,6 +56,7 @@ data class FloatingExtendedTopBarActionItem(
 fun BoxScope.FloatingExtendedTopBar(
     title: String,
     description: String = "",
+    fadeTitle: Boolean = true,
     canGoBack: Boolean,
     onGoBackRequest: () -> Unit = { },
     iconContent: @Composable (Modifier, () -> Float) -> Unit,
@@ -70,7 +71,7 @@ fun BoxScope.FloatingExtendedTopBar(
             .fillMaxWidth()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color.Black.copy(0.5f), Color.Transparent)
+                    colors = listOf(overlayTransparencyColor, Color.Transparent)
                 )
             )
     ) {
@@ -165,7 +166,13 @@ fun BoxScope.FloatingExtendedTopBar(
                             360.dp,
                             130.dp,
                             collapsedFraction.value
-                        )),
+                        ))
+                        .then( other =
+                            if (fadeTitle)
+                                Modifier.alpha(lerp(1f, 0f, collapsedFraction.value))
+                            else
+                                Modifier
+                        ),
                     onTextLayout = {
                         titleLineHeight = it.getLineBottom(0) / maxOf(1, it.lineCount)
                     }
@@ -178,13 +185,7 @@ fun BoxScope.FloatingExtendedTopBar(
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .width(360.dp)
-                            .alpha(
-                                lerp(
-                                    1f,
-                                    0f,
-                                    collapsedFraction.value
-                                )
-                            )
+                            .alpha(lerp(1f, 0f,collapsedFraction.value))
                     )
                 }
             }

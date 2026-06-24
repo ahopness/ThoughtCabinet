@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -153,9 +154,10 @@ fun InspectPostScreen(
 
             if (viewModel.hasLoadedComments)
                 items(viewModel.comments, key = { it.id }) { comment ->
+                    val commentAuthor = crowd[comment.authorId] ?: return@items
                     Comment(
                         comment,
-                        thoughtAuthor,
+                        commentAuthor,
                         onCommentLiked = { coroutineScope.launch {
                             repository.likeComment(comment)
                         } },
@@ -344,7 +346,9 @@ fun EditCommentModal(
     rootShowSnackbar: (String) -> Unit,
     viewModel: InspectPostViewModel,
 ) {
-    var commentCreationBackgroundColor by remember { mutableStateOf(Color.Black) }
+    var commentCreationBackgroundColor by remember { mutableStateOf(
+        Color(crowd[editingComment?.authorId]?.colorTheme ?: Color.Black.toArgb()).darken()
+    ) }
     val animatedCommentCreationBackgroundColor
             by animateColorAsState(commentCreationBackgroundColor)
 

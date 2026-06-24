@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.lucasangelo.thoughtcabinet.util.overlayTransparencyColor
 import kotlinx.coroutines.launch
 
 @Composable
@@ -74,7 +75,7 @@ fun PagerScaffold(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .background(Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black.copy(0.5f))
+                            colors = listOf(Color.Transparent, overlayTransparencyColor)
                         ))
                         .wrapContentHeight()
                         .fillMaxWidth()

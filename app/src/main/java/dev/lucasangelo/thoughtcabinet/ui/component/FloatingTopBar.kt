@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.util.overlayTransparencyColor
 
 val floatingTopBarPadding = 120.dp
 val floatingTopBarButtonSize = 72.dp
@@ -31,7 +32,7 @@ fun BoxScope.FloatingTopBar(
     Box(
         modifier = Modifier
             .background(Brush.verticalGradient(
-                colors = listOf(Color.Black.copy(0.5f), Color.Transparent)
+                colors = listOf(overlayTransparencyColor, Color.Transparent)
             ))
             .safeDrawingPadding()
             .align(Alignment.TopCenter)

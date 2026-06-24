@@ -4,6 +4,8 @@ package dev.lucasangelo.thoughtcabinet.util
 
 import androidx.compose.ui.graphics.Color
 
+val overlayTransparencyColor = Color.Black.copy(0.75f)
+
 inline fun Color.darken(darkenBy: Float = 0.75f): Color {
     val multiplier = 1f - darkenBy
     return copy(

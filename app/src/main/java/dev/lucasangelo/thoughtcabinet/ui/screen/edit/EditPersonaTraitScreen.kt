@@ -196,7 +196,7 @@ fun EditPersonaTraitContent(
                 OutlinedTextField(
                     value = viewModel.traitContent,
                     onValueChange = onTraitContentChanced,
-                    label = { Text("What's up?") },
+                    label = { Text("What's on your mind?") },
                     maxLines = 6,
                     minLines = 4,
                     modifier = Modifier.fillMaxWidth()
