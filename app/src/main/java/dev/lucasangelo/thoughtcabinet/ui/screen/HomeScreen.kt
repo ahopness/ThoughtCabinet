@@ -27,11 +27,12 @@ object HomeRoute
 
 @Composable
 fun HomeScreen(
-    rootNavController: NavController,
     thoughtsListState: LazyListState,
     crowdListState: LazyListState,
     thoughts: Map<Long, PostEntity>,
     crowd: Map<Long, PersonaEntity>,
+    rootNavController: NavController,
+    rootShowSnackbar: (String) -> Unit,
 ) {
     Box(Modifier.fillMaxSize()) {
         val pagerState = rememberPagerState(pageCount = { 2 })
@@ -41,7 +42,7 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize()
         ) { page ->
             when(page) {
-                0 -> ThoughtsScreen(thoughtsListState, thoughts, crowd, rootNavController)
+                0 -> ThoughtsScreen(thoughtsListState, thoughts, crowd, rootNavController, rootShowSnackbar)
                 1 -> CrowdScreen(crowdListState, crowd, rootNavController)
             }
         }

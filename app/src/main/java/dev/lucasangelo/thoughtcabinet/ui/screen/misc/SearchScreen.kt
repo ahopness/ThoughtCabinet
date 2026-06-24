@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +42,6 @@ import dev.lucasangelo.thoughtcabinet.ui.component.Post
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostRoute
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -55,8 +53,6 @@ fun SearchScreen(
     crowd: Map<Long, PersonaEntity>,
     rootNavController: NavController,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
     val context = LocalContext.current
 
     val application = context.applicationContext as MainApplication
@@ -66,6 +62,8 @@ fun SearchScreen(
             initializer { SearchViewModel(repository, application) }
         }
     )
+
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     var search by remember { mutableStateOf("") }
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
@@ -110,10 +108,10 @@ fun SearchScreen(
                 )
             }
 
-            if (searchResults.isEmpty())
+            if (isLoading)
                 item {
                     Text(
-                        text = "Wuthering and Uninhabited.",
+                        text = "Thinking...",
                         color = Color.Gray,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
@@ -123,47 +121,37 @@ fun SearchScreen(
                     )
                 }
             else
-                items(searchResults, key = { it.id }) { post ->
-                    val thoughtAuthor = crowd[post.authorId] ?: return@items
-
-                    val repostChain = remember(post.id, thoughts.values) {
-                        buildMap {
-                            var current = post
-                            while (current.repostOf != null) {
-                                val repost = thoughts[current.repostOf] ?: break
-                                val author = crowd[repost.authorId] ?: break
-                                put(author, repost)
-                                current = repost
-                            }
-                        }
+                if (searchResults.isEmpty())
+                    item {
+                        Text(
+                            text = "Wuthering and Uninhabited.",
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(horizontal = 48.dp)
+                                .padding(top = 128.dp)
+                                .fillMaxWidth(),
+                        )
                     }
-
-                    Post(
-                        isStandalone = false,
-                        postEntity = post,
-                        authorEntity = thoughtAuthor,
-                        repostChain,
-                        onDeletionRequest = { post -> coroutineScope.launch {
-                            repository.deletePost(post) // NOTE: direct calls to repository is a bad practice but i didnt wanted to create another viewmodel for such a simple task
-                        } },
-                        onLikeRequested = { post -> coroutineScope.launch {
-                            repository.likePost(post)
-                        } },
-                        onBookmarkRequested = { post -> coroutineScope.launch {
-                            repository.bookmarkPost(post)
-                        } },
-                        onCommentRequested = { post -> rootNavController.navigate(
-                            InspectPostRoute(post.id, requestComment = true)
-                        ) },
-                        rootNavController,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .border(
-                                border = BorderStroke(width = 1.dp, color = Color.Gray),
-                                shape = RoundedCornerShape(6.dp)
-                            )
-                    )
-                }
+                else
+                    items(searchResults, key = { it.id }) { post ->
+                        Post(
+                            isStandalone = false,
+                            postId = post.id,
+                            thoughts,
+                            crowd,
+                            onCommentRequested = { post -> rootNavController.navigate(
+                                InspectPostRoute(post.id, requestComment = true)
+                            ) },
+                            rootNavController = rootNavController,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .border(
+                                    border = BorderStroke(width = 1.dp, color = Color.Gray),
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                        )
+                    }
 
             item { Spacer(Modifier.height(floatingNavigationBarPadding/1.5f)) }
         }
