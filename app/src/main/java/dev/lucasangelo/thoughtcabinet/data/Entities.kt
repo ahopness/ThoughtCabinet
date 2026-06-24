@@ -113,6 +113,9 @@ data class CommentEntity(
     val postId: Long,
     val authorId: Long,
 
+    val createdAt: Instant,
+    val updatedAt: Instant?,
+
     val content: String,
 
     val liked: Boolean,

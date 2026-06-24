@@ -2,7 +2,6 @@ package dev.lucasangelo.thoughtcabinet.ui
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
@@ -23,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -41,6 +39,10 @@ import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectMediaListRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectMediaListScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaScreen
+import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostScreen
+import dev.lucasangelo.thoughtcabinet.ui.screen.misc.SearchRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.misc.SearchScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -62,8 +64,10 @@ fun AppScreen() {
         }
     )
 
-    val thoughts by viewModel.thoughts.collectAsState()
-    val crowd by viewModel.crowd.collectAsState()
+    val thoughtsList by viewModel.thoughts.collectAsState()
+    val crowdList by viewModel.crowd.collectAsState()
+    val thoughtsMap = remember(thoughtsList) { thoughtsList.associateBy { it.id } }
+    val crowdMap = remember(crowdList) { crowdList.associateBy { it.id } }
 
     val thoughtsListState = rememberLazyListState()
     val crowdListState = rememberLazyListState()
@@ -76,41 +80,54 @@ fun AppScreen() {
                     animationSpec = tween(200, easing = EaseOut),
                     towards = AnimatedContentTransitionScope.SlideDirection.Start
                 ) },
-            exitTransition = { slideOutOfContainer(
+            popEnterTransition = {
+                EnterTransition.None
+            },
+            popExitTransition = { slideOutOfContainer(
                     animationSpec = tween(200, easing = EaseIn),
                     towards = AnimatedContentTransitionScope.SlideDirection.End
                 ) }
         ) {
-            composable<HomeRoute>(
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None }
-            ) {
+            composable<HomeRoute> {
                 HomeScreen(
                     navController,
                     thoughtsListState,
                     crowdListState,
-                    thoughts,
-                    crowd,
+                    thoughtsMap,
+                    crowdMap,
+                )
+            }
+            composable<SearchRoute> {
+                SearchScreen(
+                    thoughtsMap,
+                    crowdMap,
+                    navController
                 )
             }
 
+            composable<InspectPostRoute> { backStackEntry ->
+                val routeObject :InspectPostRoute = backStackEntry.toRoute()
+                InspectPostScreen(
+                    routeObject.postId,
+                    thoughtsMap,
+                    crowdMap,
+                    routeObject.requestComment,
+                    navController,
+                    showSnackbar,
+                )
+            }
             composable<EditPostRoute> { backStackEntry ->
                 val routeObject : EditPostRoute = backStackEntry.toRoute()
                 EditPostScreen(
                     routeObject.id,
                     routeObject.repostOf,
-                    crowd,
+                    crowdList,
                     navController,
                     showSnackbar
                 )
             }
 
-            composable<InspectPersonaRoute>(
-                enterTransition =
-                    { if (!initialState.destination.hasRoute<HomeRoute>()) EnterTransition.None else null },
-                exitTransition =
-                    { if (!targetState.destination.hasRoute<HomeRoute>()) ExitTransition.None else null }
-            ) { backStackEntry ->
+            composable<InspectPersonaRoute> { backStackEntry ->
                 val routeObject :InspectPersonaRoute = backStackEntry.toRoute()
                 InspectPersonaScreen(
                     routeObject.personaId,
@@ -118,7 +135,7 @@ fun AppScreen() {
                     showSnackbar,
                 )
             }
-            composable<EditPersonaRoute>() { backStackEntry ->
+            composable<EditPersonaRoute> { backStackEntry ->
                 val routeObject :EditPersonaRoute = backStackEntry.toRoute()
                 EditPersonaScreen(
                     routeObject.personaId,
@@ -126,7 +143,7 @@ fun AppScreen() {
                     showSnackbar,
                 )
             }
-            composable<EditPersonaTraitRoute>() { backStackEntry ->
+            composable<EditPersonaTraitRoute> { backStackEntry ->
                 val routeObject :EditPersonaTraitRoute = backStackEntry.toRoute()
                 EditPersonaTraitScreen(
                     routeObject.personaId,

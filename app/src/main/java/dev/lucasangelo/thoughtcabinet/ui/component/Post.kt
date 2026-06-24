@@ -9,26 +9,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalGridApi
 import androidx.compose.foundation.layout.Grid
 import androidx.compose.foundation.layout.GridFlow
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -44,16 +37,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -61,13 +49,12 @@ import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostEntity
 import dev.lucasangelo.thoughtcabinet.data.PostType
-import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaTraitRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPostRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectMediaListRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostRoute
 import dev.lucasangelo.thoughtcabinet.util.LinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.darken
-import dev.lucasangelo.thoughtcabinet.util.draftsDir
 import dev.lucasangelo.thoughtcabinet.util.fetchLinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.formatInstant
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
@@ -79,12 +66,14 @@ val postIconSize = 54.dp
 
 @Composable
 fun Post(
+    isStandalone: Boolean,
     postEntity: PostEntity,
     authorEntity: PersonaEntity,
     repostChain: Map<PersonaEntity, PostEntity>,
     onDeletionRequest: (PostEntity) -> Unit,
     onLikeRequested: (PostEntity) -> Unit,
     onBookmarkRequested: (PostEntity) -> Unit,
+    onCommentRequested: (PostEntity) -> Unit,
     rootNavController: NavController,
     modifier: Modifier = Modifier
 ) {
@@ -99,6 +88,11 @@ fun Post(
                 showOptions = false,
                 onDeletionRequest = onDeletionRequest,
                 rootNavController = rootNavController,
+                onClickRoute =
+                    if (!isStandalone)
+                        InspectPostRoute(postEntity.id)
+                    else
+                        InspectPostRoute(entry.value.id),
                 modifier = Modifier.background(backgroundColor)
             )
 
@@ -115,6 +109,11 @@ fun Post(
             postEntity,
             onDeletionRequest = onDeletionRequest,
             rootNavController = rootNavController,
+            onClickRoute =
+                if (!isStandalone)
+                    InspectPostRoute(postEntity.id)
+                else
+                    null,
             modifier = Modifier.background(backgroundColor)
         )
 
@@ -125,9 +124,11 @@ fun Post(
         )
 
         PostActions(
+            isStandalone,
             postEntity,
             onLikeRequested,
             onBookmarkRequested,
+            onCommentRequested,
             rootNavController,
             modifier = Modifier.background(backgroundColor)
         )
@@ -142,6 +143,7 @@ fun PostHeader(
     showOptions: Boolean = true,
     onDeletionRequest: (PostEntity) -> Unit,
     rootNavController: NavController,
+    onClickRoute: Any?,
     modifier: Modifier,
 ) {
     var showOptionsModal by remember { mutableStateOf(false) }
@@ -153,6 +155,10 @@ fun PostHeader(
         modifier = modifier
             .fillMaxWidth()
             .padding(postItemSpacing)
+            .clickable(onClick = {
+                if (onClickRoute != null)
+                    rootNavController.navigate(onClickRoute)
+            })
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -182,7 +188,7 @@ fun PostHeader(
         if (showOptions)
             Image(
                 painter = painterResource(R.drawable.icon_more),
-                contentDescription = "More",
+                contentDescription = "Options",
                 modifier = Modifier
                     .size(48.dp)
                     .clickable(onClick = { showOptionsModal = true })
@@ -276,18 +282,20 @@ fun PostContentNote(
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
-        Text(
-            text = postEntity.content,
-            modifier = Modifier
-                .padding(horizontal = postItemSpacing * 2)
-                .then(
-                    other =
-                        if (postEntity.media.isEmpty())
-                            Modifier.padding(vertical = postItemSpacing * 2)
-                        else
-                            Modifier.padding(bottom = postItemSpacing)
-                )
-        )
+        SelectionContainer {
+            Text(
+                text = postEntity.content,
+                modifier = Modifier
+                    .padding(horizontal = postItemSpacing * 2)
+                    .then(
+                        other =
+                            if (postEntity.media.isEmpty())
+                                Modifier.padding(vertical = postItemSpacing * 2)
+                            else
+                                Modifier.padding(bottom = postItemSpacing)
+                    )
+            )
+        }
 
         if (postEntity.media.isNotEmpty())
             Grid(
@@ -305,7 +313,7 @@ fun PostContentNote(
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .aspectRatio(1f/1f)
+                            .aspectRatio(1f / 1f)
                             .clickable(onClick = { onMediaClicked(postEntity.media, index) })
                     )
                 }
@@ -355,11 +363,12 @@ fun PostContentReel(
                                     .padding(4.dp)
                                     .clip(CircleShape)
                                     .size(8.dp)
-                                    .background( color =
-                                        if (pagerState.currentPage == iteration)
-                                            Color.LightGray
-                                        else
-                                            Color.LightGray.copy(0.25f)
+                                    .background(
+                                        color =
+                                            if (pagerState.currentPage == iteration)
+                                                Color.LightGray
+                                            else
+                                                Color.LightGray.copy(0.25f)
                                     )
                             )
                         }
@@ -376,10 +385,12 @@ fun PostContentReel(
             )
 
         if (postEntity.content.isNotEmpty())
-            Text(
-                text = postEntity.content,
-                modifier = Modifier.padding(horizontal = postItemSpacing*2)
-            )
+            SelectionContainer {
+                Text(
+                    text = postEntity.content,
+                    modifier = Modifier.padding(horizontal = postItemSpacing*2)
+                )
+            }
     }
 }
 @Composable
@@ -436,9 +447,11 @@ fun PostContentLink(
 
 @Composable
 fun PostActions(
+    isStandalone: Boolean,
     postEntity: PostEntity,
     onLikeRequested: (PostEntity) -> Unit,
     onBookmarkRequested: (PostEntity) -> Unit,
+    onCommentRequested: (PostEntity) -> Unit,
     rootNavController: NavController,
     modifier: Modifier,
 ) {
@@ -449,11 +462,14 @@ fun PostActions(
             .fillMaxWidth()
             .padding(postItemSpacing)
     ) {
-        Image(
-            painter = painterResource(R.drawable.icon_comment),
-            contentDescription = "Comment",
-            modifier = Modifier.size(postIconSize)
-        )
+        if (!isStandalone)
+            Image(
+                painter = painterResource(R.drawable.icon_comment),
+                contentDescription = "Comment",
+                modifier = Modifier
+                    .size(postIconSize)
+                    .clickable(onClick = { onCommentRequested(postEntity) })
+            )
         Image(
             painter =
                 if (postEntity.liked)
@@ -471,7 +487,9 @@ fun PostActions(
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = {
-                    rootNavController.navigate(EditPostRoute(null, postEntity.id))
+                    rootNavController.navigate(
+                        EditPostRoute(null, repostOf = postEntity.id)
+                    )
                 })
         )
         Image(

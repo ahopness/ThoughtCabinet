@@ -2,7 +2,6 @@ package dev.lucasangelo.thoughtcabinet.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.lucasangelo.thoughtcabinet.data.AppDao
 import dev.lucasangelo.thoughtcabinet.data.AppRepository
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostEntity

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "4a813a4a3f391a290fc0b232224bb66c",
+    "identityHash": "e3c958596a95b14d3f9b5d0c52fda1e2",
     "entities": [
       {
         "tableName": "PersonaEntity",
@@ -196,7 +196,7 @@
       },
       {
         "tableName": "CommentEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `postId` INTEGER NOT NULL, `authorId` INTEGER NOT NULL, `content` TEXT NOT NULL, `liked` INTEGER NOT NULL, `metadata` TEXT NOT NULL, FOREIGN KEY(`postId`) REFERENCES `PostEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`authorId`) REFERENCES `PersonaEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `postId` INTEGER NOT NULL, `authorId` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER, `content` TEXT NOT NULL, `liked` INTEGER NOT NULL, `metadata` TEXT NOT NULL, FOREIGN KEY(`postId`) REFERENCES `PostEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`authorId`) REFERENCES `PersonaEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -215,6 +215,17 @@
             "columnName": "authorId",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "content",
@@ -289,7 +300,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4a813a4a3f391a290fc0b232224bb66c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e3c958596a95b14d3f9b5d0c52fda1e2')"
     ]
   }
 }

@@ -41,10 +41,10 @@ import coil3.compose.AsyncImage
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.PersonaTraitType
+import dev.lucasangelo.thoughtcabinet.ui.component.CleanDescriptionButton
 import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
-import dev.lucasangelo.thoughtcabinet.ui.component.CleanDescriptionButton
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
 import dev.lucasangelo.thoughtcabinet.util.traitsDir

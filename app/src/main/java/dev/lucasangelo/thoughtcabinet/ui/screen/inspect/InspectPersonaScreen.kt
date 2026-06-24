@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -412,14 +413,17 @@ fun PersonaTraitTile(
         val uriHandler = LocalUriHandler.current
         when(type) {
             PersonaTraitType.TEXT ->
-                Text(
-                    text = "\"$content\"",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    fontStyle = FontStyle.Italic,
-                    fontFamily = FontFamily.Serif,
+                SelectionContainer(
                     modifier = Modifier.align(Alignment.Center)
-                )
+                ) {
+                    Text(
+                        text = "\"$content\"",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        fontStyle = FontStyle.Italic,
+                        fontFamily = FontFamily.Serif,
+                    )
+                }
             PersonaTraitType.MEDIA ->
                 AsyncImage(
                     model = File(

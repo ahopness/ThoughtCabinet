@@ -15,7 +15,7 @@ class AppRepository(
     private val dao: AppDao,
     private val context: Context
 ) {
-    // PERSONA
+    //region PERSONA
     suspend fun insertPersona(
         personaName: String,
         personaBio: String,
@@ -65,8 +65,9 @@ class AppRepository(
             colorTheme = personaColorTheme.toArgb(),
         ))
     }
+    //endregion
 
-    // TRAITS
+    //region TRAITS
     suspend fun insertTrait(
         at: PersonaEntity,
         traitType: PersonaTraitType,
@@ -141,8 +142,9 @@ class AppRepository(
 
         return updatedPersona
     }
+    //endregion
 
-    // POSTS
+    //region POSTS
     suspend fun insertPost(
         asRepostOf: Long?,
         isArchived: Boolean,
@@ -167,6 +169,8 @@ class AppRepository(
     }
     suspend fun getPost(id: Long) = dao.getPost(id)
     fun getAllPosts() = dao.getAllPosts()
+    fun getAllPostsBy(authorId: Long) = dao.getAllPostsBy(authorId)
+    fun searchPosts(query: String) = dao.searchPosts(query)
     suspend fun deletePost(post: PostEntity) = withContext(Dispatchers.IO) {
         post.media.forEach {
             deleteInternalStorageFile(context.filesDir, mediaDir + it)
@@ -197,4 +201,39 @@ class AppRepository(
     suspend fun bookmarkPost(post: PostEntity) {
         dao.updatePost(post.copy(bookmarked = !post.bookmarked))
     }
+    //endregion
+
+    //region COMMENTS
+    suspend fun insertComment(
+        atPost: Long,
+        ofAuthor: Long,
+        content: String
+    ) {
+        dao.insertComment(CommentEntity(
+            postId = atPost,
+            authorId = ofAuthor,
+            createdAt = Instant.now(),
+            updatedAt = null,
+            content = content,
+            liked = false,
+            metadata = emptyMap()
+        ))
+    }
+    fun getAllCommentsOf(postId: Long) = dao.getAllCommentsOf(postId)
+    suspend fun deleteComment(comment: CommentEntity) = dao.deleteComment(comment)
+    suspend fun updateComment(
+        from: CommentEntity,
+        ofAuthor: Long,
+        content: String
+    ) {
+        dao.updateComment(from.copy(
+            authorId = ofAuthor,
+            updatedAt = Instant.now(),
+            content = content
+        ))
+    }
+    suspend fun likeComment(comment: CommentEntity) {
+        dao.updateComment(comment.copy(liked = !comment.liked))
+    }
+    //endregion
 }

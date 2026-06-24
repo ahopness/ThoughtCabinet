@@ -30,8 +30,8 @@ fun HomeScreen(
     rootNavController: NavController,
     thoughtsListState: LazyListState,
     crowdListState: LazyListState,
-    thoughts: List<PostEntity>,
-    crowd: List<PersonaEntity>,
+    thoughts: Map<Long, PostEntity>,
+    crowd: Map<Long, PersonaEntity>,
 ) {
     Box(Modifier.fillMaxSize()) {
         val pagerState = rememberPagerState(pageCount = { 2 })
@@ -41,8 +41,8 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize()
         ) { page ->
             when(page) {
-                0 -> ThoughtsScreen(rootNavController, thoughtsListState, thoughts, crowd)
-                1 -> CrowdScreen(rootNavController, crowdListState, crowd)
+                0 -> ThoughtsScreen(thoughtsListState, thoughts, crowd, rootNavController)
+                1 -> CrowdScreen(crowdListState, crowd, rootNavController)
             }
         }
 

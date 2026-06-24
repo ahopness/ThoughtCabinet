@@ -5,16 +5,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,7 +27,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -60,12 +56,12 @@ import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostType
+import dev.lucasangelo.thoughtcabinet.ui.component.AuthorSelect
+import dev.lucasangelo.thoughtcabinet.ui.component.CleanDescriptionButton
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanIconButton
 import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
-import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
-import dev.lucasangelo.thoughtcabinet.ui.component.CleanDescriptionButton
 import dev.lucasangelo.thoughtcabinet.ui.component.pagerScaffoldContentSpacing
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
@@ -224,10 +220,12 @@ fun EditPostContent(
         val defaultModifier = Modifier.padding(horizontal = pagerScaffoldContentSpacing)
         Text("Then, add the content you want")
 
-        EditPostAuthorSelect(
-            crowd,
-            viewModel,
-            defaultModifier
+        AuthorSelect(
+            authorId = viewModel.postAuthorId,
+            onAuthorChanged = { viewModel.postAuthorId = it },
+            onAuthorColorAcquired = { },
+            crowd = crowd,
+            modifier = defaultModifier
         )
 
         val onPostContentChanced: (String) -> Unit = {
@@ -279,113 +277,6 @@ fun EditPostContent(
                 rootShowSnackbar,
                 rootNavController
             )
-        }
-    }
-}
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditPostAuthorSelect(
-    crowd: List<PersonaEntity>,
-    viewModel: EditPostViewModel,
-    modifier: Modifier = Modifier,
-) {
-    val selectedPersona = crowd.find { it.id == viewModel.postAuthorId }
-
-    var showBottomSheet by remember { mutableStateOf(false) }
-
-    OutlinedButton(
-        modifier = modifier,
-        shape = RoundedCornerShape(6.dp),
-        contentPadding = PaddingValues(4.dp),
-        border = BorderStroke(width = 1.dp, color = Color.Gray),
-        onClick = { showBottomSheet = true },
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                PersonaProfilePicture(
-                    profilePic = selectedPersona?.profilePic,
-                    modifier = Modifier
-                        .size(64.dp)
-                        .padding(6.dp)
-                )
-                Text(
-                    text = selectedPersona?.name ?: "Select Author"
-                )
-            }
-            Image(
-                painter = painterResource(R.drawable.icon_expand),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .size(32.dp)
-            )
-        }
-    }
-
-    val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
-    if (showBottomSheet) {
-        EditPostAuthorSelectModal(
-            sheetState,
-            crowd,
-            onDismissRequest = {
-                scope.launch {
-                    sheetState.hide()
-                }.invokeOnCompletion {
-                    showBottomSheet = false
-                }
-            },
-            onPersonaSelected = { index ->
-                if (viewModel.hasLoadedPost)
-                    viewModel.postAuthorId = crowd[index].id
-            }
-        )
-    }
-}
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditPostAuthorSelectModal(
-    sheetState: SheetState,
-    crowd: List<PersonaEntity>,
-    onDismissRequest: () -> Unit,
-    onPersonaSelected: (Int) -> Unit,
-) {
-    ModalBottomSheet(
-        sheetState = sheetState,
-        onDismissRequest = onDismissRequest,
-        containerColor = Color.Black
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            crowd.forEachIndexed { index, entity ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 18.dp)
-                        .clickable(onClick = {
-                            onPersonaSelected(index)
-                            onDismissRequest()
-                        })
-                ) {
-                    PersonaProfilePicture(
-                        profilePic = entity.profilePic,
-                        modifier = Modifier.size(54.dp)
-                    )
-                    Text(
-                        text = entity.name,
-                    )
-                }
-            }
         }
     }
 }

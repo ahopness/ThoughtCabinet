@@ -1,6 +1,7 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.home
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,16 +28,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
+import dev.lucasangelo.thoughtcabinet.ui.component.FloatingExtendedTopBar
+import dev.lucasangelo.thoughtcabinet.ui.component.FloatingExtendedTopBarActionItem
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
-import dev.lucasangelo.thoughtcabinet.ui.component.SimpleFloatingExtendedTopBar
-import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
+import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.util.darken
 import kotlinx.coroutines.launch
@@ -44,22 +48,35 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalGridApi::class)
 @Composable
 fun CrowdScreen(
-    rootNavController: NavController,
     listState: LazyListState,
-    crowd: List<PersonaEntity>,
+    crowd: Map<Long, PersonaEntity>,
+    rootNavController: NavController,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     CleanScaffold(
         topBar = {
-            SimpleFloatingExtendedTopBar(
+            FloatingExtendedTopBar(
                 title = "Your Personas",
-                icon = R.drawable.icon_profile,
-                onIconClicked = { coroutineScope.launch { listState.animateScrollToItem(0) } },
-                actionName = "Settings",
-                actionIcon = R.drawable.icon_settings,
-                onActionClick = { /* TODO: settings route */ },
+                canGoBack = false,
+                iconContent = { modifier, _ ->
+                    Image(
+                        painter = painterResource(R.drawable.icon_persona),
+                        contentDescription = null,
+                        contentScale = ContentScale.Inside,
+                        modifier = modifier.clickable(onClick = {
+                            coroutineScope.launch { listState.animateScrollToItem(0) }
+                        })
+                    )
+                },
                 listState = listState,
+                actions = listOf(
+                    FloatingExtendedTopBarActionItem(
+                        name = "Help",
+                        icon = R.drawable.icon_help,
+                        onClick = {}
+                    ),
+                )
             )
         }
     ) {
@@ -94,7 +111,7 @@ fun CrowdScreen(
                             .fillMaxSize()
                             .padding(horizontal = 12.dp),
                     ) {
-                        crowd.forEach { persona ->
+                        crowd.values.forEach { persona ->
                             PersonaTile(
                                 title = persona.name,
                                 description = persona.bio,

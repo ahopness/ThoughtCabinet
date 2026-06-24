@@ -53,40 +53,9 @@ data class FloatingExtendedTopBarActionItem(
 )
 
 @Composable
-fun BoxScope.SimpleFloatingExtendedTopBar(
-    title: String,
-    icon: Int,
-    onIconClicked: () -> Unit,
-    actionName: String,
-    actionIcon: Int,
-    onActionClick: () -> Unit,
-    listState: LazyListState,
-) {
-    FloatingExtendedTopBar(
-        title = title,
-        description = "",
-        canGoBack = false,
-        iconContent = { modifier, _ ->
-            Image(
-                painter = painterResource(icon),
-                contentDescription = null,
-                contentScale = ContentScale.Inside,
-                modifier = modifier.clickable(onClick = onIconClicked)
-            )
-        },
-        actions = listOf(FloatingExtendedTopBarActionItem(
-            name = actionName,
-            icon = actionIcon,
-            onClick = onActionClick
-        )),
-        listState = listState
-    )
-}
-
-@Composable
 fun BoxScope.FloatingExtendedTopBar(
     title: String,
-    description: String,
+    description: String = "",
     canGoBack: Boolean,
     onGoBackRequest: () -> Unit = { },
     iconContent: @Composable (Modifier, () -> Float) -> Unit,
