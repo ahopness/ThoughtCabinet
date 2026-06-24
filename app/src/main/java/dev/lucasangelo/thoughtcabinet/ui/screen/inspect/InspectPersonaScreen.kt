@@ -51,6 +51,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -58,8 +59,10 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaTrait
 import dev.lucasangelo.thoughtcabinet.data.PersonaTraitType
+import dev.lucasangelo.thoughtcabinet.data.PostEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanIconButton
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
@@ -69,6 +72,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationActionItem
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationBar
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationExpandableItem
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
+import dev.lucasangelo.thoughtcabinet.ui.component.Post
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
@@ -89,6 +93,8 @@ data class InspectPersonaRoute(val personaId: Long)
 @Composable
 fun InspectPersonaScreen(
     personaId: Long,
+    allThoughts: Map<Long, PostEntity>,
+    crowd: Map<Long, PersonaEntity>,
     rootNavController: NavController,
     rootShowSnackbar: (String) -> Unit,
 ) {
@@ -99,9 +105,11 @@ fun InspectPersonaScreen(
     val application = context.applicationContext as MainApplication
     val viewModel: InspectPersonaViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { InspectPersonaViewModel(application.repository, application) }
+            initializer { InspectPersonaViewModel(application.repository, application, personaId) }
         }
     )
+
+    val thoughts by viewModel.thoughts.collectAsStateWithLifecycle()
 
     LaunchedEffect(personaId) {
         viewModel.fetchPersona(personaId)
@@ -156,7 +164,7 @@ fun InspectPersonaScreen(
         ) {
             item { Spacer(Modifier.height(floatingExtendedTopBarPadding)) }
 
-            if (viewModel.persona?.traits?.isEmpty() == true)
+            if (viewModel.persona?.traits?.isEmpty() == true && thoughts.isEmpty())
                 item {
                         Text(
                             text = "I think, therefore i am.",
@@ -200,6 +208,36 @@ fun InspectPersonaScreen(
                                     )
                                 }
                             }
+                        }
+                    }
+                }
+
+            if (thoughts.isNotEmpty())
+                item {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp)
+                    ) {
+                        thoughts.forEach { thought ->
+                            Post(
+                                isStandalone = false,
+                                postId = thought.id,
+                                allThoughts,
+                                crowd,
+                                onCommentRequested = { post -> rootNavController.navigate(
+                                    InspectPostRoute(post.id, requestComment = true)
+                                ) },
+                                rootNavController = rootNavController,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .border(
+                                        border = BorderStroke(width = 1.dp, color = Color.Gray),
+                                        shape = RoundedCornerShape(6.dp)
+                                    )
+                            )
                         }
                     }
                 }
@@ -414,7 +452,9 @@ fun PersonaTraitTile(
         when(type) {
             PersonaTraitType.TEXT ->
                 SelectionContainer(
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(8.dp)
                 ) {
                     Text(
                         text = "\"$content\"",

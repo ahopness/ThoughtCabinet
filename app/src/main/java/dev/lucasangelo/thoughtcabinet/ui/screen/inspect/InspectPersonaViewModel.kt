@@ -9,12 +9,24 @@ import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppRepository
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaTrait
+import dev.lucasangelo.thoughtcabinet.data.PostEntity
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class InspectPersonaViewModel(
     private val repository: AppRepository,
-    application: Application
+    application: Application,
+    val personaId: Long
 ) : AndroidViewModel(application) {
+    val thoughts: StateFlow<List<PostEntity>> = repository.getAllPostsBy(personaId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     var hasLoadedPersona by mutableStateOf(false)
         private set
     var persona by mutableStateOf<PersonaEntity?>(null)
