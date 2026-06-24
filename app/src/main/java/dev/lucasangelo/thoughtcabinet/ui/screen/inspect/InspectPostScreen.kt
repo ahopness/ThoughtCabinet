@@ -97,18 +97,6 @@ fun InspectPostScreen(
         viewModel.fetchComments(postId)
     }
 
-    val repostChain = remember(thought, thoughts, crowd) {
-        buildMap {
-            var current = thought
-            while (current.repostOf != null) {
-                val repost = thoughts[current.repostOf] ?: break
-                val author = crowd[repost.authorId] ?: break
-                put(author, repost)
-                current = repost
-            }
-        }
-    }
-
     var isRequestingComment by remember { mutableStateOf(requestComment) }
     var editingComment by remember { mutableStateOf<CommentEntity?>(null) }
 
@@ -130,22 +118,14 @@ fun InspectPostScreen(
             item { Spacer(Modifier.height(floatingTopBarPadding/1.5f)) }
 
             item {
-                val coroutineScope = rememberCoroutineScope()
                 Post(
                     isStandalone = true,
-                    postEntity = thought,
-                    authorEntity = thoughtAuthor,
-                    repostChain,
-                    onDeletionRequest = { post -> coroutineScope.launch {
+                    postId,
+                    thoughts,
+                    crowd,
+                    onPostDeleted = {
                         rootNavController.popBackStack()
-                        repository.deletePost(post) // NOTE: direct calls to repository is a bad practice but i didnt wanted to create another viewmodel for such a simple task
-                    } },
-                    onLikeRequested = { post -> coroutineScope.launch {
-                        repository.likePost(post)
-                    } },
-                    onBookmarkRequested = { post -> coroutineScope.launch {
-                        repository.bookmarkPost(post)
-                    } },
+                    },
                     onCommentRequested = {},
                     rootNavController,
                     modifier = Modifier
@@ -198,7 +178,7 @@ fun InspectPostScreen(
         )
 
         val sheetState = rememberModalBottomSheetState()
-        val onSheetDismissRequest: () -> Unit = {
+        val onDismissRequest: () -> Unit = {
             coroutineScope.launch {
                 sheetState.hide()
             }.invokeOnCompletion {
@@ -211,7 +191,7 @@ fun InspectPostScreen(
                 editingComment,
                 postId,
                 sheetState,
-                onSheetDismissRequest,
+                onDismissRequest,
                 crowd,
                 rootShowSnackbar,
                 viewModel
@@ -300,7 +280,6 @@ fun Comment(
             showOptionsModal = false
         }
     }
-
     if (showOptionsModal) {
         ModalBottomSheet(
             sheetState = sheetState,
@@ -341,7 +320,7 @@ fun EditCommentModal(
     editingComment: CommentEntity?,
     postId: Long,
     sheetState: SheetState,
-    onSheetDismissRequest: () -> Unit,
+    onDismissRequest: () -> Unit,
     crowd: Map<Long, PersonaEntity>,
     rootShowSnackbar: (String) -> Unit,
     viewModel: InspectPostViewModel,
@@ -357,7 +336,7 @@ fun EditCommentModal(
 
     ModalBottomSheet(
         sheetState = sheetState,
-        onDismissRequest = onSheetDismissRequest,
+        onDismissRequest = onDismissRequest,
         containerColor = animatedCommentCreationBackgroundColor
     ) {
         Column(
@@ -393,7 +372,7 @@ fun EditCommentModal(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                OutlinedButton(onClick = onSheetDismissRequest) { Text("Dismiss") }
+                //OutlinedButton(onClick = onDismissRequest) { Text("Dismiss") }
                 Button(onClick = {
                     if (commentAuthor == null) {
                         rootShowSnackbar("ERROR: Your comment needs an author.")
@@ -418,7 +397,7 @@ fun EditCommentModal(
                         )
 
                     rootShowSnackbar("Comment posted successfully!")
-                    onSheetDismissRequest()
+                    onDismissRequest()
                 }) {
                     if (editingComment == null)
                         Text("Post Comment")
