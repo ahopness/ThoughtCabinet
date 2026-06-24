@@ -218,9 +218,9 @@ fun EditPersonaProfilePicture(
             ) {
                 Text(
                     if (viewModel.personaProfilePic != null)
-                        "Replace Profile Pictire"
+                        "Replace Profile Picture"
                     else
-                        "Add Profile Pictire"
+                        "Add Profile Picture"
                 )
             }
 
