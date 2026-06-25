@@ -10,12 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.lucasangelo.thoughtcabinet.R
 
 @Composable
 fun DeleteConfirmationDialog(
-    title: String = "Are you sure?",
+    title: String = stringResource(R.string.confirm_delete_title),
     text: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
@@ -34,10 +35,10 @@ fun DeleteConfirmationDialog(
         text = { Text(text) },
         onDismissRequest = onDismiss,
         dismissButton = {
-            Button(onClick = onDismiss) { Text("Dismiss") }
+            Button(onClick = onDismiss) { Text(stringResource(R.string.dismiss)) }
         },
         confirmButton = {
-            OutlinedButton(onClick = { onConfirm(); onDismiss() }) { Text("Confirm") }
+            OutlinedButton(onClick = { onConfirm(); onDismiss() }) { Text(stringResource(R.string.confirm)) }
         },
     )
 

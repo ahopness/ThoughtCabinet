@@ -45,6 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -253,7 +254,7 @@ fun PostHeader(
         if (showOptions)
             Icon(
                 painter = painterResource(R.drawable.icon_more),
-                contentDescription = "Options",
+                contentDescription = stringResource(R.string.options),
                 modifier = Modifier
                     .size(48.dp)
                     .clickable(onClick = { showOptionsModal = true })
@@ -279,7 +280,7 @@ fun PostHeader(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 CleanIconButton(
-                    action = "Edit",
+                    action = stringResource(R.string.edit),
                     icon = R.drawable.icon_edit,
                     onClick = {
                         rootNavController.navigate(
@@ -289,7 +290,7 @@ fun PostHeader(
                     }
                 )
                 CleanIconButton(
-                    action = "Delete",
+                    action = stringResource(R.string.delete),
                     icon = R.drawable.icon_delete,
                     color = Color.Red,
                     onClick = {
@@ -306,7 +307,7 @@ fun PostHeader(
                 )
 
                 CleanIconButton(
-                    action = if (authorEntity.blocked) "Unblock Persona" else "Block Persona",
+                    action = if (authorEntity.blocked) stringResource(R.string.unblock_persona) else stringResource(R.string.block_persona),
                     icon = R.drawable.icon_block,
     //                color = Color.Red,
                     onClick = {
@@ -319,7 +320,7 @@ fun PostHeader(
     }
     if (showDeletionRequest) {
         DeleteConfirmationDialog(
-            text = "If you delete this post now you won't be able to recover it later.",
+            text = stringResource(R.string.delete_post_warning),
             onDismiss = { showDeletionRequest = false },
             onConfirm = { onDeletionRequest(postEntity) }
         )
@@ -520,12 +521,12 @@ fun PostContentLink(
             modifier = Modifier.align(Alignment.Center)
         ) {
             Text(
-                text = '[' + (linkMetadata?.title ?: "LOADING...") + ']',
+                text = '[' + (linkMetadata?.title ?: stringResource(R.string.loading)) + ']',
                 modifier = Modifier.width(250.dp)
             )
             Icon(
                 painter = painterResource(R.drawable.icon_redirect),
-                contentDescription = "Open Link",
+                contentDescription = stringResource(R.string.open_link),
                 modifier = Modifier
                     .size(postIconSize)
             )
@@ -558,7 +559,7 @@ fun PostActions(
         if (!isStandalone)
             Icon(
                 painter = painterResource(R.drawable.icon_comment),
-                contentDescription = "Comment",
+                contentDescription = stringResource(R.string.comment),
                 modifier = Modifier
                     .size(postIconSize)
                     .clickable(onClick = { onCommentRequested(postEntity) })
@@ -569,14 +570,14 @@ fun PostActions(
                     painterResource(R.drawable.icon_hearted)
                 else
                     painterResource(R.drawable.icon_heart),
-            contentDescription = "Like",
+            contentDescription = stringResource(R.string.like),
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = { onLikeRequested(postEntity) })
         )
         Icon(
             painter = painterResource(R.drawable.icon_repost),
-            contentDescription = "Repost",
+            contentDescription = stringResource(R.string.repost),
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = {
@@ -591,14 +592,14 @@ fun PostActions(
                     painterResource(R.drawable.icon_bookmarked)
                 else
                     painterResource(R.drawable.icon_bookmark),
-            contentDescription = "Bookmark",
+            contentDescription = stringResource(R.string.bookmark),
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = { onBookmarkRequested(postEntity) })
         )
         Icon(
             painter = painterResource(R.drawable.icon_share),
-            contentDescription = "Share",
+            contentDescription = stringResource(R.string.share),
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = { coroutineScope.launch {

@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -92,7 +93,7 @@ fun ThoughtsScreen(
     CleanScaffold(
         topBar = {
             FloatingExtendedTopBar(
-                title = "Thought Cabinet",
+                title = stringResource(R.string.app_name),
                 canGoBack = false,
                 iconContent = { modifier, _ ->
                     Icon(
@@ -112,7 +113,7 @@ fun ThoughtsScreen(
                         onClick = { rootNavController.navigate(SearchRoute) }
                     ),
                     FloatingExtendedTopBarActionItem(
-                        name = "Settings",
+                        name = stringResource(R.string.settings),
                         icon = R.drawable.icon_settings,
                         onClick = { showSettingsModal = true }
                     ),
@@ -130,7 +131,7 @@ fun ThoughtsScreen(
             if (isLoading)
                 item {
                     Text(
-                        text = "Thinking...",
+                        text = stringResource(R.string.thinking),
                         color = Color.Gray,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
@@ -143,7 +144,7 @@ fun ThoughtsScreen(
                 if (feed.isEmpty())
                     item {
                         Text(
-                            text = "A blank canvas, ready to be given purpose.",
+                            text = stringResource(R.string.blank_canvas),
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
@@ -216,12 +217,12 @@ fun SettingModal(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
         ) {
-            Text("Feed")
+            Text(stringResource(R.string.feed))
 
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier.height(IntrinsicSize.Max)
             ) {
-                listOf("Standard", "Bookmarks", "Archives", "Blocked Personas")
+                listOf(stringResource(R.string.feed_standard), stringResource(R.string.feed_bookmarks), stringResource(R.string.feed_archives), stringResource(R.string.feed_blocked_personas))
                     .forEachIndexed { index, string ->
                         SegmentedButton(
                             label = { Text(
@@ -241,17 +242,17 @@ fun SettingModal(
                 }
             }
 
-            Text("Actions")
+            Text(stringResource(R.string.actions))
 
             val context = LocalContext.current
             val coroutineScope = rememberCoroutineScope()
             Button(onClick = { coroutineScope.launch {
                 cleanupLinkMetadata(context)
             }.invokeOnCompletion {
-                rootShowSnackbar("Link cache cleaned up successfully!")
+                rootShowSnackbar(context.getString(R.string.link_cache_cleaned))
                 onDismissRequest()
             } } ) {
-                Text("Clean Link Cache")
+                Text(stringResource(R.string.clean_link_cache))
 
             }
         }

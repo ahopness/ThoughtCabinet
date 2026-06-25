@@ -46,6 +46,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -143,12 +144,12 @@ fun InspectPersonaScreen(
                 },
                 actions = listOf(
                     FloatingExtendedTopBarActionItem(
-                        name = "Edit",
+                        name = stringResource(R.string.edit),
                         icon = R.drawable.icon_edit,
                         onClick = { rootNavController.navigate(EditPersonaRoute(personaId)) }
                     ),
                     FloatingExtendedTopBarActionItem(
-                        name = "Remove",
+                        name = stringResource(R.string.remove),
                         icon = R.drawable.icon_delete,
                         onClick = { openPersonaDeleteAlertDialog = true }
                     )
@@ -167,7 +168,7 @@ fun InspectPersonaScreen(
             if (viewModel.persona?.traits?.isEmpty() == true && thoughts.isEmpty())
                 item {
                         Text(
-                            text = "I think, therefore i am.",
+                            text = stringResource(R.string.default_persona_bio),
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
@@ -200,7 +201,7 @@ fun InspectPersonaScreen(
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.icon_more),
-                                        contentDescription = "Options",
+                                        contentDescription = stringResource(R.string.options),
                                         modifier = Modifier
                                             .align(Alignment.TopEnd)
                                             .size(48.dp)
@@ -250,12 +251,12 @@ fun InspectPersonaScreen(
             actionItems = listOf(
                 FloatingNavigationExpandableItem(
                     icon = R.drawable.icon_add,
-                    title = "Add",
+                    title = stringResource(R.string.add),
                     showTitle = false,
                     items = listOf(
                         FloatingNavigationActionItem(
                             icon = R.drawable.icon_new,
-                            title = "Trait",
+                            title = stringResource(R.string.trait),
                             showTitle = true,
                             action = { rootNavController.navigate(EditPersonaTraitRoute(personaId, null)) }
                         ),
@@ -267,13 +268,13 @@ fun InspectPersonaScreen(
 
     if (openPersonaDeleteAlertDialog) {
         DeleteConfirmationDialog(
-            text = "If you delete this persona, all of their posts will be deleted as well and you won't be able recover neither.",
+            text = stringResource(R.string.delete_persona_warning),
             onDismiss = { openPersonaDeleteAlertDialog = false },
             onConfirm = {
                 if (!viewModel.hasLoadedPersona) return@DeleteConfirmationDialog
                 viewModel.deletePersona(viewModel.persona!!)
                 rootNavController.popBackStack()
-                rootShowSnackbar("Persona deleted successfully!")
+                rootShowSnackbar(context.getString(R.string.persona_deleted))
             }
         )
     }
@@ -298,7 +299,7 @@ fun InspectPersonaScreen(
     }
     if (pendingTraitForDeletion != null) {
         DeleteConfirmationDialog(
-            text = "If you delete this trait, you won't be able to recover it later.",
+            text = stringResource(R.string.delete_trait_warning),
             onDismiss = { pendingTraitForDeletion = null },
             onConfirm = {
                 val traitToDelete = pendingTraitForDeletion!! // NOTE: viewmodel coroutine causes race condition, taking a snapshot right before to avoid a NullPointerException
@@ -307,7 +308,7 @@ fun InspectPersonaScreen(
                         trait = traitToDelete,
                         at = it
                     )
-                    rootShowSnackbar("Trait deleted successfully!")
+                    rootShowSnackbar(context.getString(R.string.trait_deleted))
                 }
             }
         )
@@ -337,7 +338,7 @@ fun InspectPersonaTraitManipulationModal(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             CleanIconButton(
-                action = "Edit",
+                action = stringResource(R.string.edit),
                 icon = R.drawable.icon_edit,
                 onClick = {
                     rootNavController.navigate(
@@ -347,7 +348,7 @@ fun InspectPersonaTraitManipulationModal(
                 }
             )
             CleanIconButton(
-                action = "Delete",
+                action = stringResource(R.string.delete),
                 icon = R.drawable.icon_delete,
                 color = Color.Red,
                 onClick = {
@@ -371,7 +372,7 @@ fun InspectPersonaTraitManipulationModal(
 
             if (canMoveUp)
                 CleanIconButton(
-                    action = "Move Up",
+                    action = stringResource(R.string.move_up),
                     icon = R.drawable.icon_arrow_up,
                     onClick = {
                         viewModel.moveTrait(
@@ -384,7 +385,7 @@ fun InspectPersonaTraitManipulationModal(
                 )
             if (canMoveLeft)
                 CleanIconButton(
-                    action = "Move Left",
+                    action = stringResource(R.string.move_left),
                     icon = R.drawable.icon_arrow_left,
                     onClick = {
                         viewModel.moveTrait(
@@ -397,7 +398,7 @@ fun InspectPersonaTraitManipulationModal(
                 )
             if (canMoveRight)
                 CleanIconButton(
-                    action = "Move Right",
+                    action = stringResource(R.string.move_right),
                     icon = R.drawable.icon_back,
                     onClick = {
                         viewModel.moveTrait(
@@ -410,7 +411,7 @@ fun InspectPersonaTraitManipulationModal(
                 )
             if (canMoveDown)
                 CleanIconButton(
-                    action = "Move Down",
+                    action = stringResource(R.string.move_down),
                     icon = R.drawable.icon_arrow_down,
                     onClick = {
                         viewModel.moveTrait(
@@ -485,7 +486,7 @@ fun PersonaTraitTile(
                         try {
                             uriHandler.openUri(content)
                         } catch (e: Exception) {
-                            rootShowSnackbar("ERROR: Could not open URL: $content")
+                            rootShowSnackbar(context.getString(R.string.error_could_not_open_url, content))
                         }
                     })
                 ) {
@@ -506,7 +507,7 @@ fun PersonaTraitTile(
                     )
 
                     Text(
-                        text = '[' + (linkMetadata?.title ?: linkMetadata?.description ?: "LOADING...") + ']',
+                        text = '[' + (linkMetadata?.title ?: linkMetadata?.description ?: stringResource(R.string.loading)) + ']',
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.align(Alignment.Center)
@@ -514,7 +515,7 @@ fun PersonaTraitTile(
 
                     Icon(
                         painter = painterResource(R.drawable.icon_redirect),
-                        contentDescription = "Open Link",
+                        contentDescription = stringResource(R.string.open_link),
                         modifier = Modifier
                             .size(54.dp)
                             .align(Alignment.BottomStart)

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.util.overlayTransparencyColor
@@ -41,7 +42,7 @@ fun BoxScope.FloatingTopBar(
         if (canGoBack) {
             Icon(
                 painter = painterResource(R.drawable.icon_back),
-                contentDescription = "Go Back",
+                contentDescription = stringResource(R.string.go_back),
                 modifier = Modifier
                     .size(floatingTopBarButtonSize)
                     .align(Alignment.CenterStart)

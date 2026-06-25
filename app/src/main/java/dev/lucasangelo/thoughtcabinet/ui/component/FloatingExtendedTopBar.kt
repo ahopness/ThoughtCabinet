@@ -33,6 +33,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -108,7 +109,7 @@ fun BoxScope.FloatingExtendedTopBar(
             if (canGoBack) {
                 Icon(
                     painter = painterResource(R.drawable.icon_back),
-                    contentDescription = "Go Back",
+                    contentDescription = stringResource(R.string.go_back),
                     modifier = Modifier
                         .size(floatingTopBarButtonSize)
                         .align(Alignment.TopStart)

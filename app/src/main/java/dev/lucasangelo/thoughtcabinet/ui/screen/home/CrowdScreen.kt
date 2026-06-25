@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -42,7 +43,6 @@ import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.OnboardingRoute
-import dev.lucasangelo.thoughtcabinet.ui.screen.misc.OnboardingScreen
 import dev.lucasangelo.thoughtcabinet.util.darken
 import kotlinx.coroutines.launch
 
@@ -58,7 +58,7 @@ fun CrowdScreen(
     CleanScaffold(
         topBar = {
             FloatingExtendedTopBar(
-                title = "Your Personas",
+                title = stringResource(R.string.your_personas),
                 canGoBack = false,
                 iconContent = { modifier, _ ->
                     Icon(
@@ -73,7 +73,7 @@ fun CrowdScreen(
                 listState = listState,
                 actions = listOf(
                     FloatingExtendedTopBarActionItem(
-                        name = "Help",
+                        name = stringResource(R.string.help),
                         icon = R.drawable.icon_help,
                         onClick = { rootNavController.navigate(OnboardingRoute) }
                     ),
@@ -91,7 +91,7 @@ fun CrowdScreen(
             if (crowd.isEmpty())
                 item {
                         Text(
-                            text = "You stare into the abyss, and the abyss stares back.",
+                            text = stringResource(R.string.abyss_stare),
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
                             modifier = Modifier

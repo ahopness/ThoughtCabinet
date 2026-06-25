@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -102,7 +103,7 @@ fun SearchScreen(
                         )
                     },
                     label = {
-                        Text("What are we looking for?")
+                        Text(stringResource(R.string.search_prompt))
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -111,7 +112,7 @@ fun SearchScreen(
             if (isLoading)
                 item {
                     Text(
-                        text = "Thinking...",
+                        text = stringResource(R.string.thinking),
                         color = Color.Gray,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
@@ -124,7 +125,7 @@ fun SearchScreen(
                 if (searchResults.isEmpty())
                     item {
                         Text(
-                            text = "Wuthering and Uninhabited.",
+                            text = stringResource(R.string.search_empty_state),
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
                             modifier = Modifier

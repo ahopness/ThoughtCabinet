@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -41,6 +42,7 @@ import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.HueSlider
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import dev.lucasangelo.thoughtcabinet.MainApplication
+import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
@@ -78,9 +80,9 @@ fun EditPersonaScreen(
     PagerScaffold(
         title =
             if (viewModel.persona != null)
-                "Edit Your Persona"
+                stringResource(R.string.edit_your_persona)
             else
-                "Create A Persona",
+                stringResource(R.string.create_a_persona),
         backgroundColor = animatedPersonaColorTheme,
         onGoBackRequest = { rootNavController.popBackStack() },
         pageCount = 1,
@@ -142,6 +144,7 @@ fun EditPersonaProfilePicture(
             viewModel.personaProfilePic = it
     }
 
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val picker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -150,7 +153,7 @@ fun EditPersonaProfilePicture(
                 if (uri != null) {
                     val newProfilePic = viewModel.importProfilePic(uri)
                     if(newProfilePic == null) {
-                        onNotifyError("ERROR: Couldn't open selected image.")
+                        onNotifyError(context.getString(R.string.error_could_not_open_image))
                         return@launch
                     }
 
@@ -189,9 +192,9 @@ fun EditPersonaProfilePicture(
             ) {
                 Text(
                     if (viewModel.personaProfilePic != null)
-                        "Replace Profile Picture"
+                        stringResource(R.string.replace_profile_picture)
                     else
-                        "Add Profile Picture"
+                        stringResource(R.string.add_profile_picture)
                 )
             }
 
@@ -199,12 +202,12 @@ fun EditPersonaProfilePicture(
                 OutlinedButton(
                     border = BorderStroke(1.dp, Color.Gray),
                     onClick = { openAlertDialog = true },
-                ) { Text("Clear Current") }
+                ) { Text(stringResource(R.string.clear_current)) }
         }
 
         if (openAlertDialog) {
             DeleteConfirmationDialog(
-                text = "If you delete the profile picture now you won't be able to recover it later.",
+                text = stringResource(R.string.delete_profile_picture_warning),
                 onDismiss = { openAlertDialog = false },
                 onConfirm = { onProfilePicChanged(null) }
             )
@@ -273,7 +276,7 @@ fun EditPersonaTextFields(
             if (viewModel.hasLoadedPersona)
             viewModel.personaName = it
         },
-        label = { Text("Persona's Name") },
+        label = { Text(stringResource(R.string.persona_name_label)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
@@ -285,7 +288,7 @@ fun EditPersonaTextFields(
             if (viewModel.hasLoadedPersona)
                 viewModel.personaBio = it
         },
-        label = { Text("Persona's Bio") },
+        label = { Text(stringResource(R.string.persona_bio_label)) },
         maxLines = 6,
         minLines = 3,
         modifier = Modifier.fillMaxWidth()
@@ -298,11 +301,12 @@ fun EditPersonaFinishButton(
     rootShowSnackbar: (String) -> Unit,
     rootNavController: NavController,
 ) {
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     Button(onClick = {
         coroutineScope.launch {
             if (viewModel.personaName.trim().isEmpty()) {
-                rootShowSnackbar("ERROR: Your persona needs at least a name!")
+                rootShowSnackbar(context.getString(R.string.error_persona_needs_name))
                 return@launch
             }
 
@@ -310,10 +314,10 @@ fun EditPersonaFinishButton(
 
             if (viewModel.persona != null) {
                 viewModel.updatePersona(viewModel.persona!!)
-                rootShowSnackbar("Persona updated successfully!")
+                rootShowSnackbar(context.getString(R.string.persona_updated_success))
             } else {
                 viewModel.insertPersona()
-                rootShowSnackbar("Persona created successfully!")
+                rootShowSnackbar(context.getString(R.string.persona_created_success))
             }
 
             rootNavController.popBackStack()
@@ -321,9 +325,9 @@ fun EditPersonaFinishButton(
     }) {
         Text(
             if (viewModel.persona != null)
-                "Edit Persona"
+                stringResource(R.string.edit_persona)
             else
-                "Create Persona"
+                stringResource(R.string.create_persona)
         )
     }
 }

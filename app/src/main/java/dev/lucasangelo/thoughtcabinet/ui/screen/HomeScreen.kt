@@ -8,6 +8,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
@@ -66,18 +67,18 @@ fun HomeScreen(
             actionItems = listOf(
                 FloatingNavigationExpandableItem(
                     icon = R.drawable.icon_add,
-                    title = "Add",
+                    title = stringResource(R.string.add),
                     showTitle = false,
                     items = listOf(
                         FloatingNavigationActionItem(
                             icon = R.drawable.icon_post,
-                            title = "Post",
+                            title = stringResource(R.string.post),
                             showTitle = true,
                             action = { rootNavController.navigate(EditPostRoute(null)) }
                         ),
                         FloatingNavigationActionItem(
                             icon = R.drawable.icon_persona,
-                            title = "Persona",
+                            title = stringResource(R.string.persona),
                             showTitle = true,
                             action = { rootNavController.navigate(EditPersonaRoute(null)) }
                         ),

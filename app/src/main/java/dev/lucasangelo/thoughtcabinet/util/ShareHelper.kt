@@ -8,6 +8,7 @@ import android.graphics.Picture
 import android.net.Uri
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
+import dev.lucasangelo.thoughtcabinet.R
 import java.io.File
 import java.io.FileOutputStream
 
@@ -41,12 +42,12 @@ fun shareImage(context: Context, uri: Uri) {
         type = "image/png"
 
         putExtra(Intent.EXTRA_STREAM, uri)
-        putExtra(Intent.EXTRA_TEXT, "Look at this post from my Thought Cabinet!")
+        putExtra(Intent.EXTRA_TEXT, context.getString(R.string.share_post_text))
         clipData = ClipData.newRawUri(null, uri)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-    val chooserIntent = Intent.createChooser(shareIntent, "Share image via").apply {
+    val chooserIntent = Intent.createChooser(shareIntent, context.getString(R.string.share_image_via)).apply {
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 

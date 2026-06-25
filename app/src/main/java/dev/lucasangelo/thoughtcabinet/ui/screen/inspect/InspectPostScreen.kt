@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -103,7 +104,7 @@ fun InspectPostScreen(
         backgroundColor = Color(thoughtAuthor.colorTheme).darken(),
         topBar = {
             FloatingTopBar(
-                title = "Post",
+                title = stringResource(R.string.post),
                 canGoBack = true,
                 onGoBackRequest = { rootNavController.popBackStack() },
             )
@@ -159,12 +160,12 @@ fun InspectPostScreen(
             actionItems = listOf(
                 FloatingNavigationExpandableItem(
                     icon = R.drawable.icon_add,
-                    title = "Add",
+                    title = stringResource(R.string.add),
                     showTitle = false,
                     items = listOf(
                         FloatingNavigationActionItem(
                             icon = R.drawable.icon_comment,
-                            title = "Comment",
+                            title = stringResource(R.string.comment),
                             showTitle = true,
                             action = {
                                 editingComment = null
@@ -257,7 +258,7 @@ fun Comment(
         ) {
             Icon(
                 painter = painterResource(R.drawable.icon_more),
-                contentDescription = "Options",
+                contentDescription = stringResource(R.string.options),
                 modifier = Modifier
                     .size(48.dp)
                     .clickable(onClick = { showOptionsModal = true })
@@ -286,7 +287,7 @@ fun Comment(
             containerColor = Color.Black
         ) {
             CleanIconButton(
-                action = "Edit",
+                action = stringResource(R.string.edit),
                 icon = R.drawable.icon_edit,
                 onClick = {
                     onEditRequest(comment)
@@ -294,7 +295,7 @@ fun Comment(
                 }
             )
             CleanIconButton(
-                action = "Delete",
+                action = stringResource(R.string.delete),
                 icon = R.drawable.icon_delete,
                 color = Color.Red,
                 onClick = {
@@ -306,7 +307,7 @@ fun Comment(
     }
     if (showDeletionRequest) {
         DeleteConfirmationDialog(
-            text = "If you delete this post now you won't be able to recover it later.",
+            text = stringResource(R.string.delete_post_warning),
             onDismiss = { showDeletionRequest = false },
             onConfirm = { onDeletionRequest(comment) }
         )
@@ -324,6 +325,7 @@ fun EditCommentModal(
     rootShowSnackbar: (String) -> Unit,
     viewModel: InspectPostViewModel,
 ) {
+    val context = LocalContext.current
     var commentCreationBackgroundColor by remember { mutableStateOf(
         Color(crowd[editingComment?.authorId]?.colorTheme ?: Color.Black.toArgb()).darken()
     ) }
@@ -346,7 +348,7 @@ fun EditCommentModal(
                 .padding(horizontal = 24.dp)
         ) {
             Text(
-                text = "Add A Comment",
+                text = stringResource(R.string.add_a_comment),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -362,7 +364,7 @@ fun EditCommentModal(
             OutlinedTextField(
                 value = commentContent,
                 onValueChange = { commentContent = it },
-                label = { Text("What we're on about?") },
+                label = { Text(stringResource(R.string.comment_input_label)) },
                 maxLines = 6,
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth()
@@ -374,11 +376,11 @@ fun EditCommentModal(
                 //OutlinedButton(onClick = onDismissRequest) { Text("Dismiss") }
                 Button(onClick = {
                     if (commentAuthor == null) {
-                        rootShowSnackbar("ERROR: Your comment needs an author.")
+                        rootShowSnackbar(context.getString(R.string.error_comment_needs_author))
                         return@Button
                     }
                     if (commentContent.isEmpty()) {
-                        rootShowSnackbar("ERROR: Your comment cannot be empty.")
+                        rootShowSnackbar(context.getString(R.string.error_comment_cannot_empty))
                         return@Button
                     }
 
@@ -395,13 +397,13 @@ fun EditCommentModal(
                             commentContent
                         )
 
-                    rootShowSnackbar("Comment posted successfully!")
+                    rootShowSnackbar(context.getString(R.string.comment_posted_success))
                     onDismissRequest()
                 }) {
                     if (editingComment == null)
-                        Text("Post Comment")
+                        Text(stringResource(R.string.post_comment))
                     else
-                        Text("Edit Comment")
+                        Text(stringResource(R.string.edit_comment))
                 }
             }
         }

@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -99,14 +100,14 @@ fun EditPostScreen(
         title =
             if (repostOf != null) // NOTE: fugly :( but works :)
                 if (id != null)
-                    "Edit Your Repost"
+                    stringResource(R.string.edit_your_repost)
                 else
-                    "Create A Repost"
+                    stringResource(R.string.create_a_repost)
             else
                 if (id != null)
-                    "Edit Your Post"
+                    stringResource(R.string.edit_your_post)
                 else
-                    "Create A Post",
+                    stringResource(R.string.create_a_post),
         backgroundColor = animatedPersonaColorTheme,
         canGoBack = true,
         onGoBackRequest = { rootNavController.popBackStack() },
@@ -147,7 +148,7 @@ fun EditPostTypeSelect(
     onNextPageRequested: () -> Unit,
 ) {
     PagerScaffoldContent(pageOffsetDistance) {
-        Text("First, choose the kind of post")
+        Text(stringResource(R.string.choose_post_kind))
 
         var pendingPostTypeChange by remember { mutableStateOf<PostType?>(null) }
 
@@ -177,27 +178,27 @@ fun EditPostTypeSelect(
         ) {
             CleanDescriptionButton(
                 icon = R.drawable.icon_note_post,
-                title = "Note",
-                description = "Quick, text-centric with additional media",
+                title = stringResource(R.string.post_kind_note),
+                description = stringResource(R.string.post_kind_note_desc),
                 onClick = { onTryChangePostType(PostType.NOTE) }
             )
             CleanDescriptionButton(
                 icon = R.drawable.icon_media_post_alt,
-                title = "Reel",
-                description = "Refined, image-centric with additional text",
+                title = stringResource(R.string.post_kind_reel),
+                description = stringResource(R.string.post_kind_reel_desc),
                 onClick = { onTryChangePostType(PostType.REEL) }
             )
             CleanDescriptionButton(
                 icon = R.drawable.icon_link_post,
-                title = "Link",
-                description = "Delegated, outside site, music or video",
+                title = stringResource(R.string.post_kind_link),
+                description = stringResource(R.string.post_kind_link_desc),
                 onClick = { onTryChangePostType(PostType.LINK) }
             )
         }
 
         pendingPostTypeChange?.let {
             DeleteConfirmationDialog(
-                text = "The content of your post is not empty, if you delete the content now you won't be able to recover it later.",
+                text = stringResource(R.string.delete_post_content_warning),
                 onDismiss = { pendingPostTypeChange = null },
                 onConfirm = { onPostTypeChanged(pendingPostTypeChange!!) },
             )
@@ -218,7 +219,7 @@ fun EditPostContent(
         spacing = 0.dp
     ) {
         val defaultModifier = Modifier.padding(horizontal = pagerScaffoldContentSpacing)
-        Text("Then, add the content you want")
+        Text(stringResource(R.string.add_post_content_prompt))
 
         AuthorSelect(
             authorId = viewModel.postAuthorId,
@@ -254,7 +255,7 @@ fun EditPostContent(
                 OutlinedTextField(
                     value = viewModel.postContent,
                     onValueChange = onPostContentChanced,
-                    label = { Text("Paste your link here") },
+                    label = { Text(stringResource(R.string.paste_link_here)) },
                     singleLine = true,
                     modifier = defaultModifier.fillMaxWidth(),
                 )
@@ -291,7 +292,7 @@ fun EditPostNoteContent(
     OutlinedTextField(
         value = viewModel.postContent,
         onValueChange = onPostContentChanced,
-        label = { Text("What's up?") },
+        label = { Text(stringResource(R.string.post_content_note_label)) },
         maxLines = 8,
         minLines = 6,
         modifier = modifier.fillMaxWidth(),
@@ -319,7 +320,7 @@ fun EditPostReelContent(
     OutlinedTextField(
         value = viewModel.postContent,
         onValueChange = onPostContentChanced,
-        label = { Text("Write Caption") },
+        label = { Text(stringResource(R.string.post_content_reel_label)) },
         maxLines = 4,
         minLines = 1,
         modifier = modifier.fillMaxWidth(),
@@ -332,6 +333,7 @@ fun EditPostMediaList(
     viewModel: EditPostViewModel,
     onNotifyError: (String) -> Unit,
 ) {
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val picker = rememberLauncherForActivityResult(
@@ -341,7 +343,7 @@ fun EditPostMediaList(
                 uris.forEach { uri ->
                     val newMedia = viewModel.importMedia(uri)
                     if(newMedia == null) {
-                        onNotifyError("ERROR: Couldn't open selected image.")
+                        onNotifyError(context.getString(R.string.error_could_not_open_image))
                         return@launch
                     }
 
@@ -352,7 +354,6 @@ fun EditPostMediaList(
         }
     )
 
-    val context = LocalContext.current
     val cachedMedias = remember { mutableStateMapOf<String, Boolean>() }
     LaunchedEffect(viewModel.postMedia) {
         viewModel.postMedia.forEach {
@@ -399,7 +400,7 @@ fun EditPostMediaList(
                 )
                 Icon(
                     painter = painterResource(R.drawable.icon_more),
-                    contentDescription = "Options",
+                    contentDescription = stringResource(R.string.options),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .size(48.dp)
@@ -429,7 +430,7 @@ fun EditPostMediaList(
                         modifier = Modifier.size(if (large) 64.dp else 32.dp)
                     )
                     Text(
-                        text = "Add Media",
+                        text = stringResource(R.string.add_media),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -458,7 +459,7 @@ fun EditPostMediaList(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 CleanIconButton(
-                    action = "Delete",
+                    action = stringResource(R.string.delete),
                     icon = R.drawable.icon_delete,
                     color = Color.Red,
                     onClick = {
@@ -483,7 +484,7 @@ fun EditPostMediaList(
 
                 if (canMoveLeft)
                     CleanIconButton(
-                        action = "Move Left",
+                        action = stringResource(R.string.move_left),
                         icon = R.drawable.icon_arrow_left,
                         onClick = {
                             if (viewModel.hasLoadedPost) {
@@ -497,7 +498,7 @@ fun EditPostMediaList(
                     )
                 if (canMoveRight)
                     CleanIconButton(
-                        action = "Move Right",
+                        action = stringResource(R.string.move_right),
                         icon = R.drawable.icon_back,
                         onClick = {
                             if (viewModel.hasLoadedPost) {
@@ -521,23 +522,24 @@ fun EditPostFinishButton(
     rootShowSnackbar: (String) -> Unit,
     rootNavController: NavController,
 ) {
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val onClick = {
         coroutineScope.launch {
             if (viewModel.postType == PostType.REEL) {
                 if (viewModel.postMedia.isEmpty()){
-                    rootShowSnackbar("ERROR: You need at least one media in your reel!")
+                    rootShowSnackbar(context.getString(R.string.error_reel_needs_media))
                     return@launch
                 }
             } else {
                 if (viewModel.postContent.trim().isEmpty()) {
-                    rootShowSnackbar("ERROR: Your post cannot be empty!")
+                    rootShowSnackbar(context.getString(R.string.error_post_cannot_empty))
                     return@launch
                 }
             }
 
             if (viewModel.postAuthorId == null) {
-                rootShowSnackbar("ERROR: Your post needs an author!")
+                rootShowSnackbar(context.getString(R.string.error_post_needs_author))
                 return@launch
             }
 
@@ -545,10 +547,10 @@ fun EditPostFinishButton(
 
             if (viewModel.post != null) {
                 viewModel.updatePost(viewModel.post!!, archiving)
-                rootShowSnackbar("Post updated successfully!")
+                rootShowSnackbar(context.getString(R.string.post_updated_success))
             } else {
                 viewModel.insertPost(viewModel.postIsRepostOf, archiving)
-                rootShowSnackbar("Post created successfully!")
+                rootShowSnackbar(context.getString(R.string.post_created_success))
             }
 
             rootNavController.popBackStack()
@@ -560,15 +562,15 @@ fun EditPostFinishButton(
             border = BorderStroke(width = 1.dp, color = Color.Gray),
             onClick = { onClick() }
         ) {
-            Text("Archive Post")
+            Text(stringResource(R.string.archive_post))
         }
     else {
         Button(onClick = { onClick() }) {
             Text(
                 if (viewModel.post != null)
-                    "Edit Post"
+                    stringResource(R.string.edit_post)
                 else
-                    "Create Post"
+                    stringResource(R.string.create_post)
             )
         }
     }
