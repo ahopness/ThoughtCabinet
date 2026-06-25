@@ -1,9 +1,9 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,10 +23,11 @@ fun DeleteConfirmationDialog(
     AlertDialog(
         containerColor = Color.Black,
         icon = {
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.icon_delete),
                 contentDescription = null,
-                modifier = Modifier.size(64.dp)
+                modifier = Modifier
+                    .size(64.dp)
             )
         },
         title = { Text(title) },

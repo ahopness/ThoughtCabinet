@@ -1,6 +1,5 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +38,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.util.overlayTransparencyColor
@@ -107,7 +106,7 @@ fun BoxScope.FloatingExtendedTopBar(
                 }
         ) {
             if (canGoBack) {
-                Image(
+                Icon(
                     painter = painterResource(R.drawable.icon_back),
                     contentDescription = "Go Back",
                     modifier = Modifier
@@ -186,7 +185,7 @@ fun BoxScope.FloatingExtendedTopBar(
                     .align(Alignment.BottomEnd)
             ) {
                 actions.forEach {
-                    Image(
+                    Icon(
                         painter = painterResource(it.icon),
                         contentDescription = it.name,
                         modifier = Modifier

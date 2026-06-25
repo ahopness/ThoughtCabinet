@@ -6,7 +6,6 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -397,7 +397,7 @@ fun EditPostMediaList(
                             Modifier.size(100.dp))
                             .clip(RoundedCornerShape(6.dp))
                 )
-                Image(
+                Icon(
                     painter = painterResource(R.drawable.icon_more),
                     contentDescription = "Options",
                     modifier = Modifier
@@ -423,7 +423,7 @@ fun EditPostMediaList(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    Image(
+                    Icon(
                         painter = painterResource(R.drawable.icon_camera),
                         contentDescription = null,
                         modifier = Modifier.size(if (large) 64.dp else 32.dp)
@@ -475,7 +475,7 @@ fun EditPostMediaList(
                 val canMoveRight = mediaId != 0
 
                 if (canMoveLeft || canMoveRight)
-                    Image(
+                    Icon(
                         painter = painterResource(R.drawable.divider_horizontal),
                         contentDescription = null,
                         modifier = Modifier.size(54.dp),

@@ -7,9 +7,9 @@ import android.graphics.Bitmap
 import android.graphics.Picture
 import android.net.Uri
 import androidx.core.content.FileProvider
+import androidx.core.graphics.createBitmap
 import java.io.File
 import java.io.FileOutputStream
-import androidx.core.graphics.createBitmap
 
 fun createBitmapFromPicture(picture: Picture): Bitmap {
     val bitmap = createBitmap(picture.width, picture.height)

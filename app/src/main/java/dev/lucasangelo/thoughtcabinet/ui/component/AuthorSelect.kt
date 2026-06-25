@@ -1,7 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetState
@@ -74,7 +74,7 @@ fun AuthorSelect(
                     text = selectedPersona?.name ?: "Select Author"
                 )
             }
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.icon_expand),
                 contentDescription = null,
                 modifier = Modifier

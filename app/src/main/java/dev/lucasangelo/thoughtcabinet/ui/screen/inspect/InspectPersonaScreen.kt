@@ -1,7 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.inspect
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +23,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
@@ -198,7 +198,7 @@ fun InspectPersonaScreen(
                                     rootShowSnackbar = rootShowSnackbar,
                                     rootNavController = rootNavController
                                 ) {
-                                    Image(
+                                    Icon(
                                         painter = painterResource(R.drawable.icon_more),
                                         contentDescription = "Options",
                                         modifier = Modifier
@@ -363,7 +363,7 @@ fun InspectPersonaTraitManipulationModal(
             val canMoveDown = traitId <= lastTraitIdInList - 2
 
             if (canMoveUp || canMoveLeft || canMoveRight || canMoveDown)
-                Image(
+                Icon(
                     painter = painterResource(R.drawable.divider_horizontal),
                     contentDescription = null,
                     modifier = Modifier.size(54.dp),
@@ -512,7 +512,7 @@ fun PersonaTraitTile(
                         modifier = Modifier.align(Alignment.Center)
                     )
 
-                    Image(
+                    Icon(
                         painter = painterResource(R.drawable.icon_redirect),
                         contentDescription = "Open Link",
                         modifier = Modifier

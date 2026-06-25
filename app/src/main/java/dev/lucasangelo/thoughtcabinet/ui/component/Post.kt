@@ -1,7 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
 import android.graphics.Picture
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,9 +20,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -37,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.draw
@@ -253,7 +251,7 @@ fun PostHeader(
         }
 
         if (showOptions)
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.icon_more),
                 contentDescription = "Options",
                 modifier = Modifier
@@ -300,10 +298,11 @@ fun PostHeader(
                     },
                 )
 
-                Image(
+                Icon(
                     painter = painterResource(R.drawable.divider_horizontal),
                     contentDescription = null,
-                    modifier = Modifier.size(54.dp),
+                    modifier = Modifier
+                        .size(54.dp)
                 )
 
                 CleanIconButton(
@@ -451,7 +450,6 @@ fun PostContentReel(
                             Box(
                                 modifier = Modifier
                                     .padding(4.dp)
-                                    .clip(CircleShape)
                                     .size(8.dp)
                                     .background(
                                         color =
@@ -525,10 +523,11 @@ fun PostContentLink(
                 text = '[' + (linkMetadata?.title ?: "LOADING...") + ']',
                 modifier = Modifier.width(250.dp)
             )
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.icon_redirect),
                 contentDescription = "Open Link",
-                modifier = Modifier.size(postIconSize)
+                modifier = Modifier
+                    .size(postIconSize)
             )
         }
 
@@ -557,14 +556,14 @@ fun PostActions(
             .padding(postItemSpacing)
     ) {
         if (!isStandalone)
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.icon_comment),
                 contentDescription = "Comment",
                 modifier = Modifier
                     .size(postIconSize)
                     .clickable(onClick = { onCommentRequested(postEntity) })
             )
-        Image(
+        Icon(
             painter =
                 if (postEntity.liked)
                     painterResource(R.drawable.icon_hearted)
@@ -575,7 +574,7 @@ fun PostActions(
                 .size(postIconSize)
                 .clickable(onClick = { onLikeRequested(postEntity) })
         )
-        Image(
+        Icon(
             painter = painterResource(R.drawable.icon_repost),
             contentDescription = "Repost",
             modifier = Modifier
@@ -586,7 +585,7 @@ fun PostActions(
                     )
                 })
         )
-        Image(
+        Icon(
             painter =
                 if (postEntity.bookmarked)
                     painterResource(R.drawable.icon_bookmarked)
@@ -597,7 +596,7 @@ fun PostActions(
                 .size(postIconSize)
                 .clickable(onClick = { onBookmarkRequested(postEntity) })
         )
-        Image(
+        Icon(
             painter = painterResource(R.drawable.icon_share),
             contentDescription = "Share",
             modifier = Modifier

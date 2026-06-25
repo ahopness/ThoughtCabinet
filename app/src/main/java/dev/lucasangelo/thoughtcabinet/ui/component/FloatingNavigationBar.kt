@@ -2,7 +2,6 @@ package dev.lucasangelo.thoughtcabinet.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -152,10 +152,11 @@ fun FloatingNavigationButton(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.clickable(onClick = onClick),
     ) {
-        Image(
+        Icon(
             painter = painterResource(icon),
             contentDescription = title,
-            modifier = Modifier.size(72.dp)
+            modifier = Modifier
+                .size(72.dp)
         )
         AnimatedVisibility(showTitle) {
             Text(
@@ -196,7 +197,7 @@ fun ExpandableFloatingNavigationButton(
                 targetValue = if (expanded) 45f else 0f
             )
 
-            Image(
+            Icon(
                 painter = painterResource(icon),
                 contentDescription = title,
                 modifier = Modifier

@@ -14,6 +14,4 @@ A chronology-based note app alternative to dopamine inducing social media and mi
 #######
 
 todos
-- make dpi higher
-- white color theme
 - move all texts to a strings.xml

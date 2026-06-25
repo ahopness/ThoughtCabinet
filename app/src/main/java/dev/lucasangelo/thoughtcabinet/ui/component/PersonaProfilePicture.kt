@@ -1,14 +1,13 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -30,10 +29,11 @@ fun PersonaProfilePicture(
 ) {
     val context = LocalContext.current
     if (profilePic == null) {
-        Image(
+        Icon(
             painter = painterResource(R.drawable.icon_profile),
             contentDescription = null,
-            modifier = modifier.fillMaxSize()
+            modifier = modifier
+                .fillMaxSize()
         )
     } else {
         AsyncImage(
@@ -47,7 +47,6 @@ fun PersonaProfilePicture(
                 .fillMaxSize()
                 .scale(0.8f)
                 .aspectRatio(1f / 1f)
-                .clip(CircleShape)
                 .then( other =
                     if (useBorder)
                         Modifier.border(
