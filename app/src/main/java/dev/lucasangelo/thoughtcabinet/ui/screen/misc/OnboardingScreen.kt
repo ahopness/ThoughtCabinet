@@ -129,7 +129,10 @@ fun OnboardingScreen(
                         rootNavController.navigate(EditPersonaRoute(null))
                         onNextPageRequested()
                     }) {
-                        Text(stringResource(R.string.onboarding_create_first_persona))
+                        if (showOnboarding)
+                            Text(stringResource(R.string.onboarding_create_first_persona))
+                        else
+                            Text(stringResource(R.string.create_a_persona))
                     }
                 }
             },
