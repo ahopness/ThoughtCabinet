@@ -75,7 +75,7 @@
     <string name="onboarding_desc_suffix"> est votre microblog privé.</string>
     <string name="onboarding_description">Ceci est un journal intime déguisé en fil d\'actualité. Vous pouvez y publier librement vos pensées sans craindre le regard des autres ou les algorithmes qui s\'abreuvent de vos données.</string>
     <string name="onboarding_enter_app">Entrer dans Thought Cabinet</string>
-    <string name="onboarding_import_recommendation">Au lieu de partir d\'une page blanche, il est conseillé d\'importer des messages d\'autres réseaux sociaux et de journaux personnels. Cela vous encourage à écrire à chaque ouverture de l\'application.</string>
+    <string name="onboarding_import_recommendation">Plutôt que de partir d\'une page blanche, il est recommandé d\'importer vos publications provenant d\'autres réseaux sociaux ou de journaux personnels ; cela permet de trouver plus facilement la motivation de publier quelque chose à chaque fois que vous ouvrez l\'application.</string>
     <string name="onboarding_made_by_prefix">Dans Thought Cabinet, au lieu des utilisateurs traditionnels, les posts sont écrits par des </string>
     <string name="onboarding_personas_board_hint">Au lieu d\'une simple page de profil, les personas disposent d\'un tableau où vous pouvez ajouter des traits de caractère. N\'oubliez pas d\'en ajouter une fois sorti d\'ici !</string>
     <string name="onboarding_personas_description">Les personas représentent les rôles sociaux que l\'on adopte : cela peut être ce que l\'on aspire à être, des facettes de notre esprit ou des personnages de fiction.</string>

@@ -74,12 +74,12 @@
     <string name="onboarding_desc_suffix"> is Your private microblogger.</string>
     <string name="onboarding_description">This is a diary disguised as a feed, you can freely post your thoughts here without the fear of other’s reactions and algorithms feeding off of you.</string>
     <string name="onboarding_enter_app">Enter Thought Cabinet</string>
-    <string name="onboarding_import_recommendation">Instead of starting with a black canvas, it is recommended to import posts from other social media and personal diaries, this helps makes it easier to get incentivised to post something everytime you open the app.</string>
+    <string name="onboarding_import_recommendation">Instead of starting with a black canvas, it is recommended for you to bring your posts over from other social media and personal diaries, this helps makes it easier to get incentivized to post something every time you open the app.</string>
     <string name="onboarding_made_by_prefix">In Thought Cabinet, instead of users, posts are made by </string>
     <string name="onboarding_personas_board_hint">Instead of a profile page, personas have a board which you can add personality traits to, don\'t forget to do that after you\'re done here!</string>
     <string name="onboarding_personas_description">Personas are the social role that one adopts: They can be things we aspire to be, specific personalities or even fictional characters.</string>
     <string name="onboarding_personas_word">personas</string>
-    <string name="onboarding_setup_done">Now that everything is setup, you can start your experience, enjoy :)</string>
+    <string name="onboarding_setup_done">Now that everything is set up, you can start your experience, enjoy :)</string>
     <string name="onboarding_welcome">Welcome to</string>
     <string name="open_link">Open Link</string>
     <string name="options">Options</string>

@@ -3,6 +3,7 @@ package dev.lucasangelo.thoughtcabinet.ui.screen.misc
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -96,9 +97,11 @@ fun OnboardingScreen(
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                 append(stringResource(R.string.app_name))
                             }
+                            append(' ')
                             append(stringResource(R.string.onboarding_desc_suffix))
                         },
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     Text(stringResource(R.string.onboarding_description))
@@ -109,12 +112,14 @@ fun OnboardingScreen(
                     Text(
                         buildAnnotatedString {
                             append(stringResource(R.string.onboarding_made_by_prefix))
+                            append(' ')
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                 append(stringResource(R.string.onboarding_personas_word))
                             }
                             append(".")
                         },
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     Text(stringResource(R.string.onboarding_personas_description))

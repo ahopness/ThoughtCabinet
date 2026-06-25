@@ -75,7 +75,7 @@
     <string name="onboarding_desc_suffix"> は、あなただけのプライベートなマイクロブログです。</string>
     <string name="onboarding_description">これはフィードの形をした日記です。他人の反応を恐れたり、アルゴリズムに消費されたりすることなく、自由に考えを書き留めることができます。</string>
     <string name="onboarding_enter_app">Thought Cabinet を始める</string>
-    <string name="onboarding_import_recommendation">白紙から始めるのではなく、他のSNSや個人の日記から投稿をインポートすることをおすすめします。そうすることで、アプリを開くたびに気軽に何かを書きやすくなります。</string>
+    <string name="onboarding_import_recommendation">真っ白なキャンバスから始めるのではなく、他のSNSや個人の日記から過去の投稿を移行しておくことをお勧めします。そうすることで、アプリを開くたびに何かを投稿しようという意欲が湧きやすくなります。</string>
     <string name="onboarding_made_by_prefix">Thought Cabinet では、「ユーザー」の代わりに、あなたが作成した </string>
     <string name="onboarding_personas_board_hint">ペルソナにはプロフィールの代わりにボードがあり、そこに性格や特徴を追加できます。ここを終えたら忘れずに追加してみましょう！</string>
     <string name="onboarding_personas_description">ペルソナとは、自分が演じる社会的な役割のことです。なりたい自分や、特定の性格、あるいは架空のキャラクターなどを設定できます。</string>

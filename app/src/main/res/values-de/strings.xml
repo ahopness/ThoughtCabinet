@@ -75,7 +75,7 @@
     <string name="onboarding_desc_suffix"> ist dein privates Microblog.</string>
     <string name="onboarding_description">Dies ist ein als Feed getarntes Tagebuch. Du kannst deine Gedanken hier frei posten, ohne Angst vor Reaktionen anderer oder vor Algorithmen, die sich von dir ernähren.</string>
     <string name="onboarding_enter_app">Thought Cabinet betreten</string>
-    <string name="onboarding_import_recommendation">Es wird empfohlen, Beiträge aus anderen sozialen Medien und persönlichen Tagebüchern zu importieren, statt mit einer leeren Leinwand zu beginnen. Das motiviert dich, jedes Mal etwas zu schreiben, wenn du die App öffnest.</string>
+    <string name="onboarding_import_recommendation">Anstatt bei einer leeren Seite zu beginnen, empfiehlt es sich, Beiträge von anderen Social-Media-Plattformen oder aus persönlichen Tagebüchern zu übernehmen; dies macht es einfacher, sich motiviert zu fühlen, jedes Mal etwas zu posten, wenn man die App öffnet.</string>
     <string name="onboarding_made_by_prefix">In Thought Cabinet werden Beiträge nicht von Nutzern, sondern von </string>
     <string name="onboarding_personas_board_hint">Statt einer Profilseite haben Personas ein Board, auf das du Charaktereigenschaften legen kannst. Vergiss das nicht, wenn du hier fertig bist!</string>
     <string name="onboarding_personas_description">Personas sind soziale Rollen, die man einnimmt: Sie können Ideale sein, bestimmte Facetten unserer Persönlichkeit oder sogar fiktive Charaktere.</string>

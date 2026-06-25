@@ -75,7 +75,7 @@
     <string name="onboarding_desc_suffix"> é o seu microblog privado.</string>
     <string name="onboarding_description">Este é um diário disfarçado de feed. Você pode postar livremente seus pensamentos aqui, sem medo das reações alheias e de algoritmos se alimentando de você.</string>
     <string name="onboarding_enter_app">Entrar no Thought Cabinet</string>
-    <string name="onboarding_import_recommendation">Em vez de começar com uma tela preta, é recomendado importar postagens de outras redes sociais e diários pessoais. Isso ajuda a incentivar você a postar algo sempre que abrir o aplicativo.</string>
+    <string name="onboarding_import_recommendation">Em vez de começar com uma tela em branco, é recomendado você importar suas postagens de outras redes sociais e diários pessoais; isso ajuda a criar o incentivo para publicar algo sempre que você abrir o aplicativo.</string>
     <string name="onboarding_made_by_prefix">No Thought Cabinet, em vez de usuários, as postagens são feitas por </string>
     <string name="onboarding_personas_board_hint">Em vez de uma página de perfil, as personas têm um mural onde você pode adicionar traços de personalidade. Não se esqueça de fazer isso quando terminar aqui!</string>
     <string name="onboarding_personas_description">Personas são os papéis sociais que adotamos: podem ser coisas que aspiramos ser, personalidades específicas ou até personagens fictícios.</string>

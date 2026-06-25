@@ -1,6 +1,6 @@
 <div align="center">
   <h3>Thought Cabinet</h3>
-  <h4>Post For Yourself: your private microblogger.</h4>
+  <h4>Post For Yourself: Your private microblogger.</h4>
   <img width="512" height="512" alt="logo_fg" src="https://github.com/user-attachments/assets/7cd8eeab-08ed-45f1-b853-c9529cdfadf0" />
   <br>
   <br>
