@@ -66,7 +66,7 @@
     <string name="help">Ayuda</string>
     <string name="like">Me Gusta</string>
     <string name="link_cache_cleaned">¡Caché de enlaces limpia con éxito!</string>
-    <string name="loading">CARGANDO...</string>
+    <string name="loading">Cargando...</string>
     <string name="move_down">Mover Abajo</string>
     <string name="move_left">Mover a la Izquierda</string>
     <string name="move_right">Mover a la Derecha</string>
@@ -128,4 +128,6 @@
     <string name="trait_updated_success">¡Rasgo actualizado con éxito!</string>
     <string name="unblock_persona">Desbloquear Persona</string>
     <string name="your_personas">Tus Personas</string>
+    <string name="thoughts">Pensamientos</string>
+    <string name="crowd">Multitud</string>
 </resources>

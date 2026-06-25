@@ -128,4 +128,6 @@
     <string name="trait_updated_success">特徴を更新しました！</string>
     <string name="unblock_persona">ペルソナのブロックを解除</string>
     <string name="your_personas">あなたのペルソナ</string>
+    <string name="thoughts">思考</string>
+    <string name="crowd">群衆</string>
 </resources>

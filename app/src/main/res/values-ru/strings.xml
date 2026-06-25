@@ -66,7 +66,7 @@
     <string name="help">Помощь</string>
     <string name="like">Нравится</string>
     <string name="link_cache_cleaned">Кэш ссылок успешно очищен!</string>
-    <string name="loading">ЗАГРУЗКА...</string>
+    <string name="loading">Загрузка...</string>
     <string name="move_down">Вниз</string>
     <string name="move_left">Влево</string>
     <string name="move_right">Вправо</string>
@@ -127,5 +127,7 @@
     <string name="trait_kind_text_desc">Ценности, цели, цитаты: Мотивация</string>
     <string name="trait_updated_success">Черта успешно обновлена!</string>
     <string name="unblock_persona">Разблокировать персону</string>
-    <string name="your_personas">Ваши персоны</string>
+    <string name="your_personas">Ваши Персоны</string>
+    <string name="thoughts">Мысли</string>
+    <string name="crowd">Толпа</string>
 </resources>

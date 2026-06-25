@@ -1,7 +1,7 @@
 <resources>
     <!-- App name should not be translated -->
     <string name="app_name">Thought Cabinet</string>
-    <string name="abyss_stare">Você olha para o abismo, e o abismo encara de volta.</string>
+    <string name="abyss_stare">Você encara para o abismo, e o abismo encara de volta.</string>
     <string name="actions">Ações</string>
     <string name="add">Adicionar</string>
     <string name="add_a_comment">Adicionar um Comentário</string>
@@ -12,7 +12,7 @@
     <string name="add_trait">Adicionar Traço</string>
     <string name="add_trait_content_prompt">Depois, adicione o conteúdo que deseja</string>
     <string name="archive_post">Arquivar Postagem</string>
-    <string name="blank_canvas">Uma tela em branco, ansiosa por um rabisco com alma.</string>
+    <string name="blank_canvas">Uma tela em branco, ansiosa por um rabisco.</string>
     <string name="block_persona">Bloquear Persona</string>
     <string name="bookmark">Salvar</string>
     <string name="choose_post_kind">Primeiro, escolha o tipo de postagem</string>
@@ -66,7 +66,7 @@
     <string name="help">Ajuda</string>
     <string name="like">Curtir</string>
     <string name="link_cache_cleaned">Cache de links limpo com sucesso!</string>
-    <string name="loading">CARREGANDO...</string>
+    <string name="loading">Carregando...</string>
     <string name="move_down">Mover para Baixo</string>
     <string name="move_left">Mover para Esquerda</string>
     <string name="move_right">Mover para Direita</string>
@@ -93,7 +93,7 @@
     <string name="persona_updated_success">Persona atualizada com sucesso!</string>
     <string name="post">Postagem</string>
     <string name="post_comment">Publicar Comentário</string>
-    <string name="post_content_note_label">O que está acontecendo?</string>
+    <string name="post_content_note_label">Qual é a boa?</string>
     <string name="post_content_reel_label">Escreva uma Legenda</string>
     <string name="post_created_success">Postagem criada com sucesso!</string>
     <string name="post_kind_link">Link</string>
@@ -128,4 +128,6 @@
     <string name="trait_updated_success">Traço atualizado com sucesso!</string>
     <string name="unblock_persona">Desbloquear Persona</string>
     <string name="your_personas">Suas Personas</string>
+    <string name="thoughts">Pensamentos</string>
+    <string name="crowd">Galera</string>
 </resources>

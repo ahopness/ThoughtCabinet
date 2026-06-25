@@ -66,7 +66,7 @@
     <string name="help">Aide</string>
     <string name="like">J\'aime</string>
     <string name="link_cache_cleaned">Cache des liens vidé avec succès !</string>
-    <string name="loading">CHARGEMENT...</string>
+    <string name="loading">Chargement...</string>
     <string name="move_down">Descendre</string>
     <string name="move_left">Mettre à Gauche</string>
     <string name="move_right">Mettre à Droite</string>
@@ -128,4 +128,6 @@
     <string name="trait_updated_success">Trait mis à jour avec succès !</string>
     <string name="unblock_persona">Débloquer la Persona</string>
     <string name="your_personas">Vos Personas</string>
+    <string name="thoughts">Pensées</string>
+    <string name="crowd">Foule</string>
 </resources>

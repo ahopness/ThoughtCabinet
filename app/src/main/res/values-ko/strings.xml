@@ -128,4 +128,6 @@
     <string name="trait_updated_success">특징이 수정되었습니다!</string>
     <string name="unblock_persona">페르소나 차단 해제</string>
     <string name="your_personas">내 페르소나</string>
+    <string name="thoughts">생각</string>
+    <string name="crowd">군중</string>
 </resources>

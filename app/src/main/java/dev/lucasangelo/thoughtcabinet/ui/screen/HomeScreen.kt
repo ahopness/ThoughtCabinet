@@ -53,13 +53,13 @@ fun HomeScreen(
             tabItems = listOf(
                 FloatingNavigationActionItem(
                     icon = R.drawable.icon_list,
-                    title = "Thoughts",
+                    title = stringResource(R.string.thoughts),
                     showTitle = pagerState.currentPage == 0,
                     action = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
                 ),
                 FloatingNavigationActionItem(
                     icon = R.drawable.icon_crowd,
-                    title = "Crowd",
+                    title = stringResource(R.string.crowd),
                     showTitle = pagerState.currentPage == 1,
                     action = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
                 ),
