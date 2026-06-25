@@ -29,6 +29,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -118,8 +119,14 @@ fun Post(
         }
     }
 
+    // NOTE: bug fix for AsyncImages not loading on startup
+    var imagesLoadedCount by remember { mutableIntStateOf(0) }
+    val onImageLoaded: () -> Unit = { imagesLoadedCount++ }
+
     val picture = remember { Picture() }
     val captureModifier = Modifier.drawWithCache {
+        val invalidationTrigger = imagesLoadedCount
+
         val width = size.width.toInt()
         val height = size.height.toInt()
 
@@ -155,12 +162,14 @@ fun Post(
                             InspectPostRoute(postEntity.id)
                         else
                             InspectPostRoute(entry.value.id),
+                    onImageLoaded,
                     modifier = Modifier.background(repostBackgroundColor)
                 )
 
                 PostContent(
                     entry.value,
                     rootNavController,
+                    onImageLoaded,
                     modifier = Modifier.background(repostBackgroundColor)
                 )
             }
@@ -177,12 +186,14 @@ fun Post(
                         InspectPostRoute(postEntity.id)
                     else
                         null,
+                onAsyncImageLoaded = onImageLoaded,
                 modifier = Modifier.background(backgroundColor)
             )
 
             PostContent(
                 postEntity,
                 rootNavController,
+                onImageLoaded,
                 modifier = Modifier.background(backgroundColor)
             )
         }
@@ -210,6 +221,7 @@ fun PostHeader(
     onBlockPersonaRequest: (PersonaEntity) -> Unit,
     rootNavController: NavController,
     onClickRoute: Any?,
+    onAsyncImageLoaded: () -> Unit,
     modifier: Modifier,
 ) {
     var showOptionsModal by remember { mutableStateOf(false) }
@@ -233,6 +245,7 @@ fun PostHeader(
 
             PersonaProfilePicture(
                 authorEntity.profilePic,
+                onAsyncImageLoaded = onAsyncImageLoaded,
                 modifier = Modifier
                     .size(postIconSize)
                     .clickable(onClick = {
@@ -331,6 +344,7 @@ fun PostHeader(
 fun PostContent(
     postEntity: PostEntity,
     rootNavController: NavController,
+    onAsyncImageLoaded: () -> Unit,
     modifier: Modifier,
 ) {
     val onMediaClicked: (List<String>, Int) -> Unit = { list, startAt ->
@@ -342,6 +356,7 @@ fun PostContent(
             PostContentNote(
                 postEntity,
                 onMediaClicked,
+                onAsyncImageLoaded,
                 modifier
             )
         }
@@ -349,12 +364,14 @@ fun PostContent(
             PostContentReel(
                 postEntity,
                 onMediaClicked,
+                onAsyncImageLoaded,
                 modifier
             )
         }
         PostType.LINK -> {
             PostContentLink(
-                postEntity
+                postEntity,
+                onAsyncImageLoaded,
             )
         }
     }
@@ -364,6 +381,7 @@ fun PostContent(
 fun PostContentNote(
     postEntity: PostEntity,
     onMediaClicked: (List<String>, Int) -> Unit,
+    onAsyncImageLoaded: () -> Unit,
     modifier: Modifier,
 ) {
     Column(
@@ -402,6 +420,7 @@ fun PostContentNote(
                         model = File(context.filesDir, mediaDir + media),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
+                        onLoading = { onAsyncImageLoaded() },
                         modifier = Modifier
                             .aspectRatio(1f / 1f)
                             .clickable(onClick = { onMediaClicked(postEntity.media, index) })
@@ -414,6 +433,7 @@ fun PostContentNote(
 fun PostContentReel(
     postEntity: PostEntity,
     onMediaClicked: (List<String>, Int) -> Unit,
+    onAsyncImageLoaded: () -> Unit,
     modifier: Modifier,
 ) {
     Column(
@@ -432,6 +452,7 @@ fun PostContentReel(
                         model = File(context.filesDir, mediaDir + postEntity.media[page]),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
+                        onSuccess = { onAsyncImageLoaded() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable(onClick = { onMediaClicked(postEntity.media, page) })
@@ -468,6 +489,7 @@ fun PostContentReel(
                 model = File(context.filesDir, mediaDir + postEntity.media[0]),
                 contentDescription = null,
                 contentScale = ContentScale.FillWidth,
+                onSuccess = { onAsyncImageLoaded() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = { onMediaClicked(postEntity.media, 0) })
@@ -485,6 +507,7 @@ fun PostContentReel(
 @Composable
 fun PostContentLink(
     postEntity: PostEntity,
+    onAsyncImageLoaded: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
     Box(
@@ -510,6 +533,7 @@ fun PostContentLink(
             model = linkMetadata?.imageUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
+            onSuccess = { onAsyncImageLoaded() },
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black)

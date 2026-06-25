@@ -26,6 +26,7 @@ fun PersonaProfilePicture(
     profilePic: String?,
     inCache: Boolean = false,
     useBorder: Boolean = false,
+    onAsyncImageLoaded: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -44,19 +45,21 @@ fun PersonaProfilePicture(
             ),
             contentDescription = null,
             contentScale = ContentScale.Crop,
+            onSuccess = { onAsyncImageLoaded() },
             modifier = modifier
                 .fillMaxSize()
                 .scale(0.8f)
                 .clip(CircleShape)
                 .aspectRatio(1f / 1f)
-                .then( other =
-                    if (useBorder)
-                        Modifier.border(
-                            border = BorderStroke(width = 1.dp, color = Color.Gray),
-                            shape = CircleShape
-                        )
-                    else
-                        Modifier
+                .then(
+                    other =
+                        if (useBorder)
+                            Modifier.border(
+                                border = BorderStroke(width = 1.dp, color = Color.Gray),
+                                shape = CircleShape
+                            )
+                        else
+                            Modifier
                 )
 
         )
