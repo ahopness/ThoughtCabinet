@@ -50,6 +50,8 @@
     <string name="error_comment_cannot_empty">ERREUR : Votre commentaire ne peut pas être vide.</string>
     <string name="error_comment_needs_author">ERREUR : Votre commentaire a besoin d\'un auteur.</string>
     <string name="error_could_not_open_image">ERREUR : Impossible d\'ouvrir l\'image sélectionnée.</string>
+    <string name="error_could_not_open_media">ERREUR : Impossible d\'ouvrir le média sélectionné.</string>
+    <string name="error_video_type_not_supported">ERREUR : Type de vidéo non supporté.</string>
     <string name="error_could_not_open_url">ERREUR : Impossible d\'ouvrir l\'URL : %1$s</string>
     <string name="error_persona_needs_name">ERREUR : Votre persona a besoin d\'au moins un nom !</string>
     <string name="error_persona_not_found">ERREUR : Persona introuvable.</string>

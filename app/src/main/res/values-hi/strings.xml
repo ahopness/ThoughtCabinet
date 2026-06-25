@@ -49,6 +49,8 @@
     <string name="error_comment_cannot_empty">त्रुटि: आपकी टिप्पणी खाली नहीं हो सकती।</string>
     <string name="error_comment_needs_author">त्रुटि: आपकी टिप्पणी के लिए एक लेखक की आवश्यकता है।</string>
     <string name="error_could_not_open_image">त्रुटि: चयनित छवि को खोला नहीं जा सका।</string>
+    <string name="error_could_not_open_media">त्रुटि: चयनित मीडिया को खोला नहीं जा सका।</string>
+    <string name="error_video_type_not_supported">त्रुटि: वीडियो का प्रकार समर्थित नहीं है।</string>
     <string name="error_could_not_open_url">त्रुटि: URL नहीं खोला जा सका: %1$s</string>
     <string name="error_persona_needs_name">त्रुटि: आपकी पर्सोना के लिए कम से कम एक नाम होना आवश्यक है!</string>
     <string name="error_persona_not_found">त्रुटि: पर्सोना नहीं मिला।</string>

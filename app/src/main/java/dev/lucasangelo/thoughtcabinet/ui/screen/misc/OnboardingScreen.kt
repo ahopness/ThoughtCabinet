@@ -30,6 +30,8 @@ import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
 import dev.lucasangelo.thoughtcabinet.ui.screen.HomeRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.edit.EditPersonaRoute
+import io.github.kdroidfilter.composemediaplayer.AudioMode
+import io.github.kdroidfilter.composemediaplayer.InterruptionMode
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
 import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
 import kotlinx.serialization.Serializable
@@ -59,7 +61,9 @@ fun OnboardingScreen(
             val context = LocalContext.current
             val videoUri = "android.resource://${context.packageName}/${R.raw.background}"
 
-            val playerState = rememberVideoPlayerState()
+            val playerState = rememberVideoPlayerState( audioMode = AudioMode(
+                    interruptionMode = InterruptionMode.MixWithOthers
+            ) )
             LaunchedEffect(Unit) {
                 playerState.volume = 0f
                 playerState.loop = true

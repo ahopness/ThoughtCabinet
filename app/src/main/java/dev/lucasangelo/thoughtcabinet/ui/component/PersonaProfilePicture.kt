@@ -26,7 +26,6 @@ fun PersonaProfilePicture(
     profilePic: String?,
     inCache: Boolean = false,
     useBorder: Boolean = false,
-    onAsyncImageLoaded: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -45,7 +44,6 @@ fun PersonaProfilePicture(
             ),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            onSuccess = { onAsyncImageLoaded() },
             modifier = modifier
                 .fillMaxSize()
                 .scale(0.8f)

@@ -50,6 +50,8 @@
     <string name="error_comment_cannot_empty">ОШИБКА: Комментарий не может быть пустым.</string>
     <string name="error_comment_needs_author">ОШИБКА: У комментария должен быть автор.</string>
     <string name="error_could_not_open_image">ОШИБКА: Не удалось открыть выбранное изображение.</string>
+    <string name="error_could_not_open_media">ОШИБКА: Не удалось открыть выбранный медиафайл.</string>
+    <string name="error_video_type_not_supported">ОШИБКА: Формат видео не поддерживается.</string>
     <string name="error_could_not_open_url">ОШИБКА: Не удалось открыть URL: %1$s</string>
     <string name="error_persona_needs_name">ОШИБКА: У персоны должно быть хотя бы имя!</string>
     <string name="error_persona_not_found">ОШИБКА: Персона не найдена.</string>

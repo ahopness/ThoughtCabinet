@@ -1,6 +1,7 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
 import android.graphics.Picture
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,11 +39,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.drawscope.draw
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -67,6 +75,10 @@ import dev.lucasangelo.thoughtcabinet.util.formatInstant
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
 import dev.lucasangelo.thoughtcabinet.util.saveBitmapToCache
 import dev.lucasangelo.thoughtcabinet.util.shareImage
+import io.github.kdroidfilter.composemediaplayer.AudioMode
+import io.github.kdroidfilter.composemediaplayer.InterruptionMode
+import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
+import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -119,31 +131,14 @@ fun Post(
         }
     }
 
-    // NOTE: bug fix for AsyncImages not loading on startup
-    var imagesLoadedCount by remember { mutableIntStateOf(0) }
-    val onImageLoaded: () -> Unit = { imagesLoadedCount++ }
-
-    val picture = remember { Picture() }
-    val captureModifier = Modifier.drawWithCache {
-        val invalidationTrigger = imagesLoadedCount
-
-        val width = size.width.toInt()
-        val height = size.height.toInt()
-
-        onDrawWithContent {
-            val pictureCanvas = androidx.compose.ui.graphics.Canvas(
-                picture.beginRecording(width, height)
-            )
-            draw(this, layoutDirection, pictureCanvas, size) {
-                this@onDrawWithContent.drawContent()
-            }
-            picture.endRecording()
-
-            drawIntoCanvas { canvas ->
-                canvas.nativeCanvas.drawPicture(picture)
-            }
+    val graphicsLayer = rememberGraphicsLayer()
+    val captureModifier = Modifier.drawWithContent {
+        graphicsLayer.record {
+            this@drawWithContent.drawContent()
         }
+        drawLayer(graphicsLayer)
     }
+
 
     Column(modifier.fillMaxWidth()) {
         var backgroundColor by remember { mutableStateOf(Color.Black) }
@@ -162,14 +157,12 @@ fun Post(
                             InspectPostRoute(postEntity.id)
                         else
                             InspectPostRoute(entry.value.id),
-                    onImageLoaded,
                     modifier = Modifier.background(repostBackgroundColor)
                 )
 
                 PostContent(
                     entry.value,
                     rootNavController,
-                    onImageLoaded,
                     modifier = Modifier.background(repostBackgroundColor)
                 )
             }
@@ -186,14 +179,12 @@ fun Post(
                         InspectPostRoute(postEntity.id)
                     else
                         null,
-                onAsyncImageLoaded = onImageLoaded,
                 modifier = Modifier.background(backgroundColor)
             )
 
             PostContent(
                 postEntity,
                 rootNavController,
-                onImageLoaded,
                 modifier = Modifier.background(backgroundColor)
             )
         }
@@ -205,7 +196,7 @@ fun Post(
             onBookmarkRequested,
             onCommentRequested,
             rootNavController,
-            picture,
+            graphicsLayer,
             modifier = Modifier.background(backgroundColor)
         )
     }
@@ -221,7 +212,6 @@ fun PostHeader(
     onBlockPersonaRequest: (PersonaEntity) -> Unit,
     rootNavController: NavController,
     onClickRoute: Any?,
-    onAsyncImageLoaded: () -> Unit,
     modifier: Modifier,
 ) {
     var showOptionsModal by remember { mutableStateOf(false) }
@@ -245,7 +235,6 @@ fun PostHeader(
 
             PersonaProfilePicture(
                 authorEntity.profilePic,
-                onAsyncImageLoaded = onAsyncImageLoaded,
                 modifier = Modifier
                     .size(postIconSize)
                     .clickable(onClick = {
@@ -344,7 +333,6 @@ fun PostHeader(
 fun PostContent(
     postEntity: PostEntity,
     rootNavController: NavController,
-    onAsyncImageLoaded: () -> Unit,
     modifier: Modifier,
 ) {
     val onMediaClicked: (List<String>, Int) -> Unit = { list, startAt ->
@@ -356,7 +344,6 @@ fun PostContent(
             PostContentNote(
                 postEntity,
                 onMediaClicked,
-                onAsyncImageLoaded,
                 modifier
             )
         }
@@ -364,14 +351,12 @@ fun PostContent(
             PostContentReel(
                 postEntity,
                 onMediaClicked,
-                onAsyncImageLoaded,
                 modifier
             )
         }
         PostType.LINK -> {
             PostContentLink(
                 postEntity,
-                onAsyncImageLoaded,
             )
         }
     }
@@ -381,7 +366,6 @@ fun PostContent(
 fun PostContentNote(
     postEntity: PostEntity,
     onMediaClicked: (List<String>, Int) -> Unit,
-    onAsyncImageLoaded: () -> Unit,
     modifier: Modifier,
 ) {
     Column(
@@ -416,11 +400,11 @@ fun PostContentNote(
             ) {
                 val context = LocalContext.current
                 postEntity.media.forEachIndexed { index, media ->
-                    AsyncImage(
-                        model = File(context.filesDir, mediaDir + media),
-                        contentDescription = null,
+                    PostContentMediaItem(
+                        mediaFile = remember(media) {
+                            File(context.filesDir, mediaDir + media)
+                        },
                         contentScale = ContentScale.Crop,
-                        onLoading = { onAsyncImageLoaded() },
                         modifier = Modifier
                             .aspectRatio(1f / 1f)
                             .clickable(onClick = { onMediaClicked(postEntity.media, index) })
@@ -433,7 +417,6 @@ fun PostContentNote(
 fun PostContentReel(
     postEntity: PostEntity,
     onMediaClicked: (List<String>, Int) -> Unit,
-    onAsyncImageLoaded: () -> Unit,
     modifier: Modifier,
 ) {
     Column(
@@ -448,11 +431,11 @@ fun PostContentReel(
                     pagerState,
                     modifier = Modifier.aspectRatio(1f/1f)
                 ) { page ->
-                    AsyncImage(
-                        model = File(context.filesDir, mediaDir + postEntity.media[page]),
-                        contentDescription = null,
+                    PostContentMediaItem(
+                        mediaFile = remember(postEntity.media[page]) {
+                            File(context.filesDir, mediaDir + postEntity.media[page])
+                        },
                         contentScale = ContentScale.Crop,
-                        onSuccess = { onAsyncImageLoaded() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable(onClick = { onMediaClicked(postEntity.media, page) })
@@ -473,6 +456,7 @@ fun PostContentReel(
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .size(8.dp)
+                                    .clip(CircleShape)
                                     .background(
                                         color =
                                             if (pagerState.currentPage == iteration)
@@ -485,11 +469,11 @@ fun PostContentReel(
                     }
             }
         else
-            AsyncImage(
-                model = File(context.filesDir, mediaDir + postEntity.media[0]),
-                contentDescription = null,
+            PostContentMediaItem(
+                mediaFile = remember(postEntity.media[0]) {
+                    File(context.filesDir, mediaDir + postEntity.media[0])
+                },
                 contentScale = ContentScale.FillWidth,
-                onSuccess = { onAsyncImageLoaded() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = { onMediaClicked(postEntity.media, 0) })
@@ -507,7 +491,6 @@ fun PostContentReel(
 @Composable
 fun PostContentLink(
     postEntity: PostEntity,
-    onAsyncImageLoaded: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
     Box(
@@ -518,7 +501,6 @@ fun PostContentLink(
                 try {
                     uriHandler.openUri(postEntity.content)
                 } catch (e: Exception) {
-//                rootShowSnackbar("ERROR: Could not open URL: $postEntity.content")
                 }
             })
     ) {
@@ -533,7 +515,6 @@ fun PostContentLink(
             model = linkMetadata?.imageUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            onSuccess = { onAsyncImageLoaded() },
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black)
@@ -560,6 +541,40 @@ fun PostContentLink(
 }
 
 @Composable
+fun PostContentMediaItem(
+    mediaFile: File,
+    contentScale: ContentScale,
+    modifier: Modifier
+) {
+    if (mediaFile.extension == "mp4") {
+        val playerState = rememberVideoPlayerState( audioMode = AudioMode(
+            interruptionMode = InterruptionMode.MixWithOthers
+        ) )
+        LaunchedEffect(mediaFile) {
+            playerState.volume = 0f
+            playerState.loop = true
+            playerState.openUri(mediaFile.path)
+        }
+        VideoPlayerSurface(
+            playerState = playerState,
+            contentScale =
+                if (contentScale == ContentScale.Crop) // BUG
+                    ContentScale.Fit
+                else
+                    contentScale,
+            modifier = modifier
+        )
+    } else {
+        AsyncImage(
+            model = mediaFile,
+            contentDescription = null,
+            contentScale = contentScale,
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
 fun PostActions(
     isStandalone: Boolean,
     postEntity: PostEntity,
@@ -567,7 +582,7 @@ fun PostActions(
     onBookmarkRequested: (PostEntity) -> Unit,
     onCommentRequested: (PostEntity) -> Unit,
     rootNavController: NavController,
-    picture: Picture,
+    graphicsLayer: GraphicsLayer,
     modifier: Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -627,11 +642,12 @@ fun PostActions(
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = { coroutineScope.launch {
+                    val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
                     shareImage(
                         context,
                         uri = saveBitmapToCache(
                             context,
-                            bitmap = createBitmapFromPicture(picture)
+                            bitmap
                         )
                     )
                 } } )

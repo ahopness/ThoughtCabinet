@@ -37,6 +37,8 @@ suspend fun copyUriToInternalStorage(
     inputStream.use { input ->
         FileOutputStream(outputFile).use { output ->
             input.copyTo(output)
+            output.flush()
+            output.fd.sync()
         }
     }
 

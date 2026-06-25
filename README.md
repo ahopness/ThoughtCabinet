@@ -13,5 +13,5 @@ Made with Jetpack Compose, Jetpack Room, [Coil](https://github.com/coil-kt/coil)
 MORE AT: [https://lucasangelo.dev/thought-cabinet/](https://lucasangelo.dev/thought-cabinet/)
 
 ## TODOs
-- support videos in posts
-- fix that wierd coil recomposition bug
+- add button to save media to storage 
+- replace all file pickers with https://github.com/vinceglb/FileKit

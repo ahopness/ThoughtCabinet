@@ -1,6 +1,7 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.edit
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,6 +42,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -63,13 +66,17 @@ import dev.lucasangelo.thoughtcabinet.ui.component.CleanIconButton
 import dev.lucasangelo.thoughtcabinet.ui.component.DeleteConfirmationDialog
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
+import dev.lucasangelo.thoughtcabinet.ui.component.PostContentMediaItem
 import dev.lucasangelo.thoughtcabinet.ui.component.pagerScaffoldContentSpacing
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
+import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
+import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.io.File
+import kotlin.math.log
 
 @Serializable
 data class EditPostRoute(val id: Long?, val repostOf: Long? = null)
@@ -98,7 +105,7 @@ fun EditPostScreen(
     val animatedPersonaColorTheme by animateColorAsState(viewModel.personaColorTheme.darken())
     PagerScaffold(
         title =
-            if (repostOf != null) // NOTE: fugly :( but works :)
+            if (repostOf != null) // NOTE: fugly :(, but works :)
                 if (id != null)
                     stringResource(R.string.edit_your_repost)
                 else
@@ -336,6 +343,7 @@ fun EditPostMediaList(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
+    val cachedMedias = remember { mutableStateMapOf<String, Boolean>() }
     val picker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
         onResult = { uris: List<Uri> ->
@@ -343,24 +351,28 @@ fun EditPostMediaList(
                 uris.forEach { uri ->
                     val newMedia = viewModel.importMedia(uri)
                     if(newMedia == null) {
-                        onNotifyError(context.getString(R.string.error_could_not_open_image))
+                        onNotifyError(context.getString(R.string.error_could_not_open_media))
                         return@launch
                     }
 
-                    if (viewModel.hasLoadedPost)
+                    // NOTE: only supporting .mp4 for now due to:
+                    // https://github.com/kdroidFilter/ComposeMediaPlayer#-supported-video-formats
+                    val prohibitedVideoExtensions = listOf(
+                        ".avi", ".mkv", ".mov", ".flv", ".webm", ".wmv", ".3gp", ".hls",
+                    )
+                    if (prohibitedVideoExtensions.any { newMedia.endsWith(it) }) {
+                        onNotifyError(context.getString(R.string.error_video_type_not_supported))
+                        return@launch
+                    }
+
+                    if (viewModel.hasLoadedPost) {
+                        cachedMedias[newMedia] = true
                         viewModel.postMedia += newMedia
+                    }
                 }
             }
         }
     )
-
-    val cachedMedias = remember { mutableStateMapOf<String, Boolean>() }
-    LaunchedEffect(viewModel.postMedia) {
-        viewModel.postMedia.forEach {
-            val mediaFile = File(context.cacheDir, draftsDir + it)
-            cachedMedias[it] = mediaFile.exists()
-        }
-    }
 
     var pendingMediaForManipulation by remember { mutableStateOf<String?>(null) }
 
@@ -379,13 +391,13 @@ fun EditPostMediaList(
                     shape = RoundedCornerShape(6.dp)
                 )
             ) {
-                AsyncImage(
-                    model =
+                PostContentMediaItem(
+                    mediaFile = remember(media) {
                         if (cachedMedias[media] == true)
                             File(context.cacheDir, draftsDir + media)
                         else
-                            File(context.filesDir, mediaDir + media),
-                    contentDescription = null,
+                            File(context.filesDir, mediaDir + media)
+                    },
                     contentScale =
                         if (large)
                             ContentScale.FillHeight
@@ -397,6 +409,7 @@ fun EditPostMediaList(
                         else
                             Modifier.size(100.dp))
                             .clip(RoundedCornerShape(6.dp))
+                            .alpha(0.5f)
                 )
                 Icon(
                     painter = painterResource(R.drawable.icon_more),
@@ -416,7 +429,7 @@ fun EditPostMediaList(
                 modifier = Modifier.size(if (large) 250.dp else 100.dp),
                 onClick = {
                     picker.launch(PickVisualMediaRequest(
-                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                        ActivityResultContracts.PickVisualMedia.ImageAndVideo
                     ))
                 },
             ) {

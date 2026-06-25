@@ -2,8 +2,11 @@ package dev.lucasangelo.thoughtcabinet.ui.screen.inspect
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -12,6 +15,10 @@ import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
 import dev.lucasangelo.thoughtcabinet.util.swipeToDismiss
+import io.github.kdroidfilter.composemediaplayer.AudioMode
+import io.github.kdroidfilter.composemediaplayer.InterruptionMode
+import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
+import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
 import kotlinx.serialization.Serializable
 import java.io.File
 
@@ -34,20 +41,38 @@ fun InspectMediaListScreen(
         pageCount = list.size,
         initialPage = startAt
     ) { pagerState, page, offsetDistance, onNextPageRequested ->
-        list.map { {
+        list.map { media -> {
             PagerScaffoldContent(
                 pageOffsetDistance = offsetDistance,
                 spacing = 0.dp
             ) {
-                AsyncImage(
-                    model = File(context.filesDir, mediaFolder + it),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .swipeToDismiss({
-                            rootNavController.popBackStack()
-                        })
-                )
+                val mediaFile = remember(media) {
+                    File(context.filesDir, mediaFolder + media)
+                }
+
+                val modifier = Modifier
+                    .fillMaxWidth()
+                    .swipeToDismiss({
+                        rootNavController.popBackStack()
+                    })
+
+                if (mediaFile.extension == "mp4") {
+                    val playerState = rememberVideoPlayerState()
+                    LaunchedEffect(mediaFile) {
+                        playerState.loop = true
+                        playerState.openUri(mediaFile.path)
+                    }
+                    VideoPlayerSurface(
+                        playerState = playerState,
+                        modifier = modifier
+                    )
+                } else {
+                    AsyncImage(
+                        model = mediaFile,
+                        contentDescription = null,
+                        modifier = modifier
+                    )
+                }
             }
         } }
     }

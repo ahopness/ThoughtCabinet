@@ -50,6 +50,8 @@
     <string name="error_comment_cannot_empty">エラー：コメントを入力してください。</string>
     <string name="error_comment_needs_author">エラー：作成者を選択してください。</string>
     <string name="error_could_not_open_image">エラー：画像を開けませんでした。</string>
+    <string name="error_could_not_open_media">エラー：メディアを開けませんでした。</string>
+    <string name="error_video_type_not_supported">エラー：ビデオの種類がサポートされていません。</string>
     <string name="error_could_not_open_url">エラー：URLを開けませんでした: %1$s</string>
     <string name="error_persona_needs_name">エラー：名前を入力してください。</string>
     <string name="error_persona_not_found">エラー：ペルソナが見つかりません。</string>

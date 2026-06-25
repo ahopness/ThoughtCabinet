@@ -50,6 +50,8 @@
     <string name="error_comment_cannot_empty">ERROR: Tu comentario no puede estar vacío.</string>
     <string name="error_comment_needs_author">ERROR: Tu comentario necesita un autor.</string>
     <string name="error_could_not_open_image">ERROR: No se pudo abrir la imagen seleccionada.</string>
+    <string name="error_could_not_open_media">ERROR: No se pudo abrir el archivo multimedia seleccionado.</string>
+    <string name="error_video_type_not_supported">ERROR: Tipo de video no soportado.</string>
     <string name="error_could_not_open_url">ERROR: No se pudo abrir la URL: %1$s</string>
     <string name="error_persona_needs_name">ERROR: ¡Tu persona necesita al menos un nombre!</string>
     <string name="error_persona_not_found">ERROR: Persona no encontrada.</string>

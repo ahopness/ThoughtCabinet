@@ -49,6 +49,8 @@
     <string name="error_comment_cannot_empty">ERROR: Your comment cannot be empty.</string>
     <string name="error_comment_needs_author">ERROR: Your comment needs an author.</string>
     <string name="error_could_not_open_image">ERROR: Couldn\'t open selected image.</string>
+    <string name="error_could_not_open_media">ERROR: Couldn\'t open selected media.</string>
+    <string name="error_video_type_not_supported">ERROR: Video type not supported.</string>
     <string name="error_could_not_open_url">ERROR: Could not open URL: %1$s</string>
     <string name="error_persona_needs_name">ERROR: Your persona needs at least a name!</string>
     <string name="error_persona_not_found">ERROR: Persona not found.</string>
