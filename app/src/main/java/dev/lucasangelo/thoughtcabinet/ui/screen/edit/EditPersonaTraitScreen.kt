@@ -14,7 +14,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -200,6 +202,7 @@ fun EditPersonaTraitContent(
                     label = { Text(stringResource(R.string.trait_content_text_label)) },
                     maxLines = 6,
                     minLines = 4,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = Modifier.fillMaxWidth()
                 )
             PersonaTraitType.MEDIA ->
@@ -215,6 +218,7 @@ fun EditPersonaTraitContent(
                     onValueChange = onTraitContentChanced,
                     label = { Text(stringResource(R.string.paste_link_here)) },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = Modifier.fillMaxWidth()
                 )
         }

@@ -28,7 +28,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -264,6 +266,7 @@ fun EditPostContent(
                     onValueChange = onPostContentChanced,
                     label = { Text(stringResource(R.string.paste_link_here)) },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = defaultModifier.fillMaxWidth(),
                 )
             }
@@ -302,6 +305,7 @@ fun EditPostNoteContent(
         label = { Text(stringResource(R.string.post_content_note_label)) },
         maxLines = 8,
         minLines = 6,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         modifier = modifier.fillMaxWidth(),
     )
 
@@ -330,6 +334,7 @@ fun EditPostReelContent(
         label = { Text(stringResource(R.string.post_content_reel_label)) },
         maxLines = 4,
         minLines = 1,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         modifier = modifier.fillMaxWidth(),
     )
 }

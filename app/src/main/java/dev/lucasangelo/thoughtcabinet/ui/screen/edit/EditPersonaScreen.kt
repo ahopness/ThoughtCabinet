@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -278,6 +280,7 @@ fun EditPersonaTextFields(
         },
         label = { Text(stringResource(R.string.persona_name_label)) },
         singleLine = true,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         modifier = Modifier.fillMaxWidth()
     )
 
@@ -291,6 +294,7 @@ fun EditPersonaTextFields(
         label = { Text(stringResource(R.string.persona_bio_label)) },
         maxLines = 6,
         minLines = 3,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         modifier = Modifier.fillMaxWidth()
     )
 }
