@@ -1,5 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui
 
+import android.content.Context
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.EaseIn
@@ -40,6 +41,8 @@ import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostScreen
+import dev.lucasangelo.thoughtcabinet.ui.screen.misc.OnboardingRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.misc.OnboardingScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.SearchRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.SearchScreen
 import kotlinx.coroutines.launch
@@ -55,6 +58,13 @@ fun AppScreen() {
     }
 
     val context = LocalContext.current
+
+    val sharedPrefs = remember {
+        context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+    }
+    val showOnboarding = remember {
+        sharedPrefs.getBoolean("show_onboarding", true)
+    }
 
     val application = context.applicationContext as MainApplication
     val viewModel: AppViewModel = viewModel(
@@ -74,7 +84,7 @@ fun AppScreen() {
     Box {
         NavHost(
             navController = navController,
-            startDestination = HomeRoute,
+            startDestination = if (showOnboarding) OnboardingRoute else HomeRoute,
             enterTransition = { slideIntoContainer(
                     animationSpec = tween(200, easing = EaseOut),
                     towards = AnimatedContentTransitionScope.SlideDirection.Start
@@ -87,6 +97,12 @@ fun AppScreen() {
                     towards = AnimatedContentTransitionScope.SlideDirection.End
                 ) }
         ) {
+            composable<OnboardingRoute> {
+                OnboardingScreen(
+                    navController
+                )
+            }
+
             composable<HomeRoute> {
                 HomeScreen(
                     thoughtsListState,
@@ -101,6 +117,16 @@ fun AppScreen() {
                 SearchScreen(
                     thoughtsMap,
                     crowdMap,
+                    navController
+                )
+            }
+
+            composable<InspectMediaListRoute> { backStackEntry ->
+                val routeObject : InspectMediaListRoute = backStackEntry.toRoute()
+                InspectMediaListScreen(
+                    routeObject.list,
+                    routeObject.startAt,
+                    routeObject.mediaFolder,
                     navController
                 )
             }
@@ -152,16 +178,6 @@ fun AppScreen() {
                     routeObject.traitId,
                     navController,
                     showSnackbar,
-                )
-            }
-
-            composable<InspectMediaListRoute> { backStackEntry ->
-                val routeObject : InspectMediaListRoute = backStackEntry.toRoute()
-                InspectMediaListScreen(
-                    routeObject.list,
-                    routeObject.startAt,
-                    routeObject.mediaFolder,
-                    navController
                 )
             }
         }

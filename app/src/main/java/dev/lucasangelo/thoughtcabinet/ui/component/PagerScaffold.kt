@@ -35,9 +35,10 @@ fun PagerScaffold(
     title: String,
     backgroundColor: Color = Color.Black,
     canGoBack: Boolean = true,
-    onGoBackRequest: () -> Unit,
+    onGoBackRequest: () -> Unit = {},
     pageCount: Int,
     initialPage: Int = 0,
+    prelude: @Composable () -> Unit = {},
     pageContent:
         @Composable PagerScope.(
             PagerState, Int, Float, () -> Unit
@@ -54,6 +55,8 @@ fun PagerScaffold(
         }
     ) {
         Box {
+            prelude()
+
             val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { pageCount })
             HorizontalPager(
                 state = pagerState,

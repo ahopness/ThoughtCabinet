@@ -20,28 +20,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Density
 import androidx.core.view.WindowCompat
 
-private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF1C1B1F),
-    onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFF2F2F2),
-    onPrimaryContainer = Color(0xFF1C1B1F),
-    secondary = Color(0xFF49454F),
-    onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFE8E8E8),
-    onSecondaryContainer = Color(0xFF1C1B1F),
-    tertiary = Color(0xFF605D62),
-    onTertiary = Color(0xFFFFFFFF),
-    tertiaryContainer = Color(0xFFF0F0F0),
-    onTertiaryContainer = Color(0xFF1C1B1F),
-    background = Color(0xFFFFFFFF),
-    onBackground = Color(0xFF1C1B1F),
-    surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF1C1B1F),
-    surfaceVariant = Color(0xFFE7E0EC),
-    onSurfaceVariant = Color(0xFF49454F),
-    outline = Color(0xFF79747E),
-)
-
 private val DarkColorScheme = darkColorScheme(
     primary = Color(0xFFE0E0E0),
     onPrimary = Color(0xFF1C1B1F),
@@ -68,20 +46,14 @@ private val DarkColorScheme = darkColorScheme(
 fun ThoughtCabinetTheme(
     content: @Composable () -> Unit
 ) {
-    val darkTheme = isSystemInDarkTheme()
-
     val view = LocalView.current
     val activity = view.context as Activity
     val windowInsetsController = WindowCompat.getInsetsController(activity.window, view)
-    windowInsetsController.isAppearanceLightStatusBars = !darkTheme
-    windowInsetsController.isAppearanceLightNavigationBars = !darkTheme
-
-    // NOTE: too much of a hassle to implement
-//    val colorScheme = if(!darkTheme) LightColorScheme else DarkColorScheme
-    val colorScheme = DarkColorScheme
+    windowInsetsController.isAppearanceLightStatusBars = false
+    windowInsetsController.isAppearanceLightNavigationBars = false
 
     val rippleConfiguration = RippleConfiguration(
-        color = if (!darkTheme) Color.Black else Color.White,
+        color = Color.Black,
         rippleAlpha = RippleAlpha(
             pressedAlpha = 0.10f,
             focusedAlpha = 0.12f,
@@ -99,7 +71,7 @@ fun ThoughtCabinetTheme(
     )
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = DarkColorScheme,
         typography = Typography(),
     ) {
         CompositionLocalProvider(

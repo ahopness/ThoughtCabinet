@@ -80,4 +80,6 @@ dependencies {
     implementation(libs.coil.network.okhttp)
 
     implementation(libs.colorpicker.compose)
+
+    implementation(libs.compose.media.player)
 }

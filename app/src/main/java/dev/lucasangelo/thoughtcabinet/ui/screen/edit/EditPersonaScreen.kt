@@ -104,36 +104,6 @@ fun EditPersonaScreen(
     }
 }
 
-/* TODO: move this composable to onboarding
-@Composable
-fun EditPersonaIntroduction(
-    pageOffsetDistance: Float,
-    onNextPageRequested: () -> Unit,
-) {
-    PagerScaffoldContent(pageOffsetDistance) {
-        Text(
-            text = "In Thought Cabinet, instead of users, posts are made by personas",
-            textAlign = TextAlign.Center,
-        )
-
-        Text(
-            text =
-"""Personas are the social role that one adopts: They can be things we aspire to be, specific personalities or even fictional characters.
-
-Instead of a profile page, personas have a board which you can add personality traits to, don't forget to do that after you're done here!""",
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Light,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        )
-
-        Button(onClick = onNextPageRequested) {
-            Text("Next")
-        }
-    }
-}
-*/
-
 @Composable
 fun EditPersonaContent(
     pageOffsetDistance: Float,
@@ -201,7 +171,8 @@ fun EditPersonaProfilePicture(
             profilePic = viewModel.personaProfilePic,
             inCache = viewModel.hasNewProfilePicDraft,
             useBorder = true,
-            modifier = Modifier.size(120.dp)
+            modifier = Modifier
+                .size(120.dp)
         )
 
         Column(
