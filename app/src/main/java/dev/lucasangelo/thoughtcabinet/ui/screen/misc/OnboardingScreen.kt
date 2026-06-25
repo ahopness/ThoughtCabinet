@@ -102,10 +102,6 @@ fun OnboardingScreen(
                     )
 
                     Text(stringResource(R.string.onboarding_description))
-
-//                    Button(onClick = onNextPageRequested) {
-//                        Text("Next")
-//                    }
                 }
             },
             {
