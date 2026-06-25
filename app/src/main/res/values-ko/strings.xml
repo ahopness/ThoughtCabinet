@@ -40,6 +40,7 @@
     <string name="dismiss">취소</string>
     <string name="edit">수정</string>
     <string name="edit_comment">댓글 수정</string>
+    <string name="edit_your_comment">댓글 수정</string>
     <string name="edit_persona">페르소나 수정</string>
     <string name="edit_persona_trait_title">페르소나 특징 수정</string>
     <string name="edit_post">게시글 수정</string>
@@ -132,4 +133,5 @@
     <string name="your_personas">내 페르소나</string>
     <string name="thoughts">생각</string>
     <string name="crowd">군중</string>
+    <string name="really_quiet_in_here">여긴 정말 조용하네요.</string>
 </resources>

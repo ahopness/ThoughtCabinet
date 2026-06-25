@@ -40,6 +40,7 @@
     <string name="dismiss">Dispensar</string>
     <string name="edit">Editar</string>
     <string name="edit_comment">Editar Comentário</string>
+    <string name="edit_your_comment">Editar Seu Comentário</string>
     <string name="edit_persona">Editar Persona</string>
     <string name="edit_persona_trait_title">Editar o Traço da Sua Persona</string>
     <string name="edit_post">Editar Postagem</string>
@@ -132,4 +133,5 @@
     <string name="your_personas">Suas Personas</string>
     <string name="thoughts">Pensamentos</string>
     <string name="crowd">Galera</string>
+    <string name="really_quiet_in_here">Tá bem quieto aqui.</string>
 </resources>

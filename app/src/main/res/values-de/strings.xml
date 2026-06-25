@@ -40,6 +40,7 @@
     <string name="dismiss">Verwerfen</string>
     <string name="edit">Bearbeiten</string>
     <string name="edit_comment">Kommentar bearbeiten</string>
+    <string name="edit_your_comment">Deinen Kommentar bearbeiten</string>
     <string name="edit_persona">Persona bearbeiten</string>
     <string name="edit_persona_trait_title">Eigenschaft deiner Persona bearbeiten</string>
     <string name="edit_post">Beitrag bearbeiten</string>
@@ -132,4 +133,5 @@
     <string name="your_personas">Deine Personas</string>
     <string name="thoughts">Gedanken</string>
     <string name="crowd">Menge</string>
+    <string name="really_quiet_in_here">Es ist wirklich ruhig hier.</string>
 </resources>

@@ -40,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -88,16 +89,14 @@ fun InspectPostScreen(
     val repository = application.repository
     val viewModel: InspectPostViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { InspectPostViewModel(repository, application) }
+            initializer { InspectPostViewModel(repository, application, postId) }
         }
     )
 
     val thought = remember(postId, thoughts) { thoughts[postId] } ?: return
     val thoughtAuthor = crowd[thought.authorId] ?: return
 
-    LaunchedEffect(postId) {
-        viewModel.fetchComments(postId)
-    }
+    val comments by viewModel.comments.collectAsStateWithLifecycle()
 
     var isRequestingComment by remember { mutableStateOf(requestComment) }
     var editingComment by remember { mutableStateOf<CommentEntity?>(null) }
@@ -134,8 +133,8 @@ fun InspectPostScreen(
                 )
             }
 
-            if (viewModel.hasLoadedComments)
-                items(viewModel.comments, key = { it.id }) { comment ->
+            if (comments.isNotEmpty())
+                items(comments, key = { it.id }) { comment ->
                     val commentAuthor = crowd[comment.authorId] ?: return@items
                     Comment(
                         comment,
@@ -151,6 +150,18 @@ fun InspectPostScreen(
                             viewModel.deleteComment(it)
                         },
                         rootNavController
+                    )
+                }
+            else
+                item {
+                    Text(
+                        text = stringResource(R.string.really_quiet_in_here),
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(horizontal = 48.dp)
+                            .padding(top = 128.dp)
+                            .fillMaxWidth(),
                     )
                 }
 
@@ -350,7 +361,12 @@ fun EditCommentModal(
                 .padding(horizontal = 24.dp)
         ) {
             Text(
-                text = stringResource(R.string.add_a_comment),
+                text = stringResource(
+                    if (editingComment == null)
+                        R.string.add_a_comment
+                    else
+                        R.string.edit_your_comment
+                ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )

@@ -39,6 +39,7 @@
     <string name="dismiss">Dismiss</string>
     <string name="edit">Edit</string>
     <string name="edit_comment">Edit Comment</string>
+    <string name="edit_your_comment">Edit Your Comment</string>
     <string name="edit_persona">Edit Persona</string>
     <string name="edit_persona_trait_title">Edit The Trait Of Your Persona</string>
     <string name="edit_post">Edit Post</string>
@@ -131,4 +132,5 @@
     <string name="your_personas">Your Personas</string>
     <string name="thoughts">Thoughts</string>
     <string name="crowd">Crowd</string>
+    <string name="really_quiet_in_here">It\'s really quiet in here.</string>
 </resources>

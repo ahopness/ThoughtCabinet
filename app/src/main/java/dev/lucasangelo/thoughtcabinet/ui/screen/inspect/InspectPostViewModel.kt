@@ -9,22 +9,23 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppRepository
 import dev.lucasangelo.thoughtcabinet.data.CommentEntity
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class InspectPostViewModel (
     private val repository: AppRepository,
-    application: Application
+    application: Application,
+    val postId: Long
 ) : AndroidViewModel(application) {
-    var hasLoadedComments by mutableStateOf(false)
-        private set
-    var comments = mutableStateListOf<CommentEntity>()
-    fun fetchComments(postId: Long) = viewModelScope.launch {
-        repository.getAllCommentsOf(postId).collect { list ->
-            comments.clear()
-            comments.addAll(list)
-            hasLoadedComments = true
-        }
-    }
+    val comments: StateFlow<List<CommentEntity>> = repository.getAllCommentsOf(postId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     fun insertComment(atPost: Long, ofAuthor: Long, content: String) = viewModelScope.launch {
         repository.insertComment(atPost, ofAuthor, content)

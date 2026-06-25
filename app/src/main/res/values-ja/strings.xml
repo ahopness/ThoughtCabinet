@@ -40,6 +40,7 @@
     <string name="dismiss">キャンセル</string>
     <string name="edit">編集</string>
     <string name="edit_comment">コメントを編集</string>
+    <string name="edit_your_comment">コメントを編集</string>
     <string name="edit_persona">ペルソナを編集</string>
     <string name="edit_persona_trait_title">ペルソナの特徴を編集</string>
     <string name="edit_post">投稿を編集</string>
@@ -132,4 +133,5 @@
     <string name="your_personas">あなたのペルソナ</string>
     <string name="thoughts">思考</string>
     <string name="crowd">群衆</string>
+    <string name="really_quiet_in_here">ここは本当に静かですね。</string>
 </resources>

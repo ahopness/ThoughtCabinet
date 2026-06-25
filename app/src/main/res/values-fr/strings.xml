@@ -40,6 +40,7 @@
     <string name="dismiss">Ignorer</string>
     <string name="edit">Modifier</string>
     <string name="edit_comment">Modifier le Commentaire</string>
+    <string name="edit_your_comment">Modifier Votre Commentaire</string>
     <string name="edit_persona">Modifier la Persona</string>
     <string name="edit_persona_trait_title">Modifier le Trait de Votre Persona</string>
     <string name="edit_post">Modifier la Publication</string>
@@ -132,4 +133,5 @@
     <string name="your_personas">Vos Personas</string>
     <string name="thoughts">Pensées</string>
     <string name="crowd">Foule</string>
+    <string name="really_quiet_in_here">C\'est vraiment très calme ici.</string>
 </resources>

@@ -40,6 +40,7 @@
     <string name="dismiss">Отмена</string>
     <string name="edit">Изменить</string>
     <string name="edit_comment">Изменить комментарий</string>
+    <string name="edit_your_comment">Изменить ваш комментарий</string>
     <string name="edit_persona">Изменить персону</string>
     <string name="edit_persona_trait_title">Изменить черту вашей персоны</string>
     <string name="edit_post">Изменить пост</string>
@@ -132,4 +133,5 @@
     <string name="your_personas">Ваши Персоны</string>
     <string name="thoughts">Мысли</string>
     <string name="crowd">Толпа</string>
+    <string name="really_quiet_in_here">Здесь действительно очень тихо.</string>
 </resources>

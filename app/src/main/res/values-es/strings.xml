@@ -40,6 +40,7 @@
     <string name="dismiss">Descartar</string>
     <string name="edit">Editar</string>
     <string name="edit_comment">Editar Comentario</string>
+    <string name="edit_your_comment">Editar Tu Comentario</string>
     <string name="edit_persona">Editar Persona</string>
     <string name="edit_persona_trait_title">Editar Rasgo de Tu Persona</string>
     <string name="edit_post">Editar Publicación</string>
@@ -132,4 +133,5 @@
     <string name="your_personas">Tus Personas</string>
     <string name="thoughts">Pensamientos</string>
     <string name="crowd">Multitud</string>
+    <string name="really_quiet_in_here">Está muy tranquilo aquí.</string>
 </resources>
