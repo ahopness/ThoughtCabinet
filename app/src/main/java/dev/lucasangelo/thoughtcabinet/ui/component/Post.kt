@@ -580,8 +580,11 @@ fun PostContentMediaItem(
         }
         VideoPlayerSurface(
             playerState = playerState,
-            surfaceType = SurfaceType.SurfaceView,
-            contentScale = contentScale,
+            contentScale = // BUG
+                if (contentScale == ContentScale.Crop)
+                    ContentScale.Fit
+                else
+                    contentScale,
             modifier = modifier
         )
     } else {
