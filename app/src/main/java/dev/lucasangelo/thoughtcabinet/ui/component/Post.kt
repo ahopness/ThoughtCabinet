@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -78,6 +79,7 @@ import io.github.kdroidfilter.composemediaplayer.InterruptionMode
 import io.github.kdroidfilter.composemediaplayer.SurfaceType
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
 import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
+import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -131,7 +133,7 @@ fun Post(
     }
 
     val graphicsLayer = rememberGraphicsLayer()
-    val captureModifier = Modifier.drawWithContent {
+    val captureModifier = modifier.drawWithContent {
         graphicsLayer.record {
             this@drawWithContent.drawContent()
         }
@@ -139,54 +141,52 @@ fun Post(
     }
 
 
-    Column(modifier.fillMaxWidth()) {
+    Column(captureModifier.fillMaxWidth()) {
         var backgroundColor by remember { mutableStateOf(Color.Black) }
-        Column(captureModifier) {
-            repostChain.entries.reversed().forEach { entry ->
-                val repostBackgroundColor = Color(entry.key.colorTheme).darken()
-                PostHeader(
-                    entry.key,
-                    entry.value,
-                    showOptions = false,
-                    onDeletionRequest,
-                    onBlockPersonaRequest,
-                    rootNavController,
-                    onClickRoute =
-                        if (!isStandalone)
-                            InspectPostRoute(postEntity.id)
-                        else
-                            InspectPostRoute(entry.value.id),
-                    modifier = Modifier.background(repostBackgroundColor)
-                )
-
-                PostContent(
-                    entry.value,
-                    rootNavController,
-                    modifier = Modifier.background(repostBackgroundColor)
-                )
-            }
-
-            backgroundColor = Color(authorEntity.colorTheme).darken()
+        repostChain.entries.reversed().forEach { entry ->
+            val repostBackgroundColor = Color(entry.key.colorTheme).darken()
             PostHeader(
-                authorEntity,
-                postEntity,
-                onDeletionRequest = onDeletionRequest,
-                onBlockPersonaRequest = onBlockPersonaRequest,
-                rootNavController = rootNavController,
+                entry.key,
+                entry.value,
+                showOptions = false,
+                onDeletionRequest,
+                onBlockPersonaRequest,
+                rootNavController,
                 onClickRoute =
                     if (!isStandalone)
                         InspectPostRoute(postEntity.id)
                     else
-                        null,
-                modifier = Modifier.background(backgroundColor)
+                        InspectPostRoute(entry.value.id),
+                modifier = Modifier.background(repostBackgroundColor)
             )
 
             PostContent(
-                postEntity,
+                entry.value,
                 rootNavController,
-                modifier = Modifier.background(backgroundColor)
+                modifier = Modifier.background(repostBackgroundColor)
             )
         }
+
+        backgroundColor = Color(authorEntity.colorTheme).darken()
+        PostHeader(
+            authorEntity,
+            postEntity,
+            onDeletionRequest = onDeletionRequest,
+            onBlockPersonaRequest = onBlockPersonaRequest,
+            rootNavController = rootNavController,
+            onClickRoute =
+                if (!isStandalone)
+                    InspectPostRoute(postEntity.id)
+                else
+                    null,
+            modifier = Modifier.background(backgroundColor)
+        )
+
+        PostContent(
+            postEntity,
+            rootNavController,
+            modifier = Modifier.background(backgroundColor)
+        )
 
         PostActions(
             isStandalone,
