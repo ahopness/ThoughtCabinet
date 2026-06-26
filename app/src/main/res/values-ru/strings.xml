@@ -135,4 +135,5 @@
     <string name="crowd">Толпа</string>
     <string name="really_quiet_in_here">Здесь действительно очень тихо.</string>
     <string name="error_note_only_pictures_use_reel">Если вы хотите опубликовать только изображения, используйте вместо этого Галерею!</string>
+    <string name="export_media_to_local_storage">Экспортировать медиа в локальное хранилище</string>
 </resources>

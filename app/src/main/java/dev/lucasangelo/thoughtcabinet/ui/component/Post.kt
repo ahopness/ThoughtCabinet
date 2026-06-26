@@ -311,6 +311,22 @@ fun PostHeader(
                         onDismissRequest()
                     },
                 )
+
+                if (postEntity.media.isNotEmpty())
+                    CleanIconButton(
+                        action = stringResource(R.string.export_media_to_local_storage),
+                        icon = R.drawable.icon_copy,
+                        onClick = {
+                            postEntity.media.forEach { coroutineScope.launch {
+                                exportMediaToLocalStorage(
+                                    context,
+                                    sourceFile = File(context.filesDir, mediaDir + it),
+                                    fileName = it
+                                )
+                            } }
+                            onDismissRequest()
+                        },
+                    )
             }
         }
     }

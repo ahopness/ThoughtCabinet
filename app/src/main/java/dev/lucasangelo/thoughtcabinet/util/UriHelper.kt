@@ -1,8 +1,13 @@
 package dev.lucasangelo.thoughtcabinet.util
 
+import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.webkit.MimeTypeMap
+import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -81,3 +86,35 @@ suspend fun cleanupDrafts(
 suspend fun cleanupLinkMetadata(
     context: Context,
 ) = cleanupFolder(context, linkMetadataDir)
+
+suspend fun exportMediaToLocalStorage(context: Context, sourceFile: File, fileName: String): Uri? =
+withContext(Dispatchers.IO) {
+    val resolver = context.contentResolver
+    val contentValues = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+        put(MediaStore.MediaColumns.MIME_TYPE, context.contentResolver.getType(sourceFile.toUri()))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM)
+        }
+    }
+
+    val collectionUri =
+        if (fileName.endsWith("mp4"))
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        else
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
+    val destinationUri = resolver.insert(collectionUri, contentValues) ?: return@withContext null
+
+    try {
+        resolver.openOutputStream(destinationUri)?.use { outputStream ->
+            sourceFile.inputStream().use { inputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+        destinationUri
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}

@@ -135,4 +135,5 @@
     <string name="crowd">군중</string>
     <string name="really_quiet_in_here">여긴 정말 조용하네요.</string>
     <string name="error_note_only_pictures_use_reel">사진만 올리려면 대신 릴을 사용하세요!</string>
+    <string name="export_media_to_local_storage">로컬 저장소로 미디어 내보내기</string>
 </resources>
