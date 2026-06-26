@@ -1,5 +1,10 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -603,6 +608,8 @@ fun PostActions(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    val vibrator = remember { getVibrator(context) }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -627,7 +634,10 @@ fun PostActions(
             contentDescription = stringResource(R.string.like),
             modifier = Modifier
                 .size(postIconSize)
-                .clickable(onClick = { onLikeRequested(postEntity) })
+                .clickable(onClick = {
+                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+                    onLikeRequested(postEntity)
+                })
         )
         Icon(
             painter = painterResource(R.drawable.icon_repost),
@@ -649,7 +659,10 @@ fun PostActions(
             contentDescription = stringResource(R.string.bookmark),
             modifier = Modifier
                 .size(postIconSize)
-                .clickable(onClick = { onBookmarkRequested(postEntity) })
+                .clickable(onClick = {
+                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+                    onBookmarkRequested(postEntity)
+                })
         )
         Icon(
             painter = painterResource(R.drawable.icon_share),
@@ -667,5 +680,16 @@ fun PostActions(
                     )
                 } } )
         )
+    }
+}
+fun getVibrator(context: Context): Vibrator {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val vibratorManager =
+            context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        return vibratorManager.defaultVibrator
+    } else {
+        @Suppress("DEPRECATION")
+        return context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
     }
 }
