@@ -41,6 +41,7 @@ fun AuthorSelect(
     onAuthorChanged: (Long) -> Unit,
     onAuthorColorAcquired: (Color) -> Unit,
     crowd: List<PersonaEntity>,
+    borderColor: Color = Color.Gray,
     modifier: Modifier = Modifier,
 ) {
     val selectedPersona = remember(authorId) {
@@ -53,7 +54,7 @@ fun AuthorSelect(
         modifier = modifier,
         shape = RoundedCornerShape(6.dp),
         contentPadding = PaddingValues(4.dp),
-        border = BorderStroke(width = 1.dp, color = Color.Gray),
+        border = BorderStroke(width = 1.dp, color = borderColor),
         onClick = { showBottomSheet = true },
     ) {
         Row(

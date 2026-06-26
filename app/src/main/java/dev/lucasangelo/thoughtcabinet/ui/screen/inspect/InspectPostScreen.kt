@@ -12,20 +12,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +36,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -65,6 +64,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.floatingTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.pagerScaffoldContentSpacing
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.formatInstant
+import dev.lucasangelo.thoughtcabinet.util.lighten
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -371,20 +371,33 @@ fun EditCommentModal(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            var authorSelectIsError by remember { mutableStateOf(false) }
             AuthorSelect(
                 commentAuthor,
-                onAuthorChanged = { commentAuthor = it },
-                onAuthorColorAcquired = { commentCreationBackgroundColor = it },
+                onAuthorChanged = {
+                    commentAuthor = it
+                    authorSelectIsError = false
+                },
+                onAuthorColorAcquired = {
+                    commentCreationBackgroundColor = it
+                },
                 crowd.values.toList(),
+                borderColor =
+                    if (authorSelectIsError)
+                        Color.Red.lighten(.85f)
+                    else
+                        Color.Gray,
                 modifier = Modifier.fillMaxWidth()
             )
 
+            var contentIsError by remember { mutableStateOf(false) }
             OutlinedTextField(
                 value = commentContent,
                 onValueChange = { commentContent = it },
                 label = { Text(stringResource(R.string.comment_input_label)) },
                 maxLines = 6,
                 minLines = 4,
+                isError = contentIsError,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -392,14 +405,15 @@ fun EditCommentModal(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                //OutlinedButton(onClick = onDismissRequest) { Text("Dismiss") }
                 Button(onClick = {
                     if (commentAuthor == null) {
-                        rootShowSnackbar(context.getString(R.string.error_comment_needs_author))
+//                        rootShowSnackbar(context.getString(R.string.error_comment_needs_author))
+                        authorSelectIsError = true
                         return@Button
                     }
                     if (commentContent.isEmpty()) {
-                        rootShowSnackbar(context.getString(R.string.error_comment_cannot_empty))
+//                        rootShowSnackbar(context.getString(R.string.error_comment_cannot_empty))
+                        contentIsError = true
                         return@Button
                     }
 
