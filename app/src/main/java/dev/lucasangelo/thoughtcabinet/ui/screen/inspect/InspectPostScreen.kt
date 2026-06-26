@@ -277,7 +277,8 @@ fun Comment(
                     .clickable(onClick = { showOptionsModal = true })
             )
             Text(
-                text = formatInstant(comment.createdAt, "MMMM d"),
+                text = formatInstant(comment.createdAt, "MMMM d")
+                    .replaceFirstChar { it.titlecase() },
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(0.5f)
             )
@@ -407,7 +408,7 @@ fun EditCommentModal(
             ) {
                 Button(onClick = {
                     if (commentAuthor == null) {
-//                        rootShowSnackbar(context.getString(R.string.error_comment_needs_author))
+//                        rootShowSnackbar(context.getString(R.string.error_comment_needs_author)) // NOTE: renders below bottom sheet
                         authorSelectIsError = true
                         return@Button
                     }

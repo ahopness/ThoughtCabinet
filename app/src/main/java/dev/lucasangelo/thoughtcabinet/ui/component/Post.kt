@@ -246,7 +246,8 @@ fun PostHeader(
                     text = authorEntity.name,
                 )
                 Text(
-                    text = formatInstant(postEntity.createdAt, "MMMM d"),
+                    text = formatInstant(postEntity.createdAt, "MMMM d")
+                        .replaceFirstChar { it.titlecase() },
                     color = Color.White.copy(0.5f)
                 )
             }
