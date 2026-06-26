@@ -1,7 +1,5 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
-import android.graphics.Picture
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +29,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,15 +37,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.drawscope.draw
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -68,8 +61,8 @@ import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectMediaListRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostRoute
 import dev.lucasangelo.thoughtcabinet.util.LinkMetadata
-import dev.lucasangelo.thoughtcabinet.util.createBitmapFromPicture
 import dev.lucasangelo.thoughtcabinet.util.darken
+import dev.lucasangelo.thoughtcabinet.util.exportMediaToLocalStorage
 import dev.lucasangelo.thoughtcabinet.util.fetchLinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.formatInstant
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
@@ -77,6 +70,7 @@ import dev.lucasangelo.thoughtcabinet.util.saveBitmapToCache
 import dev.lucasangelo.thoughtcabinet.util.shareImage
 import io.github.kdroidfilter.composemediaplayer.AudioMode
 import io.github.kdroidfilter.composemediaplayer.InterruptionMode
+import io.github.kdroidfilter.composemediaplayer.SurfaceType
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
 import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
 import kotlinx.coroutines.launch
@@ -264,6 +258,7 @@ fun PostHeader(
     }
 
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState()
     val onDismissRequest: () -> Unit = {
         coroutineScope.launch {
@@ -311,7 +306,6 @@ fun PostHeader(
                 CleanIconButton(
                     action = if (authorEntity.blocked) stringResource(R.string.unblock_persona) else stringResource(R.string.block_persona),
                     icon = R.drawable.icon_block,
-    //                color = Color.Red,
                     onClick = {
                         onBlockPersonaRequest(authorEntity)
                         onDismissRequest()
@@ -386,31 +380,39 @@ fun PostContentNote(
             )
         }
 
+        val context = LocalContext.current
         if (postEntity.media.isNotEmpty())
-            Grid(
-                config = {
-                    if (postEntity.media.size == 1)
-                        repeat(1){ column(1f) }
-                    else
+            if (postEntity.media.size > 1)
+                Grid(
+                    config = {
                         repeat(2){ column(0.5f) }
-                    gap(0.dp)
-                    flow = GridFlow.Row
-                },
-                modifier = Modifier.fillMaxSize()
-            ) {
-                val context = LocalContext.current
-                postEntity.media.forEachIndexed { index, media ->
-                    PostContentMediaItem(
-                        mediaFile = remember(media) {
-                            File(context.filesDir, mediaDir + media)
-                        },
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .aspectRatio(1f / 1f)
-                            .clickable(onClick = { onMediaClicked(postEntity.media, index) })
-                    )
+                        gap(0.dp)
+                        flow = GridFlow.Row
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    postEntity.media.forEachIndexed { index, media ->
+                        PostContentMediaItem(
+                            mediaFile = remember(media) {
+                                File(context.filesDir, mediaDir + media)
+                            },
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .clickable(onClick = { onMediaClicked(postEntity.media, index) })
+                                .aspectRatio(1f / 1f)
+                        )
+                    }
                 }
-            }
+            else
+                PostContentMediaItem(
+                    mediaFile = remember(postEntity.media[0]) {
+                        File(context.filesDir, mediaDir + postEntity.media[0])
+                    },
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = { onMediaClicked(postEntity.media, 0) })
+                )
     }
 }
 @Composable
@@ -557,11 +559,8 @@ fun PostContentMediaItem(
         }
         VideoPlayerSurface(
             playerState = playerState,
-            contentScale =
-                if (contentScale == ContentScale.Crop) // BUG
-                    ContentScale.Fit
-                else
-                    contentScale,
+            surfaceType = SurfaceType.SurfaceView,
+            contentScale = contentScale,
             modifier = modifier
         )
     } else {
