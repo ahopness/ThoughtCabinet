@@ -1,7 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.edit
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,14 +21,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -51,13 +48,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
-import coil3.compose.AsyncImage
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
@@ -73,12 +70,9 @@ import dev.lucasangelo.thoughtcabinet.ui.component.pagerScaffoldContentSpacing
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
-import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
-import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.io.File
-import kotlin.math.log
 
 @Serializable
 data class EditPostRoute(val id: Long?, val repostOf: Long? = null)
@@ -209,7 +203,7 @@ fun EditPostTypeSelect(
             DeleteConfirmationDialog(
                 text = stringResource(R.string.delete_post_content_warning),
                 onDismiss = { pendingPostTypeChange = null },
-                onConfirm = { onPostTypeChanged(pendingPostTypeChange!!) },
+                onConfirm = { onPostTypeChanged(it) },
             )
         }
     }
@@ -551,7 +545,10 @@ fun EditPostFinishButton(
                 }
             } else {
                 if (viewModel.postContent.trim().isEmpty()) {
-                    rootShowSnackbar(context.getString(R.string.error_post_cannot_empty))
+                    if (viewModel.postMedia.isNotEmpty())
+                        rootShowSnackbar(context.getString(R.string.error_note_only_pictures_use_reel))
+                    else
+                        rootShowSnackbar(context.getString(R.string.error_post_cannot_empty))
                     return@launch
                 }
             }

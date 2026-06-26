@@ -134,4 +134,5 @@
     <string name="thoughts">Pensamentos</string>
     <string name="crowd">Galera</string>
     <string name="really_quiet_in_here">Tá bem quieto aqui.</string>
+    <string name="error_note_only_pictures_use_reel">Se você quer apenas postar fotos, use um reel em vez disso!</string>
 </resources>

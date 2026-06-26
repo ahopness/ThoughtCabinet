@@ -133,4 +133,5 @@
     <string name="thoughts">Thoughts</string>
     <string name="crowd">Crowd</string>
     <string name="really_quiet_in_here">It\'s really quiet in here.</string>
+    <string name="error_note_only_pictures_use_reel">If you only want to post pictures, use a Reel instead!</string>
 </resources>

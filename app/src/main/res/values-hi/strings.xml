@@ -133,4 +133,5 @@
     <string name="thoughts">विचार</string>
     <string name="crowd">भीड़</string>
     <string name="really_quiet_in_here">यहाँ सच में बहुत शांति है।</string>
+    <string name="error_note_only_pictures_use_reel">यदि आप केवल तस्वीरें पोस्ट करना चाहते हैं, तो इसके बजाय रील का उपयोग करें!</string>
 </resources>
