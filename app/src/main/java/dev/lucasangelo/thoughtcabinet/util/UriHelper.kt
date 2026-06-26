@@ -87,7 +87,7 @@ suspend fun cleanupLinkMetadata(
     context: Context,
 ) = cleanupFolder(context, linkMetadataDir)
 
-suspend fun exportMediaToLocalStorage(context: Context, sourceFile: File, fileName: String): Uri? =
+suspend fun saveMediaToLocalStorage(context: Context, sourceFile: File, fileName: String): Uri? =
 withContext(Dispatchers.IO) {
     val resolver = context.contentResolver
     val contentValues = ContentValues().apply {

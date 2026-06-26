@@ -135,5 +135,5 @@
     <string name="crowd">Foule</string>
     <string name="really_quiet_in_here">C\'est vraiment très calme ici.</string>
     <string name="error_note_only_pictures_use_reel">Si vous voulez seulement publier des photos, utilisez un reel à la place !</string>
-    <string name="export_media_to_local_storage">Exporter les médias vers le stockage local</string>
+    <string name="save_media_to_local_storage">Enregistrer Les Médias Dans Le Stockage Local</string>
 </resources>

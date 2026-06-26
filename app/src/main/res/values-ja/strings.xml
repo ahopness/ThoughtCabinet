@@ -135,5 +135,5 @@
     <string name="crowd">群衆</string>
     <string name="really_quiet_in_here">ここは本当に静かですね。</string>
     <string name="error_note_only_pictures_use_reel">画像だけを投稿したい場合は、代わりにリールを使用してください！</string>
-    <string name="export_media_to_local_storage">メディアをローカルストレージにエクスポート</string>
+    <string name="save_media_to_local_storage">メディアをローカルストレージに保存</string>
 </resources>

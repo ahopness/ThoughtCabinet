@@ -67,7 +67,7 @@ import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostRoute
 import dev.lucasangelo.thoughtcabinet.util.LinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.darken
-import dev.lucasangelo.thoughtcabinet.util.exportMediaToLocalStorage
+import dev.lucasangelo.thoughtcabinet.util.saveMediaToLocalStorage
 import dev.lucasangelo.thoughtcabinet.util.fetchLinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.formatInstant
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
@@ -319,11 +319,11 @@ fun PostHeader(
 
                 if (postEntity.media.isNotEmpty())
                     CleanIconButton(
-                        action = stringResource(R.string.export_media_to_local_storage),
+                        action = stringResource(R.string.save_media_to_local_storage),
                         icon = R.drawable.icon_copy,
                         onClick = {
                             postEntity.media.forEach { coroutineScope.launch {
-                                exportMediaToLocalStorage(
+                                saveMediaToLocalStorage(
                                     context,
                                     sourceFile = File(context.filesDir, mediaDir + it),
                                     fileName = it

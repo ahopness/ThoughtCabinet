@@ -135,5 +135,5 @@
     <string name="crowd">Multitud</string>
     <string name="really_quiet_in_here">Está muy tranquilo aquí.</string>
     <string name="error_note_only_pictures_use_reel">¡Si solo quieres publicar fotos, usa un reel en su lugar!</string>
-    <string name="export_media_to_local_storage">Exportar archivos multimedia al almacenamiento local</string>
+    <string name="save_media_to_local_storage">Guardar Archivos Multimedia En El Almacenamiento Local</string>
 </resources>
