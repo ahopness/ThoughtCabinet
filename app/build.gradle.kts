@@ -20,8 +20,8 @@ android {
         applicationId = "dev.lucasangelo.thoughtcabinet"
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
-        versionName = "v0.99999b"
+        versionCode = 6
+        versionName = "v0.999999b"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
