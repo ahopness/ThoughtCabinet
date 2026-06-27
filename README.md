@@ -7,7 +7,7 @@
 
 This is a diary disguised as a feed, you can freely post your thoughts here without the fear of other’s reactions and algorithms feeding off of you.
 
-Made with Jetpack Compose, Jetpack Room, [Coil](https://github.com/coil-kt/coil), [Compose Media Player](https://github.com/kdroidFilter/ComposeMediaPlayer) & [Colorpicker Compose](https://github.com/skydoves/colorpicker-compose).
+Made with Compose, [Room](https://developer.android.com/training/data-storage/room), [Coil](https://github.com/coil-kt/coil), [Compose Media Player](https://github.com/kdroidFilter/ComposeMediaPlayer) & [Colorpicker Compose](https://github.com/skydoves/colorpicker-compose).
 
 MORE AT: [https://lucasangelo.dev/thought-cabinet/](https://lucasangelo.dev/thought-cabinet/)
 

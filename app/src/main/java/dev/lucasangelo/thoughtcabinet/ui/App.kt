@@ -49,7 +49,7 @@ import dev.lucasangelo.thoughtcabinet.viewmodel.AppViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun AppScreen() {
+fun App() {
     val navController = rememberNavController()
 
     val snackbarScope = rememberCoroutineScope()
