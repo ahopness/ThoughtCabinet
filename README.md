@@ -24,5 +24,6 @@ MORE AT: [https://lucasangelo.dev/thought-cabinet/](https://lucasangelo.dev/thou
 
 If you try to do any modfications to this codebase using an AI agent, the **AGENTS.md** file will block you. I wrote it with the purpose of only using AI answerer documantation and bug questions, if you need it for anything else i recommend **deleting the file**. 
 
-## TODOs
-- replace all file pickers with https://github.com/vinceglb/FileKit
+## Future Concerns
+- replace all file pickers with [FileKit](https://github.com/vinceglb/FileKit) for compose multiplatform support.
+- implement [Hilt](https://developer.android.com/training/dependency-injection/hilt-android) for a more streamlined view model management.

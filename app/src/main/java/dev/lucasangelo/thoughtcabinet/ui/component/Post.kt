@@ -5,7 +5,6 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +54,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import dev.lucasangelo.thoughtcabinet.MainApplication
@@ -68,18 +70,17 @@ import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostRoute
 import dev.lucasangelo.thoughtcabinet.util.LinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.darken
-import dev.lucasangelo.thoughtcabinet.util.saveMediaToLocalStorage
 import dev.lucasangelo.thoughtcabinet.util.fetchLinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.formatInstant
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
 import dev.lucasangelo.thoughtcabinet.util.saveBitmapToCache
+import dev.lucasangelo.thoughtcabinet.util.saveMediaToLocalStorage
 import dev.lucasangelo.thoughtcabinet.util.shareImage
+import dev.lucasangelo.thoughtcabinet.viewmodel.PostViewModel
 import io.github.kdroidfilter.composemediaplayer.AudioMode
 import io.github.kdroidfilter.composemediaplayer.InterruptionMode
-import io.github.kdroidfilter.composemediaplayer.SurfaceType
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
 import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
-import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -101,22 +102,25 @@ fun Post(
 
     val context = LocalContext.current
     val application = context.applicationContext as MainApplication
-    val repository = application.repository
+    val viewModel: PostViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer { PostViewModel(application.repository) }
+        }
+    )
 
-    // NOTE: direct calls to repository is a bad practice, doing it anyway because it's only for simple tasks
-    val onDeletionRequest: (PostEntity) -> Unit = { coroutineScope.launch {
-        repository.deletePost(it)
+    val onDeletionRequest: (PostEntity) -> Unit = {
+        viewModel.deletePost(it)
         onPostDeleted()
-    } }
-    val onBlockPersonaRequest: (PersonaEntity) -> Unit = { coroutineScope.launch {
-        repository.blockPersona(it)
-    } }
-    val onLikeRequested: (PostEntity) -> Unit = { coroutineScope.launch {
-        repository.likePost(it)
-    } }
-    val onBookmarkRequested: (PostEntity) -> Unit = { coroutineScope.launch {
-        repository.bookmarkPost(it)
-    } }
+    }
+    val onBlockPersonaRequest: (PersonaEntity) -> Unit = {
+        viewModel.blockPersona(it)
+    }
+    val onLikeRequested: (PostEntity) -> Unit = {
+        viewModel.likePost(it)
+    }
+    val onBookmarkRequested: (PostEntity) -> Unit = {
+        viewModel.bookmarkPost(it)
+    }
 
     val postEntity = thoughts[postId] ?: return
     val authorEntity = crowd[postEntity.authorId] ?: return
