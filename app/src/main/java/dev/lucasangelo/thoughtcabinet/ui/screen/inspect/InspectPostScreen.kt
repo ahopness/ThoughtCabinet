@@ -65,6 +65,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.pagerScaffoldContentSpacing
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.formatInstant
 import dev.lucasangelo.thoughtcabinet.util.lighten
+import dev.lucasangelo.thoughtcabinet.viewmodel.InspectPostViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 

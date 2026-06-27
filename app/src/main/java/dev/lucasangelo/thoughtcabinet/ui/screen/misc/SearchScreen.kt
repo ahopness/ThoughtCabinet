@@ -45,6 +45,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.Post
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostRoute
+import dev.lucasangelo.thoughtcabinet.viewmodel.SearchViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable

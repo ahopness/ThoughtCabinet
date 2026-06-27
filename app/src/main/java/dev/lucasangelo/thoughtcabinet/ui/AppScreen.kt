@@ -45,6 +45,7 @@ import dev.lucasangelo.thoughtcabinet.ui.screen.misc.OnboardingRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.OnboardingScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.SearchRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.SearchScreen
+import dev.lucasangelo.thoughtcabinet.viewmodel.AppViewModel
 import kotlinx.coroutines.launch
 
 @Composable

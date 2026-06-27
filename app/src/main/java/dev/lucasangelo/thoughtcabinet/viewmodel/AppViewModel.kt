@@ -1,4 +1,4 @@
-package dev.lucasangelo.thoughtcabinet.ui
+package dev.lucasangelo.thoughtcabinet.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 
-class AppViewModel(private val repository: AppRepository) : ViewModel() {
+class AppViewModel(
+    private val repository: AppRepository
+) : ViewModel() {
     val thoughts: StateFlow<List<PostEntity>> = repository.getAllPosts()
         .stateIn(
             scope = viewModelScope,

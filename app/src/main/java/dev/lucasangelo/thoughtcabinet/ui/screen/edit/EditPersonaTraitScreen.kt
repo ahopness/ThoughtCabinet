@@ -51,6 +51,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
 import dev.lucasangelo.thoughtcabinet.util.traitsDir
+import dev.lucasangelo.thoughtcabinet.viewmodel.EditPersonaTraitViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.io.File

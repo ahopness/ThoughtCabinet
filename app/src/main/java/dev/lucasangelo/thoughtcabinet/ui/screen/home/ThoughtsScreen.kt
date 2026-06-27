@@ -60,6 +60,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.SearchRoute
 import dev.lucasangelo.thoughtcabinet.util.cleanupLinkMetadata
+import dev.lucasangelo.thoughtcabinet.viewmodel.ThoughtsViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

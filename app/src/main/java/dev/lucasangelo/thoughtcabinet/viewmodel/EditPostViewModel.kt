@@ -1,4 +1,4 @@
-package dev.lucasangelo.thoughtcabinet.ui.screen.edit
+package dev.lucasangelo.thoughtcabinet.viewmodel
 
 import android.app.Application
 import android.net.Uri

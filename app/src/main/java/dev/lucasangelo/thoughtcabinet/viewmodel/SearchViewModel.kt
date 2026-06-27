@@ -1,9 +1,10 @@
-package dev.lucasangelo.thoughtcabinet.ui.screen.misc
+package dev.lucasangelo.thoughtcabinet.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,7 +29,7 @@ class SearchViewModel (
         _searchQuery.value = to
     }
 
-    @OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val searchResults = searchQuery
         .debounce(300L)
         .filter {

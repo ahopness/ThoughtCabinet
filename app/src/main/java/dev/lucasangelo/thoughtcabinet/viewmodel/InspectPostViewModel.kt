@@ -1,4 +1,4 @@
-package dev.lucasangelo.thoughtcabinet.ui.screen.inspect
+package dev.lucasangelo.thoughtcabinet.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

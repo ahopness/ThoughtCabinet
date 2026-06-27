@@ -83,6 +83,7 @@ import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
 import dev.lucasangelo.thoughtcabinet.util.fetchLinkMetadata
 import dev.lucasangelo.thoughtcabinet.util.traitsDir
+import dev.lucasangelo.thoughtcabinet.viewmodel.InspectPersonaViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.io.File

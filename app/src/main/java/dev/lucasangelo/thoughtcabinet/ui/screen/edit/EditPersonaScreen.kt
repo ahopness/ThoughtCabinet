@@ -50,6 +50,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
 import dev.lucasangelo.thoughtcabinet.ui.component.PersonaProfilePicture
 import dev.lucasangelo.thoughtcabinet.util.darken
+import dev.lucasangelo.thoughtcabinet.viewmodel.EditPersonaViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch

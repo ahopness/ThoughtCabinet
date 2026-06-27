@@ -70,6 +70,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.pagerScaffoldContentSpacing
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
+import dev.lucasangelo.thoughtcabinet.viewmodel.EditPostViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.io.File
