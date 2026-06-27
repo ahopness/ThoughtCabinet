@@ -48,8 +48,10 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -616,7 +618,7 @@ fun PostActions(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val vibrator = remember { getVibrator(context) }
+    val haptic = LocalHapticFeedback.current
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -643,11 +645,7 @@ fun PostActions(
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-                    } else {
-                        vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-                    }
+                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                     onLikeRequested(postEntity)
                 })
         )
@@ -672,11 +670,7 @@ fun PostActions(
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-                    } else {
-                        vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-                    }
+                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                     onBookmarkRequested(postEntity)
                 })
         )
@@ -696,16 +690,5 @@ fun PostActions(
                     )
                 } } )
         )
-    }
-}
-fun getVibrator(context: Context): Vibrator {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val vibratorManager =
-            context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        return vibratorManager.defaultVibrator
-    } else {
-        @Suppress("DEPRECATION")
-        return context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-
     }
 }
