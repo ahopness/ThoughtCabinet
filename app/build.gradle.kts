@@ -4,24 +4,22 @@ plugins {
 
     id("com.google.devtools.ksp")
 
-    kotlin("plugin.serialization") version "2.0.21"
+    kotlin("plugin.serialization") version "2.4.0"
 }
 
 android {
     namespace = "dev.lucasangelo.thoughtcabinet"
 
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version = release(37)
     }
 
     defaultConfig {
         applicationId = "dev.lucasangelo.thoughtcabinet"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "v1.0rev0"
+        versionCode = 8
+        versionName = "v1.0rc1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
