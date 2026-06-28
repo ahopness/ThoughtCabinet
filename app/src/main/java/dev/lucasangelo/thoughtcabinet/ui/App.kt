@@ -19,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -74,8 +75,8 @@ fun App() {
         }
     )
 
-    val thoughtsList by viewModel.thoughts.collectAsState()
-    val crowdList by viewModel.crowd.collectAsState()
+    val thoughtsList by viewModel.thoughts.collectAsStateWithLifecycle()
+    val crowdList by viewModel.crowd.collectAsStateWithLifecycle()
     val thoughtsMap = remember(thoughtsList) { thoughtsList.associateBy { it.id } }
     val crowdMap = remember(crowdList) { crowdList.associateBy { it.id } }
 
