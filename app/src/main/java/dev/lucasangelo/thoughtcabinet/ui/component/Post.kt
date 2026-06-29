@@ -645,7 +645,7 @@ fun PostActions(
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                    haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
                     onLikeRequested(postEntity)
                 })
         )
@@ -670,7 +670,7 @@ fun PostActions(
             modifier = Modifier
                 .size(postIconSize)
                 .clickable(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                    haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
                     onBookmarkRequested(postEntity)
                 })
         )
