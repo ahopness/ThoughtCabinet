@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import dev.lucasangelo.thoughtcabinet.util.deleteInternalStorageFile
+import dev.lucasangelo.thoughtcabinet.util.linkMetadataDir
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
 import dev.lucasangelo.thoughtcabinet.util.traitsDir
 import kotlinx.coroutines.Dispatchers
@@ -180,8 +181,12 @@ class AppRepository(
     fun getAllPostsBy(authorId: Long) = dao.getAllPostsBy(authorId)
     fun searchPosts(query: String) = dao.searchPosts(query)
     suspend fun deletePost(post: PostEntity) = withContext(Dispatchers.IO) {
-        post.media.forEach {
-            deleteInternalStorageFile(context.filesDir, mediaDir + it)
+        if (post.type == PostType.LINK){
+            deleteInternalStorageFile(context.cacheDir, linkMetadataDir + post.content.hashCode())
+        } else {
+            post.media.forEach {
+                deleteInternalStorageFile(context.filesDir, mediaDir + it)
+            }
         }
 
         dao.deletePost(post)

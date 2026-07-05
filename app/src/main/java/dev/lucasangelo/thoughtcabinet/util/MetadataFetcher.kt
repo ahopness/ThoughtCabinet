@@ -36,7 +36,7 @@ suspend fun fetchLinkMetadata(urlString: String, context: Context): LinkMetadata
         val connection = url.openConnection()
 
         // NOTE: some websites dont like default user agents, other do, no idea which one to choose
-        // TODO: replace this is if it ever gives users headaches
+        // TODO: rollback this is if it ever gives users headaches
 //        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
         connection.setRequestProperty("User-Agent", "ThoughtCabinet/1.0 (dev.lucas.angelo@gmail.com)")
 
