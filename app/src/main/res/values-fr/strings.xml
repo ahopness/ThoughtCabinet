@@ -68,7 +68,7 @@
     <string name="go_back">Retour</string>
     <string name="help">Aide</string>
     <string name="like">J\'aime</string>
-    <string name="link_cache_cleaned">Cache des liens vidé avec succès !</string>
+    <string name="link_cache_cleaned">Le nettoyage du cache des liens a réussi ! Redémarrez l\'application pour que les changements prennent effet.</string>
     <string name="loading">Chargement...</string>
     <string name="move_down">Descendre</string>
     <string name="move_left">Mettre à Gauche</string>

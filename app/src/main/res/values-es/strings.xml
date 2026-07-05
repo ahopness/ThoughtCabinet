@@ -68,7 +68,7 @@
     <string name="go_back">Atrás</string>
     <string name="help">Ayuda</string>
     <string name="like">Me Gusta</string>
-    <string name="link_cache_cleaned">¡Caché de enlaces limpia con éxito!</string>
+    <string name="link_cache_cleaned">La caché de enlaces se ha limpiado correctamente. Reinicia la aplicación para ver los cambios.</string>
     <string name="loading">Cargando...</string>
     <string name="move_down">Mover Abajo</string>
     <string name="move_left">Mover a la Izquierda</string>

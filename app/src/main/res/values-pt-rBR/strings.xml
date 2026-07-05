@@ -68,7 +68,7 @@
     <string name="go_back">Voltar</string>
     <string name="help">Ajuda</string>
     <string name="like">Curtir</string>
-    <string name="link_cache_cleaned">Cache de links limpo com sucesso!</string>
+    <string name="link_cache_cleaned">Cache de links limpo com sucesso! Reinicie o aplicativo para ver a alteração entrar em vigor.</string>
     <string name="loading">Carregando...</string>
     <string name="move_down">Mover para Baixo</string>
     <string name="move_left">Mover para Esquerda</string>

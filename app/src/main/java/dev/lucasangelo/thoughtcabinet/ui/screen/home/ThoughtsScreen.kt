@@ -59,6 +59,8 @@ import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPostRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.SearchRoute
+import dev.lucasangelo.thoughtcabinet.util.cleanupImageCacheInDisk
+import dev.lucasangelo.thoughtcabinet.util.cleanupImageCacheInMemory
 import dev.lucasangelo.thoughtcabinet.util.cleanupLinkMetadata
 import dev.lucasangelo.thoughtcabinet.viewmodel.ThoughtsViewModel
 import kotlinx.coroutines.launch
@@ -250,12 +252,13 @@ fun SettingModal(
             val coroutineScope = rememberCoroutineScope()
             Button(onClick = { coroutineScope.launch {
                 cleanupLinkMetadata(context)
+                cleanupImageCacheInMemory(context)
+                cleanupImageCacheInDisk(context)
             }.invokeOnCompletion {
                 rootShowSnackbar(context.getString(R.string.link_cache_cleaned))
                 onDismissRequest()
             } } ) {
                 Text(stringResource(R.string.clean_link_cache))
-
             }
         }
     }

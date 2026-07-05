@@ -68,7 +68,7 @@
     <string name="go_back">뒤로</string>
     <string name="help">도움말</string>
     <string name="like">좋아요</string>
-    <string name="link_cache_cleaned">링크 캐시가 성공적으로 비워졌습니다!</string>
+    <string name="link_cache_cleaned">링크 캐시가 성공적으로 정리되었습니다! 변경 사항을 적용하려면 앱을 다시 시작하세요.</string>
     <string name="loading">로딩 중...</string>
     <string name="move_down">아래로 이동</string>
     <string name="move_left">왼쪽으로 이동</string>

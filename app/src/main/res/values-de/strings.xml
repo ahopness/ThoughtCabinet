@@ -68,7 +68,7 @@
     <string name="go_back">Zurück</string>
     <string name="help">Hilfe</string>
     <string name="like">Gefällt mir</string>
-    <string name="link_cache_cleaned">Link-Cache erfolgreich geleert!</string>
+    <string name="link_cache_cleaned">Link-Cache erfolgreich bereinigt! Starten Sie die App neu, damit die Änderungen wirksam werden.</string>
     <string name="loading">Lädt...</string>
     <string name="move_down">Nach unten</string>
     <string name="move_left">Nach links</string>

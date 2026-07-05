@@ -68,7 +68,7 @@
     <string name="go_back">Назад</string>
     <string name="help">Помощь</string>
     <string name="like">Нравится</string>
-    <string name="link_cache_cleaned">Кэш ссылок успешно очищен!</string>
+    <string name="link_cache_cleaned">Кэш ссылок успешно очищен! Перезапустите приложение, чтобы изменения вступили в силу.</string>
     <string name="loading">Загрузка...</string>
     <string name="move_down">Вниз</string>
     <string name="move_left">Влево</string>

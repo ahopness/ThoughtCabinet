@@ -67,7 +67,7 @@
     <string name="go_back">वापस जाएं</string>
     <string name="help">सहायता</string>
     <string name="like">पसंद करें</string>
-    <string name="link_cache_cleaned">लिंक कैश सफलतापूर्वक साफ़ हो गया!</string>
+    <string name="link_cache_cleaned">लिंक कैश सफलतापूर्वक साफ़ कर दिया गया है! बदलाव देखने के लिए ऐप को रीस्टार्ट करें।</string>
     <string name="loading">लोड हो रहा है...</string>
     <string name="move_down">नीचे ले जाएं</string>
     <string name="move_left">बाईं ओर ले जाएं</string>

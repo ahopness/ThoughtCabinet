@@ -8,6 +8,8 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
+import coil3.imageLoader
+import coil3.util.CoilUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -86,6 +88,12 @@ suspend fun cleanupDrafts(
 suspend fun cleanupLinkMetadata(
     context: Context,
 ) = cleanupFolder(context, linkMetadataDir)
+fun cleanupImageCacheInMemory (
+    context: Context,
+) = context.imageLoader.memoryCache?.clear()
+fun cleanupImageCacheInDisk (
+    context: Context,
+) = context.imageLoader.diskCache?.clear()
 
 suspend fun saveMediaToLocalStorage(context: Context, sourceFile: File, fileName: String): Uri? =
 withContext(Dispatchers.IO) {
