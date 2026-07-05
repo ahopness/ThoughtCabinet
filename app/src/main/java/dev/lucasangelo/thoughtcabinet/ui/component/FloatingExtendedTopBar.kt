@@ -60,6 +60,7 @@ fun BoxScope.FloatingExtendedTopBar(
     onGoBackRequest: () -> Unit = { },
     iconContent: @Composable (Modifier, () -> Float) -> Unit,
     actions: List<FloatingExtendedTopBarActionItem>,
+    customOverlayTransparencyColor: Color = overlayTransparencyColor,
     listState: LazyListState,
 ) {
     var parentSize by remember { mutableStateOf(IntSize.Zero) }
@@ -70,7 +71,7 @@ fun BoxScope.FloatingExtendedTopBar(
             .fillMaxWidth()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(overlayTransparencyColor, Color.Transparent)
+                    colors = listOf(customOverlayTransparencyColor, Color.Transparent)
                 )
             )
     ) {

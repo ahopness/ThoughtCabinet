@@ -38,6 +38,7 @@ fun PagerScaffold(
     onGoBackRequest: () -> Unit = {},
     pageCount: Int,
     initialPage: Int = 0,
+    customOverlayTransparencyColor: Color = overlayTransparencyColor,
     prelude: @Composable () -> Unit = {},
     pageContent:
         @Composable PagerScope.(
@@ -78,7 +79,7 @@ fun PagerScaffold(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .background(Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, overlayTransparencyColor)
+                            colors = listOf(Color.Transparent, customOverlayTransparencyColor)
                         ))
                         .wrapContentHeight()
                         .fillMaxWidth()

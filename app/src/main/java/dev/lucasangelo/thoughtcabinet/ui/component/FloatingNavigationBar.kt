@@ -60,6 +60,7 @@ data class FloatingNavigationExpandableItem(
 fun BoxScope.FloatingNavigationBar(
     tabItems: List<FloatingNavigationActionItem>,
     actionItems: List<FloatingNavigationItem>,
+    customOverlayTransparencyColor: Color =  overlayTransparencyColor,
 ) {
     Box(
         modifier = Modifier
@@ -73,7 +74,7 @@ fun BoxScope.FloatingNavigationBar(
                 .fillMaxWidth()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, overlayTransparencyColor)
+                        colors = listOf(Color.Transparent, customOverlayTransparencyColor)
                     )
                 )
         ) {

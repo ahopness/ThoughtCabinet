@@ -70,6 +70,7 @@ fun CrowdScreen(
                         })
                     )
                 },
+                customOverlayTransparencyColor = Color.Black,
                 listState = listState,
                 actions = listOf(
                     FloatingExtendedTopBarActionItem(

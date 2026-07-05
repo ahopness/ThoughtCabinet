@@ -8,6 +8,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
@@ -50,6 +51,7 @@ fun HomeScreen(
 
         val coroutineScope = rememberCoroutineScope()
         FloatingNavigationBar(
+            customOverlayTransparencyColor = Color.Black,
             tabItems = listOf(
                 FloatingNavigationActionItem(
                     icon = R.drawable.icon_list,

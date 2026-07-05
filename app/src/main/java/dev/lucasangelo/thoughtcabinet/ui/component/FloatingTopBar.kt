@@ -29,11 +29,12 @@ fun BoxScope.FloatingTopBar(
     title: String,
     canGoBack: Boolean,
     onGoBackRequest: () -> Unit,
+    customOverlayTransparencyColor: Color = overlayTransparencyColor,
 ) {
     Box(
         modifier = Modifier
             .background(Brush.verticalGradient(
-                colors = listOf(overlayTransparencyColor, Color.Transparent)
+                colors = listOf(customOverlayTransparencyColor, Color.Transparent)
             ))
             .safeDrawingPadding()
             .align(Alignment.TopCenter)
