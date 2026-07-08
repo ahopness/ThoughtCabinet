@@ -1,5 +1,6 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,13 +60,21 @@ fun PagerScaffold(
             prelude()
 
             val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { pageCount })
+            val coroutineScope = rememberCoroutineScope()
+
+            BackHandler(enabled = (pagerState.currentPage > 0)) {
+                coroutineScope.launch {
+                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                }
+            }
+
+
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
             ) { page ->
                 val offsetDistance = { pagerState.getOffsetDistanceInPages(page) }
 
-                val coroutineScope = rememberCoroutineScope()
                 val onNextPageRequested: () -> Unit =
                     { coroutineScope.launch { pagerState.animateScrollToPage(page+1) } }
 
