@@ -1,6 +1,7 @@
 package dev.lucasangelo.thoughtcabinet.util
 
 import android.content.Context
+import androidx.core.text.HtmlCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -42,9 +43,9 @@ suspend fun fetchLinkMetadata(urlString: String, context: Context): LinkMetadata
 
         val html = connection.getInputStream().bufferedReader().use { it.readText() }
 
-        val title = extractMetaTag(html, "og:title") ?: extractTitleTag(html)
+        val title = (extractMetaTag(html, "og:title") ?: extractTitleTag(html))?.decodeHtml()
         val imageUrl = extractMetaTag(html, "og:image")
-        val description = extractMetaTag(html, "og:description") ?: extractMetaTagByName(html, "description")
+        val description = (extractMetaTag(html, "og:description") ?: extractMetaTagByName(html, "description"))?.decodeHtml()
 
         val metadata = LinkMetadata(title, imageUrl, description)
 
@@ -75,3 +76,6 @@ private fun extractTitleTag(html: String): String? {
     val matcher = pattern.matcher(html)
     return if (matcher.find()) matcher.group(1).trim() else null
 }
+
+fun String.decodeHtml(): String =
+    HtmlCompat.fromHtml(this, HtmlCompat.FROM_HTML_MODE_COMPACT).toString()

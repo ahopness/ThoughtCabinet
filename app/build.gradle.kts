@@ -18,8 +18,8 @@ android {
         applicationId = "dev.lucasangelo.thoughtcabinet"
         minSdk = 26
         targetSdk = 36
-        versionCode = 10
-        versionName = "v1.0rev1"
+        versionCode = 11
+        versionName = "v1.0rev2"
     }
 
     buildTypes {
