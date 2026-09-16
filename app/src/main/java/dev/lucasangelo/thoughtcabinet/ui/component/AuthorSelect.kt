@@ -86,7 +86,7 @@ fun AuthorSelect(
         }
     }
 
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     if (showBottomSheet) {
         AuthorSelectModal(

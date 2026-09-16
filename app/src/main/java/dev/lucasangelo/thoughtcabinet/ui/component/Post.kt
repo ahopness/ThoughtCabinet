@@ -277,7 +277,7 @@ fun PostHeader(
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val onDismissRequest: () -> Unit = {
         coroutineScope.launch {
             sheetState.hide()

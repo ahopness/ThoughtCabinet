@@ -453,7 +453,7 @@ fun EditPostMediaList(
         item { Spacer(Modifier.width(pagerScaffoldContentSpacing - mediaSpacing)) }
     }
 
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     if (pendingMediaForManipulation != null) {
         val onDismissRequest: () -> Unit = {
             coroutineScope.launch {

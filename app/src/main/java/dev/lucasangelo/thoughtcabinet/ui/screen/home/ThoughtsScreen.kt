@@ -182,7 +182,7 @@ fun ThoughtsScreen(
         }
     }
 
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val onDismissRequest: () -> Unit = {
         coroutineScope.launch {
             sheetState.hide()

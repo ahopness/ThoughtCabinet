@@ -191,7 +191,7 @@ fun InspectPostScreen(
             )
         )
 
-        val sheetState = rememberModalBottomSheetState()
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val onDismissRequest: () -> Unit = {
             coroutineScope.launch {
                 sheetState.hide()
@@ -287,7 +287,7 @@ fun Comment(
     }
 
     val coroutineScope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val onDismissRequest: () -> Unit = {
         coroutineScope.launch {
             sheetState.hide()

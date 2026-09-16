@@ -280,7 +280,7 @@ fun InspectPersonaScreen(
         )
     }
 
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     if (pendingTraitInfoForManipulation != null) {
         InspectPersonaTraitManipulationModal(
             sheetState,
