@@ -136,4 +136,5 @@
     <string name="really_quiet_in_here">Tá bem quieto aqui.</string>
     <string name="error_note_only_pictures_use_reel">Se você quer apenas postar fotos, use um reel em vez disso!</string>
     <string name="save_media_to_local_storage">Salvar Mídia No Armazenamento Local</string>
+    <string name="edited">Editado</string>
 </resources>

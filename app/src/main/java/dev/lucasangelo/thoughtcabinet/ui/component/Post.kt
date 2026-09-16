@@ -252,8 +252,14 @@ fun PostHeader(
                     text = authorEntity.name,
                 )
                 Text(
-                    text = formatInstant(postEntity.createdAt, "MMMM d")
-                        .replaceFirstChar { it.titlecase() },
+                    text = buildString {
+                        append(formatInstant(postEntity.createdAt, "MMMM d")
+                            .replaceFirstChar { it.titlecase() })
+                        if (postEntity.updatedAt != null) {
+                            append(" ∙ ")
+                            append(stringResource(R.string.edited))
+                        }
+                    },
                     color = Color.White.copy(0.5f)
                 )
             }
