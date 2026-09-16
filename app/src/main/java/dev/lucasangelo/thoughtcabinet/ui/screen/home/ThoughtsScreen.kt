@@ -3,6 +3,7 @@ package dev.lucasangelo.thoughtcabinet.ui.screen.home
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -224,7 +226,9 @@ fun SettingModal(
             Text(stringResource(R.string.feed))
 
             SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.height(IntrinsicSize.Max)
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .height(IntrinsicSize.Max)
             ) {
                 listOf(stringResource(R.string.feed_standard), stringResource(R.string.feed_bookmarks), stringResource(R.string.feed_archives), stringResource(R.string.feed_blocked_personas))
                     .forEachIndexed { index, string ->
