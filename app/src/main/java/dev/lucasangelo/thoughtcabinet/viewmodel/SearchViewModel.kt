@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlin.time.Duration.Companion.milliseconds
 
 class SearchViewModel (
     private val repository: AppRepository,
@@ -31,7 +32,7 @@ class SearchViewModel (
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val searchResults = searchQuery
-        .debounce(300L)
+        .debounce(300L.milliseconds)
         .filter {
             _isLoading.value = false
             it.trim().isNotEmpty()

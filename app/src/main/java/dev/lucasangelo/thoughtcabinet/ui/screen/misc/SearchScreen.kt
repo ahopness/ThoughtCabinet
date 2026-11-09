@@ -1,8 +1,10 @@
 package dev.lucasangelo.thoughtcabinet.ui.screen.misc
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
+import com.valentinilk.shimmer.shimmer
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
@@ -114,15 +117,14 @@ fun SearchScreen(
             }
 
             if (isLoading)
-                item {
-                    Text(
-                        text = stringResource(R.string.thinking),
-                        color = Color.Gray,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(horizontal = 48.dp)
-                            .padding(top = 128.dp)
-                            .fillMaxWidth(),
+                items(1) {
+                    Box(
+                        Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .shimmer()
+                            .fillMaxWidth()
+                            .height(230.dp)
+                            .background(Color.Gray.copy(alpha = 0.5f))
                     )
                 }
             else
