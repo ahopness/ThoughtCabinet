@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -160,11 +161,11 @@ fun InspectPersonaScreen(
         }
     ) {
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxSize(),
             state = listState
         ) {
-            item { Spacer(Modifier.height(floatingExtendedTopBarPadding)) }
+            item { Spacer(Modifier.height(floatingExtendedTopBarPadding + 16.dp)) }
 
             if (viewModel.persona?.traits?.isEmpty() == true && thoughts.isEmpty())
                 item {
@@ -174,7 +175,7 @@ fun InspectPersonaScreen(
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .padding(horizontal = 48.dp)
-                                .padding(top = 128.dp)
+                                .padding(top = 128.dp, bottom = 16.dp)
                                 .fillMaxWidth(),
                         )
                 }
@@ -189,7 +190,8 @@ fun InspectPersonaScreen(
                         },
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(12.dp),
+                            .padding(12.dp)
+                            .padding(bottom = 16.dp),
                     ) {
                         viewModel.persona?.let { persona ->
                             persona.traits.forEachIndexed { traitId, trait ->
@@ -214,35 +216,30 @@ fun InspectPersonaScreen(
                     }
                 }
 
-            if (thoughts.isNotEmpty())
-                item {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp)
-                    ) {
-                        thoughts.forEach { thought ->
-                            Post(
-                                isStandalone = false,
-                                postId = thought.id,
-                                allThoughts,
-                                crowd,
-                                onCommentRequested = { post -> rootNavController.navigate(
-                                    InspectPostRoute(post.id, requestComment = true)
-                                ) },
-                                rootNavController = rootNavController,
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .border(
-                                        border = BorderStroke(width = 1.dp, color = Color.Gray),
-                                        shape = RoundedCornerShape(6.dp)
-                                    )
-                            )
-                        }
-                    }
-                }
+            itemsIndexed(
+                items = thoughts,
+                key = { _, thought -> thought.id },
+                contentType = { _, _ -> "post" }
+            ) { index, thought ->
+                Post(
+                    isStandalone = false,
+                    postId = thought.id,
+                    thoughts = allThoughts,
+                    crowd = crowd,
+                    onCommentRequested = { post -> rootNavController.navigate(
+                        InspectPostRoute(post.id, requestComment = true)
+                    ) },
+                    rootNavController = rootNavController,
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = if (index == thoughts.lastIndex) 16.dp else 0.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .border(
+                            border = BorderStroke(width = 1.dp, color = Color.Gray),
+                            shape = RoundedCornerShape(6.dp)
+                        )
+                )
+            }
 
                 item { Spacer(Modifier.height(floatingNavigationBarPadding)) }
             }
