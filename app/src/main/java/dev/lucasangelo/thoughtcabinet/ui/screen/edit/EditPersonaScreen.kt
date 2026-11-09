@@ -277,10 +277,13 @@ fun EditPersonaTextFields(
         value = viewModel.personaName,
         onValueChange = {
             if (viewModel.hasLoadedPersona)
-            viewModel.personaName = it
+                viewModel.personaName = it
+
+            viewModel.personaNameIsError = false
         },
         label = { Text(stringResource(R.string.persona_name_label)) },
         singleLine = true,
+        isError = viewModel.personaNameIsError,
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         modifier = Modifier.fillMaxWidth()
     )
@@ -311,7 +314,8 @@ fun EditPersonaFinishButton(
     Button(onClick = {
         coroutineScope.launch {
             if (viewModel.personaName.trim().isEmpty()) {
-                rootShowSnackbar(context.getString(R.string.error_persona_needs_name))
+//                rootShowSnackbar(context.getString(R.string.error_persona_needs_name))
+                viewModel.personaNameIsError = true
                 return@launch
             }
 

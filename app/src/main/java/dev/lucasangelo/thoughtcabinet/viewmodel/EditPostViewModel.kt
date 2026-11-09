@@ -53,6 +53,10 @@ class EditPostViewModel(
             _postAuthorId = value
         }
 
+    var postContentIsError by mutableStateOf(false)
+    var postMediaIsError by mutableStateOf(false)
+    var postAuthorIsError by mutableStateOf(false)
+
     var hasLoadedPost by mutableStateOf(false)
         private set
     var post by mutableStateOf<PostEntity?>(null)

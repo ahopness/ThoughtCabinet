@@ -32,6 +32,8 @@ class EditPersonaViewModel(
     var personaProfilePic by mutableStateOf<String?>(null)
     var personaColorTheme by mutableStateOf(Color.Black)
 
+    var personaNameIsError by mutableStateOf(false)
+
     var hasLoadedPersona by mutableStateOf(false)
         private set
     var persona by mutableStateOf<PersonaEntity?>(null)

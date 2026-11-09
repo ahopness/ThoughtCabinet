@@ -32,6 +32,8 @@ class EditPersonaTraitViewModel(
     var traitType by mutableStateOf(PersonaTraitType.TEXT)
     var traitContent by mutableStateOf("")
 
+    var traitContentIsError by mutableStateOf(false)
+
     var personaColorTheme by mutableStateOf(Color.Black)
         private set
 

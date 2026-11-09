@@ -50,6 +50,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffoldContent
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
+import dev.lucasangelo.thoughtcabinet.util.lighten
 import dev.lucasangelo.thoughtcabinet.util.traitsDir
 import dev.lucasangelo.thoughtcabinet.viewmodel.EditPersonaTraitViewModel
 import kotlinx.coroutines.launch
@@ -193,6 +194,8 @@ fun EditPersonaTraitContent(
         val onTraitContentChanced: (String) -> Unit = {
             if (viewModel.hasLoadedTrait)
                 viewModel.traitContent = it
+
+            viewModel.traitContentIsError = false
         }
 
         when(viewModel.traitType) {
@@ -203,6 +206,7 @@ fun EditPersonaTraitContent(
                     label = { Text(stringResource(R.string.trait_content_text_label)) },
                     maxLines = 6,
                     minLines = 4,
+                    isError = viewModel.traitContentIsError,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -219,6 +223,7 @@ fun EditPersonaTraitContent(
                     onValueChange = onTraitContentChanced,
                     label = { Text(stringResource(R.string.paste_link_here)) },
                     singleLine = true,
+                    isError = viewModel.traitContentIsError,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -252,6 +257,7 @@ fun EditPersonaTraitContentImagePicker(
                     }
 
                     onTraitContentChanced(newMedia)
+                    viewModel.traitContentIsError = false
                 }
             }
         }
@@ -292,7 +298,14 @@ fun EditPersonaTraitContentImagePicker(
         } else {
             OutlinedButton(
                 shape = RoundedCornerShape(6.dp),
-                border = BorderStroke(width = 1.dp, color = Color.Gray),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color =
+                        if (!viewModel.traitContentIsError)
+                            Color.Gray
+                        else
+                            Color.Red.lighten(0.75f)
+                ),
                 modifier = Modifier.size(150.dp),
                 onClick = {
                     picker.launch(PickVisualMediaRequest(
@@ -328,14 +341,11 @@ fun EditPersonaFinishButton(
     val coroutineScope = rememberCoroutineScope()
     Button(onClick = {
         coroutineScope.launch {
-            val currentPersona = viewModel.persona
-            if (currentPersona == null) {
-                rootShowSnackbar(context.getString(R.string.error_persona_not_found))
-                return@launch
-            }
+            val currentPersona = checkNotNull(viewModel.persona)
 
             if (viewModel.traitContent.trim().isEmpty()) {
-                rootShowSnackbar(context.getString(R.string.error_trait_cannot_empty))
+//                rootShowSnackbar(context.getString(R.string.error_trait_cannot_empty))
+                viewModel.traitContentIsError = true
                 return@launch
             }
 

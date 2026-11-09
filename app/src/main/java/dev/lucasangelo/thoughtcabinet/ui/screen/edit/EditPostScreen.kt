@@ -69,6 +69,7 @@ import dev.lucasangelo.thoughtcabinet.ui.component.PostContentMediaItem
 import dev.lucasangelo.thoughtcabinet.ui.component.pagerScaffoldContentSpacing
 import dev.lucasangelo.thoughtcabinet.util.darken
 import dev.lucasangelo.thoughtcabinet.util.draftsDir
+import dev.lucasangelo.thoughtcabinet.util.lighten
 import dev.lucasangelo.thoughtcabinet.util.mediaDir
 import dev.lucasangelo.thoughtcabinet.viewmodel.EditPostViewModel
 import kotlinx.coroutines.launch
@@ -102,7 +103,7 @@ fun EditPostScreen(
     val animatedPersonaColorTheme by animateColorAsState(viewModel.personaColorTheme.darken())
     PagerScaffold(
         title =
-            if (repostOf != null) // NOTE: fugly :(, but works :)
+            if (repostOf != null) // NOTE: ugly :(, but works :)
                 if (id != null)
                     stringResource(R.string.edit_your_repost)
                 else
@@ -227,15 +228,25 @@ fun EditPostContent(
 
         AuthorSelect(
             authorId = viewModel.postAuthorId,
-            onAuthorChanged = { viewModel.postAuthorId = it },
+            onAuthorChanged = {
+                viewModel.postAuthorId = it
+                viewModel.postAuthorIsError = false
+            },
             onAuthorColorAcquired = { },
             crowd = crowd,
+            borderColor =
+                if (!viewModel.postAuthorIsError)
+                    Color.Gray
+                else
+                    Color.Red.lighten(0.75f),
             modifier = defaultModifier
         )
 
         val onPostContentChanced: (String) -> Unit = {
             if (viewModel.hasLoadedPost)
                 viewModel.postContent = it
+
+            viewModel.postContentIsError = false
         }
 
         when(viewModel.postType) {
@@ -261,6 +272,7 @@ fun EditPostContent(
                     onValueChange = onPostContentChanced,
                     label = { Text(stringResource(R.string.paste_link_here)) },
                     singleLine = true,
+                    isError = viewModel.postContentIsError,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = defaultModifier.fillMaxWidth(),
                 )
@@ -300,6 +312,7 @@ fun EditPostNoteContent(
         label = { Text(stringResource(R.string.post_content_note_label)) },
         maxLines = 8,
         minLines = 6,
+        isError = viewModel.postContentIsError,
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         modifier = modifier.fillMaxWidth(),
     )
@@ -368,6 +381,8 @@ fun EditPostMediaList(
                     if (viewModel.hasLoadedPost) {
                         cachedMedias[newMedia] = true
                         viewModel.postMedia += newMedia
+
+                        viewModel.postMediaIsError = false
                     }
                 }
             }
@@ -425,7 +440,14 @@ fun EditPostMediaList(
         item {
             OutlinedButton(
                 shape = RoundedCornerShape(6.dp),
-                border = BorderStroke(width = 1.dp, color = Color.Gray),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color =
+                        if (!viewModel.postMediaIsError)
+                            Color.Gray
+                        else
+                            Color.Red.lighten(0.75f)
+                ),
                 modifier = Modifier.size(if (large) 250.dp else 100.dp),
                 onClick = {
                     picker.launch(PickVisualMediaRequest(
@@ -539,9 +561,16 @@ fun EditPostFinishButton(
     val coroutineScope = rememberCoroutineScope()
     val onClick = {
         coroutineScope.launch {
+            if (viewModel.postAuthorId == null) {
+//                rootShowSnackbar(context.getString(R.string.error_post_needs_author))
+                viewModel.postAuthorIsError = true
+                return@launch
+            }
+
             if (viewModel.postType == PostType.REEL) {
                 if (viewModel.postMedia.isEmpty()){
-                    rootShowSnackbar(context.getString(R.string.error_reel_needs_media))
+//                    rootShowSnackbar(context.getString(R.string.error_reel_needs_media))
+                    viewModel.postMediaIsError = true
                     return@launch
                 }
             } else {
@@ -549,14 +578,10 @@ fun EditPostFinishButton(
                     if (viewModel.postMedia.isNotEmpty())
                         rootShowSnackbar(context.getString(R.string.error_note_only_pictures_use_reel))
                     else
-                        rootShowSnackbar(context.getString(R.string.error_post_cannot_empty))
+//                        rootShowSnackbar(context.getString(R.string.error_post_cannot_empty))
+                        viewModel.postContentIsError = true
                     return@launch
                 }
-            }
-
-            if (viewModel.postAuthorId == null) {
-                rootShowSnackbar(context.getString(R.string.error_post_needs_author))
-                return@launch
             }
 
             viewModel.commitMedia()
