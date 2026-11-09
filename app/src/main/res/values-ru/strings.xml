@@ -137,4 +137,7 @@
     <string name="error_note_only_pictures_use_reel">Если вы хотите опубликовать только изображения, используйте вместо этого Галерею!</string>
     <string name="save_media_to_local_storage">Сохранить медиа в локальное хранилище</string>
     <string name="edited">Отредактировано</string>
+    <string name="sorting">Сортировка</string>
+    <string name="recently_added">Недавно добавленные</string>
+    <string name="chronological">Хронологический порядок</string>
 </resources>

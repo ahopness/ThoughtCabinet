@@ -94,6 +94,7 @@ fun ThoughtsScreen(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     val feedMode by viewModel.feedMode.collectAsStateWithLifecycle()
+    val feedSorting by viewModel.feedSorting.collectAsStateWithLifecycle()
     val feed by viewModel.feed.collectAsStateWithLifecycle()
 
     var showSettingsModal by remember { mutableStateOf(false) }
@@ -198,6 +199,7 @@ fun ThoughtsScreen(
     if (showSettingsModal)
         SettingModal(
             feedMode,
+            feedSorting,
             sheetState,
             onDismissRequest,
             viewModel,
@@ -209,6 +211,7 @@ fun ThoughtsScreen(
 @Composable
 fun SettingModal(
     feedMode: ThoughtsViewModel.FeedMode,
+    feedSorting: ThoughtsViewModel.FeedSorting,
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
     viewModel: ThoughtsViewModel,
@@ -227,7 +230,6 @@ fun SettingModal(
                 .padding(horizontal = 24.dp)
         ) {
             Text(stringResource(R.string.feed))
-
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
                     .horizontalScroll(rememberScrollState())
@@ -251,6 +253,33 @@ fun SettingModal(
                             modifier = Modifier.fillMaxHeight(),
                         )
                 }
+            }
+
+            Text(stringResource(R.string.sorting))
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .height(IntrinsicSize.Max)
+            ) {
+                listOf(stringResource(R.string.recently_added), stringResource(R.string.chronological)
+                )
+                    .forEachIndexed { index, string ->
+                        SegmentedButton(
+                            label = { Text(
+                                text = string,
+                                style = MaterialTheme.typography.labelSmall
+                            ) },
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = ThoughtsViewModel.FeedSorting.entries.size
+                            ),
+                            onClick = {
+                                viewModel.onFeedSortingChanged(ThoughtsViewModel.FeedSorting.entries[index])
+                            },
+                            selected = (index == feedSorting.ordinal),
+                            modifier = Modifier.fillMaxHeight(),
+                        )
+                    }
             }
 
             Text(stringResource(R.string.actions))

@@ -137,4 +137,7 @@
     <string name="error_note_only_pictures_use_reel">Se você quer apenas postar fotos, use um reel em vez disso!</string>
     <string name="save_media_to_local_storage">Salvar Mídia No Armazenamento Local</string>
     <string name="edited">Editado</string>
+    <string name="sorting">Ordenação</string>
+    <string name="recently_added">Adicionados recentemente</string>
+    <string name="chronological">Ordem cronológica</string>
 </resources>

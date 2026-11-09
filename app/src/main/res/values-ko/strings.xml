@@ -137,4 +137,7 @@
     <string name="error_note_only_pictures_use_reel">사진만 올리려면 대신 릴을 사용하세요!</string>
     <string name="save_media_to_local_storage">로컬 저장소에 미디어 저장</string>
     <string name="edited">수정됨</string>
+    <string name="sorting">정렬</string>
+    <string name="recently_added">최근 추가순</string>
+    <string name="chronological">시간순</string>
 </resources>

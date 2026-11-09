@@ -9,10 +9,12 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlin.time.Duration.Companion.milliseconds
 
 class ThoughtsViewModel(
     private val repository: AppRepository,
@@ -34,9 +36,20 @@ class ThoughtsViewModel(
         _feedMode.value = to
     }
 
+    enum class FeedSorting {
+        RECENTLY_ADDED,
+        CHRONOLOGICAL
+    }
+    private var _feedSorting = MutableStateFlow(FeedSorting.RECENTLY_ADDED)
+    val feedSorting = _feedSorting.asStateFlow()
+    fun onFeedSortingChanged(to: FeedSorting) {
+        _isLoading.value = true
+        _feedSorting.value = to
+    }
+
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val feed = feedMode
-        .debounce(300L)
+        .debounce(300L.milliseconds)
         .flatMapLatest { mode ->
             _isLoading.value = true
             val flow = when (mode) {
@@ -49,7 +62,15 @@ class ThoughtsViewModel(
                 FeedMode.BLOCKED_PERSONAS_ONLY ->
                     repository.getAllPostsFromBlockedPersonas()
             }
-            flow.onEach { _isLoading.value = false }
+            combine(flow, feedSorting) { posts, sorting ->
+                when (sorting) {
+                    FeedSorting.RECENTLY_ADDED ->
+                        posts.sortedByDescending { it.id }
+
+                    FeedSorting.CHRONOLOGICAL ->
+                        posts.sortedBy { it.createdAt }
+                }
+            }.onEach { _isLoading.value = false }
         }
         .stateIn(
             scope = viewModelScope,
