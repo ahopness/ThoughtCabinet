@@ -126,13 +126,13 @@ fun Post(
 
     val postEntity = thoughts[postId] ?: return
     val authorEntity = crowd[postEntity.authorId] ?: return
-    val repostChain = remember(postId, thoughts.values) {
+    val repostChain = remember(postId, thoughts, crowd) {
         buildMap {
             var current = postEntity
             while (current.repostOf != null) {
                 val repost = thoughts[current.repostOf] ?: break
                 val author = crowd[repost.authorId] ?: break
-                put(author, repost)
+                put(repost, author)
                 current = repost
             }
         }
@@ -150,10 +150,10 @@ fun Post(
     Column(captureModifier.fillMaxWidth()) {
         var backgroundColor by remember { mutableStateOf(Color.Black) }
         repostChain.entries.reversed().forEach { entry ->
-            val repostBackgroundColor = Color(entry.key.colorTheme).darken()
+            val repostBackgroundColor = Color(entry.value.colorTheme).darken()
             PostHeader(
-                entry.key,
                 entry.value,
+                entry.key,
                 showOptions = false,
                 onDeletionRequest,
                 onBlockPersonaRequest,
@@ -167,7 +167,7 @@ fun Post(
             )
 
             PostContent(
-                entry.value,
+                entry.key,
                 rootNavController,
                 modifier = Modifier.background(repostBackgroundColor)
             )
