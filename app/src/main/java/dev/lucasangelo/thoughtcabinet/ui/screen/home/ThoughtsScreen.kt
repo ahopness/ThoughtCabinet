@@ -167,9 +167,10 @@ fun ThoughtsScreen(
                     items(feed.toList(), key = { it.id }) { post ->
                         Post(
                             isStandalone = false,
+                            showComments = true,
                             postId = post.id,
-                            thoughts,
-                            crowd,
+                            thoughts = thoughts,
+                            crowd = crowd,
                             onCommentRequested = { post -> rootNavController.navigate(
                                     InspectPostRoute(post.id, requestComment = true)
                             ) },

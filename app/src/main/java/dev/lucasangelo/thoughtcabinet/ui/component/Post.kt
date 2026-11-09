@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -98,10 +99,9 @@ fun Post(
     onPostDeleted: () -> Unit = {},
     onCommentRequested: (PostEntity) -> Unit,
     rootNavController: NavController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showComments: Boolean = false,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
     val context = LocalContext.current
     val application = context.applicationContext as MainApplication
     val viewModel: PostViewModel = viewModel(
@@ -204,6 +204,66 @@ fun Post(
             graphicsLayer,
             modifier = Modifier.background(backgroundColor)
         )
+
+        if (showComments && !isStandalone) {
+            PostComments(
+                postId = postId,
+                crowd = crowd,
+                modifier = Modifier.background(backgroundColor)
+            )
+        }
+    }
+}
+
+@Composable
+fun PostComments(
+    postId: Long,
+    crowd: Map<Long, PersonaEntity>,
+    modifier: Modifier = Modifier,
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val application = LocalContext.current.applicationContext as MainApplication
+    val commentsFlow = remember(postId) {
+        application.repository.getAllCommentsOf(postId)
+    }
+    val comments by commentsFlow.collectAsStateWithLifecycle(initialValue = emptyList())
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = postItemSpacing)
+            .padding(bottom = postItemSpacing)
+    ) {
+        comments.forEach { comment ->
+            val author = crowd[comment.authorId] ?: return@forEach
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                PersonaProfilePicture(
+                    author.profilePic,
+                    modifier = Modifier.size(48.dp)
+                )
+                SelectionContainer(Modifier.weight(1f)) {
+                    Text(comment.content)
+                }
+                Icon(
+                    painter = painterResource(
+                        if (comment.liked) R.drawable.icon_hearted else R.drawable.icon_heart
+                    ),
+                    contentDescription = stringResource(R.string.like),
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clickable {
+                            coroutineScope.launch {
+                                application.repository.likeComment(comment)
+                            }
+                        }
+                )
+            }
+        }
     }
 }
 
