@@ -74,4 +74,6 @@ dependencies {
     implementation(libs.colorpicker.compose)
 
     implementation(libs.compose.media.player)
+
+    implementation(libs.compose.shimmer)
 }
