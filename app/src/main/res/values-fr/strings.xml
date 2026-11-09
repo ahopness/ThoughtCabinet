@@ -140,4 +140,14 @@
     <string name="sorting">Tri</string>
     <string name="recently_added">Ajoutés récemment</string>
     <string name="chronological">Ordre chronologique</string>
+    <string name="stats_total_intro">Vous avez créé au total :</string>
+    <string name="stats_posts">Publications</string>
+    <string name="stats_personas">Personas</string>
+    <string name="stats_reposts">Reposts</string>
+    <string name="stats_likes">J’aime</string>
+    <string name="stats_traits">Traits</string>
+    <string name="stats_days_posting">Jours</string>
+    <string name="statistics">Statistiques</string>
+    <string name="search">Rechercher</string>
+    <string name="stats_persona_summary">Publications : %1$d, Reposts : %2$d\nJ’aime : %3$d, Traits : %4$d</string>
 </resources>

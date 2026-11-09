@@ -43,6 +43,8 @@ import dev.lucasangelo.thoughtcabinet.ui.component.floatingExtendedTopBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.component.floatingNavigationBarPadding
 import dev.lucasangelo.thoughtcabinet.ui.screen.inspect.InspectPersonaRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.OnboardingRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.misc.SearchRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.misc.StatsRoute
 import dev.lucasangelo.thoughtcabinet.util.darken
 import kotlinx.coroutines.launch
 
@@ -74,9 +76,9 @@ fun CrowdScreen(
                 listState = listState,
                 actions = listOf(
                     FloatingExtendedTopBarActionItem(
-                        name = stringResource(R.string.help),
-                        icon = R.drawable.icon_help,
-                        onClick = { rootNavController.navigate(OnboardingRoute) }
+                        name = stringResource(R.string.statistics),
+                        icon = R.drawable.icon_stats,
+                        onClick = { rootNavController.navigate(StatsRoute) }
                     ),
                 )
             )

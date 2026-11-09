@@ -78,7 +78,7 @@ fun SearchScreen(
     CleanScaffold(
         topBar = {
             FloatingTopBar(
-                title = "Search",
+                title = stringResource(R.string.search),
                 canGoBack = true,
                 onGoBackRequest = { rootNavController.popBackStack() }
             )

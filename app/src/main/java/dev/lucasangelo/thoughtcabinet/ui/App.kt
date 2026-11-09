@@ -46,6 +46,8 @@ import dev.lucasangelo.thoughtcabinet.ui.screen.misc.OnboardingRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.OnboardingScreen
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.SearchRoute
 import dev.lucasangelo.thoughtcabinet.ui.screen.misc.SearchScreen
+import dev.lucasangelo.thoughtcabinet.ui.screen.misc.StatsRoute
+import dev.lucasangelo.thoughtcabinet.ui.screen.misc.StatsScreen
 import dev.lucasangelo.thoughtcabinet.viewmodel.AppViewModel
 import kotlinx.coroutines.launch
 
@@ -117,6 +119,13 @@ fun App() {
             }
             composable<SearchRoute> {
                 SearchScreen(
+                    thoughtsMap,
+                    crowdMap,
+                    navController
+                )
+            }
+            composable<StatsRoute> {
+                StatsScreen(
                     thoughtsMap,
                     crowdMap,
                     navController

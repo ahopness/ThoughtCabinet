@@ -140,4 +140,14 @@
     <string name="sorting">並び順</string>
     <string name="recently_added">最近追加した順</string>
     <string name="chronological">日時の昇順</string>
+    <string name="stats_total_intro">これまでの合計：</string>
+    <string name="stats_posts">投稿</string>
+    <string name="stats_personas">ペルソナ</string>
+    <string name="stats_reposts">リポスト</string>
+    <string name="stats_likes">いいね</string>
+    <string name="stats_traits">特徴</string>
+    <string name="stats_days_posting">経過日数</string>
+    <string name="statistics">統計</string>
+    <string name="search">検索</string>
+    <string name="stats_persona_summary">投稿：%1$d、リポスト：%2$d\nいいね：%3$d、特徴：%4$d</string>
 </resources>

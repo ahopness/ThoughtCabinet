@@ -139,4 +139,14 @@
     <string name="sorting">क्रमबद्ध करना</string>
     <string name="recently_added">हाल ही में जोड़े गए</string>
     <string name="chronological">कालानुक्रमिक क्रम</string>
+    <string name="stats_total_intro">आपने कुल बनाए:</string>
+    <string name="stats_posts">पोस्ट</string>
+    <string name="stats_personas">पर्सोना</string>
+    <string name="stats_reposts">रीपोस्ट</string>
+    <string name="stats_likes">लाइक</string>
+    <string name="stats_traits">विशेषताएँ</string>
+    <string name="stats_days_posting">दिन</string>
+    <string name="statistics">आँकड़े</string>
+    <string name="search">खोजें</string>
+    <string name="stats_persona_summary">पोस्ट: %1$d, रीपोस्ट: %2$d\nलाइक: %3$d, विशेषताएँ: %4$d</string>
 </resources>

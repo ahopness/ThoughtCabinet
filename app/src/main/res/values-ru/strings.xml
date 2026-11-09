@@ -140,4 +140,14 @@
     <string name="sorting">Сортировка</string>
     <string name="recently_added">Недавно добавленные</string>
     <string name="chronological">Хронологический порядок</string>
+    <string name="stats_total_intro">Всего создано:</string>
+    <string name="stats_posts">Посты</string>
+    <string name="stats_personas">Персоны</string>
+    <string name="stats_reposts">Репосты</string>
+    <string name="stats_likes">Отметки «Нравится»</string>
+    <string name="stats_traits">Черты</string>
+    <string name="stats_days_posting">Дни</string>
+    <string name="statistics">Статистика</string>
+    <string name="search">Поиск</string>
+    <string name="stats_persona_summary">Посты: %1$d, Репосты: %2$d\nОтметки «Нравится»: %3$d, Черты: %4$d</string>
 </resources>

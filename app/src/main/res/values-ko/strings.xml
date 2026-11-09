@@ -140,4 +140,14 @@
     <string name="sorting">정렬</string>
     <string name="recently_added">최근 추가순</string>
     <string name="chronological">시간순</string>
+    <string name="stats_total_intro">지금까지 만든 기록:</string>
+    <string name="stats_posts">게시물</string>
+    <string name="stats_personas">페르소나</string>
+    <string name="stats_reposts">리포스트</string>
+    <string name="stats_likes">좋아요</string>
+    <string name="stats_traits">특성</string>
+    <string name="stats_days_posting">경과일</string>
+    <string name="statistics">통계</string>
+    <string name="search">검색</string>
+    <string name="stats_persona_summary">게시물: %1$d, 리포스트: %2$d\n좋아요: %3$d, 특성: %4$d</string>
 </resources>

@@ -140,4 +140,14 @@
     <string name="sorting">Ordenação</string>
     <string name="recently_added">Adicionados recentemente</string>
     <string name="chronological">Ordem cronológica</string>
+    <string name="stats_total_intro">Você criou um total de:</string>
+    <string name="stats_posts">Postagens</string>
+    <string name="stats_personas">Personas</string>
+    <string name="stats_reposts">Reposts</string>
+    <string name="stats_likes">Curtidas</string>
+    <string name="stats_traits">Traços</string>
+    <string name="stats_days_posting">Dias</string>
+    <string name="statistics">Estatísticas</string>
+    <string name="search">Pesquisar</string>
+    <string name="stats_persona_summary">Postagens: %1$d, Reposts: %2$d\nCurtidas: %3$d, Traços: %4$d</string>
 </resources>

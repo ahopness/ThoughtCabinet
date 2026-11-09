@@ -139,4 +139,14 @@
     <string name="sorting">Sorting</string>
     <string name="recently_added">Recently Added</string>
     <string name="chronological">Chronological</string>
+    <string name="search">Search</string>
+    <string name="statistics">Statistics</string>
+    <string name="stats_total_intro">You made a total of…</string>
+    <string name="stats_posts">Posts</string>
+    <string name="stats_personas">Personas</string>
+    <string name="stats_reposts">Reposts</string>
+    <string name="stats_likes">Likes</string>
+    <string name="stats_traits">Traits</string>
+    <string name="stats_days_posting">Days Posting</string>
+    <string name="stats_persona_summary">%1$d Posts, %2$d Reposts\n%3$d Likes, %4$d Traits</string>
 </resources>
