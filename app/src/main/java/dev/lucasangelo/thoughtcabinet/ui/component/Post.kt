@@ -56,7 +56,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -64,6 +63,7 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.data.CommentEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostEntity
 import dev.lucasangelo.thoughtcabinet.data.PostType
@@ -95,12 +95,12 @@ fun Post(
     isStandalone: Boolean,
     postId: Long,
     thoughts: Map<Long, PostEntity>,
+    comments: Map<Long, CommentEntity>? = null,
     crowd: Map<Long, PersonaEntity>,
     onPostDeleted: () -> Unit = {},
     onCommentRequested: (PostEntity) -> Unit,
     rootNavController: NavController,
     modifier: Modifier = Modifier,
-    showComments: Boolean = false,
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as MainApplication
@@ -205,10 +205,13 @@ fun Post(
             modifier = Modifier.background(backgroundColor)
         )
 
-        if (showComments && !isStandalone) {
+        if (comments != null && !isStandalone) {
             PostComments(
-                postId = postId,
+                comments = remember(postId, comments) {
+                    comments.values.filter { it.postId == postId }
+                },
                 crowd = crowd,
+                onLikeRequested = { viewModel.likeComment(it) },
                 modifier = Modifier.background(backgroundColor)
             )
         }
@@ -217,17 +220,11 @@ fun Post(
 
 @Composable
 fun PostComments(
-    postId: Long,
+    comments: List<CommentEntity>,
     crowd: Map<Long, PersonaEntity>,
+    onLikeRequested: (CommentEntity) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val application = LocalContext.current.applicationContext as MainApplication
-    val commentsFlow = remember(postId) {
-        application.repository.getAllCommentsOf(postId)
-    }
-    val comments by commentsFlow.collectAsStateWithLifecycle(initialValue = emptyList())
-
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = modifier
@@ -257,9 +254,7 @@ fun PostComments(
                     modifier = Modifier
                         .size(48.dp)
                         .clickable {
-                            coroutineScope.launch {
-                                application.repository.likeComment(comment)
-                            }
+                            onLikeRequested(comment)
                         }
                 )
             }

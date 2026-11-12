@@ -39,7 +39,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -77,6 +76,7 @@ data class InspectPostRoute(val postId: Long, val requestComment: Boolean = fals
 fun InspectPostScreen(
     postId: Long,
     thoughts: Map<Long, PostEntity>,
+    commentsMap: Map<Long, CommentEntity>,
     crowd: Map<Long, PersonaEntity>,
     requestComment: Boolean = false,
     rootNavController: NavController,
@@ -90,14 +90,16 @@ fun InspectPostScreen(
     val repository = application.repository
     val viewModel: InspectPostViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { InspectPostViewModel(repository, application, postId) }
+            initializer { InspectPostViewModel(repository, application) }
         }
     )
 
     val thought = remember(postId, thoughts) { thoughts[postId] } ?: return
     val thoughtAuthor = crowd[thought.authorId] ?: return
 
-    val comments by viewModel.comments.collectAsStateWithLifecycle()
+    val comments = remember(postId, commentsMap) {
+        commentsMap.values.filter { it.postId == postId }
+    }
 
     var isRequestingComment by remember { mutableStateOf(requestComment) }
     var editingComment by remember { mutableStateOf<CommentEntity?>(null) }
@@ -124,6 +126,7 @@ fun InspectPostScreen(
                     isStandalone = true,
                     postId,
                     thoughts,
+                    comments = null,
                     crowd,
                     onPostDeleted = {
                         rootNavController.popBackStack()

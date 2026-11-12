@@ -3,6 +3,7 @@ package dev.lucasangelo.thoughtcabinet.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppRepository
+import dev.lucasangelo.thoughtcabinet.data.CommentEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostEntity
 import kotlinx.coroutines.launch
@@ -15,6 +16,9 @@ class PostViewModel(
     }
     fun likePost(post: PostEntity) = viewModelScope.launch {
         repository.likePost(post)
+    }
+    fun likeComment(comment: CommentEntity) = viewModelScope.launch {
+        repository.likeComment(comment)
     }
     fun bookmarkPost(post: PostEntity) = viewModelScope.launch {
         repository.bookmarkPost(post)

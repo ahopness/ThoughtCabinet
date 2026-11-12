@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.data.CommentEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.FloatingNavigationActionItem
@@ -32,6 +33,7 @@ fun HomeScreen(
     thoughtsListState: LazyListState,
     crowdListState: LazyListState,
     thoughts: Map<Long, PostEntity>,
+    comments: Map<Long, CommentEntity>,
     crowd: Map<Long, PersonaEntity>,
     rootNavController: NavController,
     rootShowSnackbar: (String) -> Unit,
@@ -44,7 +46,7 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize()
         ) { page ->
             when(page) {
-                0 -> ThoughtsScreen(thoughtsListState, thoughts, crowd, rootNavController, rootShowSnackbar)
+                0 -> ThoughtsScreen(thoughtsListState, thoughts, comments, crowd, rootNavController, rootShowSnackbar)
                 1 -> CrowdScreen(crowdListState, crowd, rootNavController)
             }
         }

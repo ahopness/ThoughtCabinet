@@ -61,6 +61,7 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.data.CommentEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaTrait
 import dev.lucasangelo.thoughtcabinet.data.PersonaTraitType
@@ -97,6 +98,7 @@ data class InspectPersonaRoute(val personaId: Long)
 fun InspectPersonaScreen(
     personaId: Long,
     allThoughts: Map<Long, PostEntity>,
+    comments: Map<Long, CommentEntity>,
     crowd: Map<Long, PersonaEntity>,
     rootNavController: NavController,
     rootShowSnackbar: (String) -> Unit,
@@ -225,6 +227,7 @@ fun InspectPersonaScreen(
                     isStandalone = false,
                     postId = thought.id,
                     thoughts = allThoughts,
+                    comments = comments,
                     crowd = crowd,
                     onCommentRequested = { post -> rootNavController.navigate(
                         InspectPostRoute(post.id, requestComment = true)

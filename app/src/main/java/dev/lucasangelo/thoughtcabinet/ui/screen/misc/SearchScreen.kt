@@ -40,6 +40,7 @@ import androidx.navigation.NavController
 import com.valentinilk.shimmer.shimmer
 import dev.lucasangelo.thoughtcabinet.MainApplication
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.data.CommentEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.CleanScaffold
@@ -57,6 +58,7 @@ object SearchRoute
 @Composable
 fun SearchScreen(
     thoughts: Map<Long, PostEntity>,
+    comments: Map<Long, CommentEntity>,
     crowd: Map<Long, PersonaEntity>,
     rootNavController: NavController,
 ) {
@@ -146,6 +148,7 @@ fun SearchScreen(
                             isStandalone = false,
                             postId = post.id,
                             thoughts,
+                            comments,
                             crowd,
                             onCommentRequested = { post -> rootNavController.navigate(
                                 InspectPostRoute(post.id, requestComment = true)

@@ -81,7 +81,7 @@ fun App() {
     val commentsList by viewModel.comments.collectAsStateWithLifecycle()
     val crowdList by viewModel.crowd.collectAsStateWithLifecycle()
     val thoughtsMap = remember(thoughtsList) { thoughtsList.associateBy { it.id } }
-    val commentsMap = remember(thoughtsList) { commentsList.associateBy { it.id } }
+    val commentsMap = remember(commentsList) { commentsList.associateBy { it.id } }
     val crowdMap = remember(crowdList) { crowdList.associateBy { it.id } }
 
     val thoughtsListState = rememberLazyListState()
@@ -114,6 +114,7 @@ fun App() {
                     thoughtsListState,
                     crowdListState,
                     thoughtsMap,
+                    commentsMap,
                     crowdMap,
                     navController,
                     showSnackbar
@@ -122,6 +123,7 @@ fun App() {
             composable<SearchRoute> {
                 SearchScreen(
                     thoughtsMap,
+                    commentsMap,
                     crowdMap,
                     navController
                 )
@@ -150,6 +152,7 @@ fun App() {
                 InspectPostScreen(
                     routeObject.postId,
                     thoughtsMap,
+                    commentsMap,
                     crowdMap,
                     routeObject.requestComment,
                     navController,
@@ -172,6 +175,7 @@ fun App() {
                 InspectPersonaScreen(
                     routeObject.personaId,
                     thoughtsMap,
+                    commentsMap,
                     crowdMap,
                     navController,
                     showSnackbar,
