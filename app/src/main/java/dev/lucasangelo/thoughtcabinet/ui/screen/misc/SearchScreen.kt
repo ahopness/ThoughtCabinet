@@ -89,7 +89,7 @@ fun SearchScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 20.dp)//24.dp)
         ) {
             item { Spacer(Modifier.height(floatingTopBarPadding/1.5f)) }
 
@@ -117,7 +117,7 @@ fun SearchScreen(
             }
 
             if (isLoading)
-                items(1) {
+                items(5) {
                     Box(
                         Modifier
                             .clip(RoundedCornerShape(6.dp))
