@@ -63,6 +63,7 @@ fun StatsScreen(
         canGoBack = true,
         onGoBackRequest = { rootNavController.popBackStack() },
         pageCount = 2,
+        /*
         prelude = {
             Box(Modifier.fillMaxSize()) {
                 Image(
@@ -76,6 +77,7 @@ fun StatsScreen(
                 )
             }
         }
+        */
     ) { pagerState, page, offsetDistance, onNextPageRequested ->
         listOf(
             {
