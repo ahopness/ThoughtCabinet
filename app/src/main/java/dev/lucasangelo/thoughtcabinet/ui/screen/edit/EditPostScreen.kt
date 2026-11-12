@@ -310,7 +310,7 @@ fun EditPostNoteContent(
         value = viewModel.postContent,
         onValueChange = onPostContentChanced,
         label = { Text(stringResource(R.string.post_content_note_label)) },
-        maxLines = 8,
+        maxLines = 12,
         minLines = 6,
         isError = viewModel.postContentIsError,
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
