@@ -146,8 +146,10 @@
     <string name="stats_reposts">Reposts</string>
     <string name="stats_likes">J’aime</string>
     <string name="stats_traits">Traits</string>
-    <string name="stats_days_posting">Jours</string>
+    <string name="stats_comments">Commentaires</string>
+    <string name="stats_bookmarks">Favoris</string>
+    <string name="stats_days_posting">Jours depuis la première publication</string>
     <string name="statistics">Statistiques</string>
     <string name="search">Rechercher</string>
-    <string name="stats_persona_summary">Publications : %1$d, Reposts : %2$d\nJ’aime : %3$d, Traits : %4$d</string>
+    <string name="stats_persona_summary">%1$d Publications, %2$d Reposts, %3$d Commentaires\n%4$d J’aime, %5$d Favoris, %6$d Traits</string>
 </resources>

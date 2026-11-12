@@ -146,8 +146,10 @@
     <string name="stats_reposts">Репосты</string>
     <string name="stats_likes">Отметки «Нравится»</string>
     <string name="stats_traits">Черты</string>
-    <string name="stats_days_posting">Дни</string>
+    <string name="stats_comments">Комментарии</string>
+    <string name="stats_bookmarks">Закладки</string>
+    <string name="stats_days_posting">Дней с первой публикации</string>
     <string name="statistics">Статистика</string>
     <string name="search">Поиск</string>
-    <string name="stats_persona_summary">Посты: %1$d, Репосты: %2$d\nОтметки «Нравится»: %3$d, Черты: %4$d</string>
+    <string name="stats_persona_summary">Посты: %1$d, Репосты: %2$d, Комментарии: %3$d\nОтметки «Нравится»: %4$d, Закладки: %5$d, Черты: %6$d</string>
 </resources>

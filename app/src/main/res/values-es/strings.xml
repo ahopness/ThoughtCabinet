@@ -146,8 +146,10 @@
     <string name="stats_reposts">Reposts</string>
     <string name="stats_likes">Me gusta</string>
     <string name="stats_traits">Rasgos</string>
-    <string name="stats_days_posting">Días</string>
+    <string name="stats_comments">Comentarios</string>
+    <string name="stats_bookmarks">Marcadores</string>
+    <string name="stats_days_posting">Días publicando</string>
     <string name="statistics">Estadísticas</string>
     <string name="search">Buscar</string>
-    <string name="stats_persona_summary">Publicaciones: %1$d, Reposts: %2$d\nMe gusta: %3$d, Rasgos: %4$d</string>
+    <string name="stats_persona_summary">%1$d Publicaciones, %2$d Reposts, %3$d Comentarios\n%4$d Me gusta, %5$d Marcadores, %6$d Rasgos</string>
 </resources>

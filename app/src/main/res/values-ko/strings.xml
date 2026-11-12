@@ -146,8 +146,10 @@
     <string name="stats_reposts">리포스트</string>
     <string name="stats_likes">좋아요</string>
     <string name="stats_traits">특성</string>
-    <string name="stats_days_posting">경과일</string>
+    <string name="stats_comments">댓글</string>
+    <string name="stats_bookmarks">북마크</string>
+    <string name="stats_days_posting">첫 게시 후 경과일</string>
     <string name="statistics">통계</string>
     <string name="search">검색</string>
-    <string name="stats_persona_summary">게시물: %1$d, 리포스트: %2$d\n좋아요: %3$d, 특성: %4$d</string>
+    <string name="stats_persona_summary">게시물 %1$d개, 리포스트 %2$d개, 댓글 %3$d개\n좋아요 %4$d개, 북마크 %5$d개, 특성 %6$d개</string>
 </resources>

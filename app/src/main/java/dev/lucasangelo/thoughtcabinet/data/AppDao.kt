@@ -85,6 +85,8 @@ interface AppDao {
     //region COMMENTS
     @Insert
     suspend fun insertComment(comment: CommentEntity): Long
+    @Query("SELECT * FROM CommentEntity")
+    fun getAllComments(): Flow<List<CommentEntity>>
     @Query("SELECT * FROM CommentEntity WHERE postId = :postId")
     fun getAllCommentsOf(postId: Long): Flow<List<CommentEntity>>
     @Query("SELECT * FROM CommentEntity WHERE authorId = :authorId")

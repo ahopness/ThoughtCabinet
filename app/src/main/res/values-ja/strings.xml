@@ -146,8 +146,10 @@
     <string name="stats_reposts">リポスト</string>
     <string name="stats_likes">いいね</string>
     <string name="stats_traits">特徴</string>
-    <string name="stats_days_posting">経過日数</string>
+    <string name="stats_comments">コメント</string>
+    <string name="stats_bookmarks">ブックマーク</string>
+    <string name="stats_days_posting">投稿開始からの日数</string>
     <string name="statistics">統計</string>
     <string name="search">検索</string>
-    <string name="stats_persona_summary">投稿：%1$d、リポスト：%2$d\nいいね：%3$d、特徴：%4$d</string>
+    <string name="stats_persona_summary">%1$d 投稿、%2$d リポスト、%3$d コメント\n%4$d いいね、%5$d ブックマーク、%6$d 特徴</string>
 </resources>

@@ -233,6 +233,7 @@ class AppRepository(
         ))
     }
     fun getAllCommentsOf(postId: Long) = dao.getAllCommentsOf(postId)
+    fun getAllComments() = dao.getAllComments()
     suspend fun deleteComment(comment: CommentEntity) = dao.deleteComment(comment)
     suspend fun updateComment(
         from: CommentEntity,

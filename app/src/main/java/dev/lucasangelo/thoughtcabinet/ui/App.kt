@@ -78,8 +78,10 @@ fun App() {
     )
 
     val thoughtsList by viewModel.thoughts.collectAsStateWithLifecycle()
+    val commentsList by viewModel.comments.collectAsStateWithLifecycle()
     val crowdList by viewModel.crowd.collectAsStateWithLifecycle()
     val thoughtsMap = remember(thoughtsList) { thoughtsList.associateBy { it.id } }
+    val commentsMap = remember(thoughtsList) { commentsList.associateBy { it.id } }
     val crowdMap = remember(crowdList) { crowdList.associateBy { it.id } }
 
     val thoughtsListState = rememberLazyListState()
@@ -127,6 +129,7 @@ fun App() {
             composable<StatsRoute> {
                 StatsScreen(
                     thoughtsMap,
+                    commentsMap,
                     crowdMap,
                     navController
                 )

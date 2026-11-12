@@ -145,8 +145,10 @@
     <string name="stats_reposts">रीपोस्ट</string>
     <string name="stats_likes">लाइक</string>
     <string name="stats_traits">विशेषताएँ</string>
-    <string name="stats_days_posting">दिन</string>
+    <string name="stats_comments">टिप्पणियाँ</string>
+    <string name="stats_bookmarks">बुकमार्क</string>
+    <string name="stats_days_posting">पोस्ट करना शुरू किए हुए दिन</string>
     <string name="statistics">आँकड़े</string>
     <string name="search">खोजें</string>
-    <string name="stats_persona_summary">पोस्ट: %1$d, रीपोस्ट: %2$d\nलाइक: %3$d, विशेषताएँ: %4$d</string>
+    <string name="stats_persona_summary">%1$d पोस्ट, %2$d रीपोस्ट, %3$d टिप्पणियाँ\n%4$d लाइक, %5$d बुकमार्क, %6$d विशेषताएँ</string>
 </resources>

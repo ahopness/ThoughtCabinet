@@ -3,6 +3,7 @@ package dev.lucasangelo.thoughtcabinet.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppRepository
+import dev.lucasangelo.thoughtcabinet.data.CommentEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostEntity
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,6 +17,13 @@ class AppViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000), // NOTE: standard android boilerplate for smooth rotations
+            initialValue = emptyList()
+        )
+
+    val comments: StateFlow<List<CommentEntity>> = repository.getAllComments()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 

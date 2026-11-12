@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -35,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import dev.lucasangelo.thoughtcabinet.R
+import dev.lucasangelo.thoughtcabinet.data.CommentEntity
 import dev.lucasangelo.thoughtcabinet.data.PersonaEntity
 import dev.lucasangelo.thoughtcabinet.data.PostEntity
 import dev.lucasangelo.thoughtcabinet.ui.component.PagerScaffold
@@ -51,6 +54,7 @@ object StatsRoute
 @Composable
 fun StatsScreen(
     thoughts: Map<Long, PostEntity>,
+    comments: Map<Long, CommentEntity>,
     crowd: Map<Long, PersonaEntity>,
     rootNavController: NavController
 ) {
@@ -86,6 +90,8 @@ fun StatsScreen(
 
                     // NOTE: theres prob an easier way to do this... dont know how tho
                     val postLabel = stringResource(R.string.stats_posts)
+                    val commentsLabel = stringResource(R.string.stats_comments)
+                    val bookmarksLabel = stringResource(R.string.stats_bookmarks)
                     val personaLabel = stringResource(R.string.stats_personas)
                     val repostLabel = stringResource(R.string.stats_reposts)
                     val likeLabel = stringResource(R.string.stats_likes)
@@ -110,6 +116,8 @@ fun StatsScreen(
                                 repostLabel to thoughts.values.count { it.repostOf != null }.toString(),
                                 likeLabel to thoughts.values.count { it.liked }.toString(),
                                 traitLabel to crowd.values.sumOf { it.traits.size }.toString(),
+                                commentsLabel to comments.values.count().toString(),
+                                bookmarksLabel to thoughts.values.count { it.bookmarked }.toString(),
                                 daysLabel to daysSinceFirstPost.toString()
                             )
                         ) { (label, value) ->
@@ -117,7 +125,7 @@ fun StatsScreen(
                                 verticalArrangement = Arrangement.spacedBy(4.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text(text = value, fontSize = 80.sp)
+                                Text(text = value, fontSize = 64.sp)
                                 Text(text = label, textAlign = TextAlign.Center)
                             }
                         }
@@ -126,51 +134,58 @@ fun StatsScreen(
             },
             {
                 PagerScaffoldContent(offsetDistance) {
-                    crowd.values.forEach { persona ->
-                        Box(
-                            modifier = Modifier
-                                .background(Color(persona.colorTheme))
-                                .clip(RoundedCornerShape(6.dp))
-                                .border(
-                                    border = BorderStroke(width = 1.dp, color = Color.Gray),
-                                    shape = RoundedCornerShape(6.dp)
-                                )
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Absolute.Left
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(pagerScaffoldContentSpacing)
+                    ) {
+                        items(crowd.values.toList(), key = { it.id }) { persona ->
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(persona.colorTheme))
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .border(
+                                        border = BorderStroke(width = 1.dp, color = Color.Gray),
+                                        shape = RoundedCornerShape(6.dp)
+                                    )
                             ) {
-                                PersonaProfilePicture(
-                                    persona.profilePic,
-                                    modifier = Modifier
-                                        .padding(8.dp)
-                                        .size(120.dp)
-                                )
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    horizontalAlignment = Alignment.End,
-                                    modifier = Modifier
-                                        .padding(12.dp)
-                                        .fillMaxWidth()
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Absolute.Left
                                 ) {
-                                    Text(
-                                        text = persona.name,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.Bold
+                                    PersonaProfilePicture(
+                                        persona.profilePic,
+                                        modifier = Modifier
+                                            .padding(8.dp)
+                                            .size(120.dp)
                                     )
-                                    Spacer(Modifier.height(8.dp))
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                                        horizontalAlignment = Alignment.End,
+                                        modifier = Modifier
+                                            .padding(12.dp)
+                                            .fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = persona.name,
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(Modifier.height(6.dp))
 
-                                    val posts = thoughts.values.filter { it.authorId == persona.id }
-                                    Text(
-                                        text = stringResource(
-                                            R.string.stats_persona_summary,
-                                            posts.size,
-                                            posts.count { it.repostOf != null },
-                                            posts.count { it.liked },
-                                            persona.traits.size
-                                        ),
-                                        textAlign = TextAlign.End
-                                    )
+                                        val posts = thoughts.values.filter { it.authorId == persona.id }
+                                        Text(
+                                            text = stringResource(
+                                                R.string.stats_persona_summary,
+                                                posts.size,
+                                                posts.count { it.repostOf != null },
+                                                comments.values.count { it.authorId == persona.id },
+                                                posts.count { it.liked },
+                                                posts.count { it.bookmarked },
+                                                persona.traits.size
+                                            ),
+                                            textAlign = TextAlign.End
+                                        )
+                                    }
                                 }
                             }
                         }
