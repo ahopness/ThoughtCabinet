@@ -9,7 +9,6 @@ import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
 import coil3.imageLoader
-import coil3.util.CoilUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

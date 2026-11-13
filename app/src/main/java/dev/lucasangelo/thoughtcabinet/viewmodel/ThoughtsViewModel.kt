@@ -2,6 +2,7 @@ package dev.lucasangelo.thoughtcabinet.viewmodel
 
 import android.app.Application
 import android.content.Context
+import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppRepository
@@ -16,7 +17,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlin.time.Duration.Companion.milliseconds
-import androidx.core.content.edit
 
 class ThoughtsViewModel(
     private val repository: AppRepository,
