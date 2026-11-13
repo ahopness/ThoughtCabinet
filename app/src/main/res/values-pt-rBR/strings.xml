@@ -152,4 +152,7 @@
     <string name="statistics">Estatísticas</string>
     <string name="search">Pesquisar</string>
     <string name="stats_persona_summary">%1$d Postagens, %2$d Reposts, %3$d Comentários\n%4$d Curtidas, %5$d Salvos, %6$d Traços</string>
+    <string name="style">Estilo</string>
+    <string name="style_standard">Padrão</string>
+    <string name="style_simplified">Simplificado</string>
 </resources>

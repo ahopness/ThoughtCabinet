@@ -151,4 +151,7 @@
     <string name="stats_bookmarks">Bookmarks</string>
     <string name="stats_days_posting">Days Posting</string>
     <string name="stats_persona_summary">%1$d Posts, %2$d Reposts, %3$d Comments\n%4$d Likes, %5$d Bookmarks, %6$d Traits</string>
+    <string name="style">Style</string>
+    <string name="style_standard">Standard</string>
+    <string name="style_simplified">Simplified</string>
 </resources>

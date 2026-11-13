@@ -97,6 +97,7 @@ fun ThoughtsScreen(
 
     val feedMode by viewModel.feedMode.collectAsStateWithLifecycle()
     val feedSorting by viewModel.feedSorting.collectAsStateWithLifecycle()
+    val feedStyle by viewModel.feedStyle.collectAsStateWithLifecycle()
     val feed by viewModel.feed.collectAsStateWithLifecycle()
 
     var showSettingsModal by remember { mutableStateOf(false) }
@@ -169,10 +170,11 @@ fun ThoughtsScreen(
                     items(feed.toList(), key = { it.id }) { post ->
                         Post(
                             isStandalone = false,
+                            isSimplified = feedStyle == ThoughtsViewModel.FeedStyle.SIMPLIFIED,
                             postId = post.id,
-                            thoughts,
-                            comments,
-                            crowd,
+                            thoughts = thoughts,
+                            comments = comments,
+                            crowd = crowd,
                             onCommentRequested = { post -> rootNavController.navigate(
                                     InspectPostRoute(post.id, requestComment = true)
                             ) },
@@ -203,6 +205,7 @@ fun ThoughtsScreen(
         SettingModal(
             feedMode,
             feedSorting,
+            feedStyle,
             sheetState,
             onDismissRequest,
             viewModel,
@@ -215,6 +218,7 @@ fun ThoughtsScreen(
 fun SettingModal(
     feedMode: ThoughtsViewModel.FeedMode,
     feedSorting: ThoughtsViewModel.FeedSorting,
+    feedStyle: ThoughtsViewModel.FeedStyle,
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
     viewModel: ThoughtsViewModel,
@@ -264,8 +268,7 @@ fun SettingModal(
                     .horizontalScroll(rememberScrollState())
                     .height(IntrinsicSize.Max)
             ) {
-                listOf(stringResource(R.string.recently_added), stringResource(R.string.chronological)
-                )
+                listOf(stringResource(R.string.recently_added), stringResource(R.string.chronological))
                     .forEachIndexed { index, string ->
                         SegmentedButton(
                             label = { Text(
@@ -285,8 +288,33 @@ fun SettingModal(
                     }
             }
 
-            Text(stringResource(R.string.actions))
+            Text(stringResource(R.string.style))
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .height(IntrinsicSize.Max)
+            ) {
+                listOf(stringResource(R.string.style_standard), stringResource(R.string.style_simplified))
+                    .forEachIndexed { index, string ->
+                        SegmentedButton(
+                            label = { Text(
+                                text = string,
+                                style = MaterialTheme.typography.labelSmall
+                            ) },
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = ThoughtsViewModel.FeedStyle.entries.size
+                            ),
+                            onClick = {
+                                viewModel.onFeedStyleChanged(ThoughtsViewModel.FeedStyle.entries[index])
+                            },
+                            selected = (index == feedStyle.ordinal),
+                            modifier = Modifier.fillMaxHeight(),
+                        )
+                    }
+            }
 
+            Text(stringResource(R.string.actions))
             val context = LocalContext.current
             val coroutineScope = rememberCoroutineScope()
             Button(onClick = { coroutineScope.launch {

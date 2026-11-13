@@ -152,4 +152,7 @@
     <string name="statistics">통계</string>
     <string name="search">검색</string>
     <string name="stats_persona_summary">게시물 %1$d개, 리포스트 %2$d개, 댓글 %3$d개\n좋아요 %4$d개, 북마크 %5$d개, 특성 %6$d개</string>
+    <string name="style">스타일</string>
+    <string name="style_standard">기본</string>
+    <string name="style_simplified">간소화</string>
 </resources>

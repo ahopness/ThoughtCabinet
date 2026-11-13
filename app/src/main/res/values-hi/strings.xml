@@ -151,4 +151,7 @@
     <string name="statistics">आँकड़े</string>
     <string name="search">खोजें</string>
     <string name="stats_persona_summary">%1$d पोस्ट, %2$d रीपोस्ट, %3$d टिप्पणियाँ\n%4$d लाइक, %5$d बुकमार्क, %6$d विशेषताएँ</string>
+    <string name="style">शैली</string>
+    <string name="style_standard">मानक</string>
+    <string name="style_simplified">सरलीकृत</string>
 </resources>

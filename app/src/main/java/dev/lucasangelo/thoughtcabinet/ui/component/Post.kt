@@ -1,10 +1,5 @@
 package dev.lucasangelo.thoughtcabinet.ui.component
 
-import android.content.Context
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -101,6 +96,7 @@ fun Post(
     onCommentRequested: (PostEntity) -> Unit,
     rootNavController: NavController,
     modifier: Modifier = Modifier,
+    isSimplified: Boolean = false,
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as MainApplication
@@ -146,120 +142,105 @@ fun Post(
         drawLayer(graphicsLayer)
     }
 
+    var backgroundColor by remember { mutableStateOf(Color.Black) }
+    backgroundColor = Color(authorEntity.colorTheme).darken()
+    if (!isSimplified)
+        Column(captureModifier.fillMaxWidth()) {
+            repostChain.entries.reversed().forEach { entry ->
+                val repostBackgroundColor = Color(entry.value.colorTheme).darken()
+                PostHeader(
+                    entry.value,
+                    entry.key,
+                    showOptions = false,
+                    onDeletionRequest,
+                    onBlockPersonaRequest,
+                    rootNavController,
+                    onClickRoute =
+                        if (!isStandalone)
+                            InspectPostRoute(postEntity.id)
+                        else
+                            InspectPostRoute(entry.value.id),
+                    modifier = Modifier.background(repostBackgroundColor)
+                )
 
-    Column(captureModifier.fillMaxWidth()) {
-        var backgroundColor by remember { mutableStateOf(Color.Black) }
-        repostChain.entries.reversed().forEach { entry ->
-            val repostBackgroundColor = Color(entry.value.colorTheme).darken()
+                PostContent(
+                    entry.key,
+                    rootNavController,
+                    modifier = Modifier.background(repostBackgroundColor)
+                )
+            }
+
             PostHeader(
-                entry.value,
-                entry.key,
-                showOptions = false,
-                onDeletionRequest,
-                onBlockPersonaRequest,
-                rootNavController,
+                authorEntity,
+                postEntity,
+                onDeletionRequest = onDeletionRequest,
+                onBlockPersonaRequest = onBlockPersonaRequest,
+                rootNavController = rootNavController,
                 onClickRoute =
                     if (!isStandalone)
                         InspectPostRoute(postEntity.id)
                     else
-                        InspectPostRoute(entry.value.id),
-                modifier = Modifier.background(repostBackgroundColor)
+                        null,
+                modifier = Modifier.background(backgroundColor)
             )
 
             PostContent(
-                entry.key,
+                postEntity,
                 rootNavController,
-                modifier = Modifier.background(repostBackgroundColor)
-            )
-        }
-
-        backgroundColor = Color(authorEntity.colorTheme).darken()
-        PostHeader(
-            authorEntity,
-            postEntity,
-            onDeletionRequest = onDeletionRequest,
-            onBlockPersonaRequest = onBlockPersonaRequest,
-            rootNavController = rootNavController,
-            onClickRoute =
-                if (!isStandalone)
-                    InspectPostRoute(postEntity.id)
-                else
-                    null,
-            modifier = Modifier.background(backgroundColor)
-        )
-
-        PostContent(
-            postEntity,
-            rootNavController,
-            modifier = Modifier.background(backgroundColor)
-        )
-
-        PostActions(
-            isStandalone,
-            postEntity,
-            onLikeRequested,
-            onBookmarkRequested,
-            onCommentRequested,
-            rootNavController,
-            graphicsLayer,
-            modifier = Modifier.background(backgroundColor)
-        )
-
-        if (comments != null && !isStandalone) {
-            PostComments(
-                comments = remember(postId, comments) {
-                    comments.values.filter { it.postId == postId }
-                },
-                crowd = crowd,
-                onLikeRequested = { viewModel.likeComment(it) },
+                isSimplified,
                 modifier = Modifier.background(backgroundColor)
             )
-        }
-    }
-}
 
-@Composable
-fun PostComments(
-    comments: List<CommentEntity>,
-    crowd: Map<Long, PersonaEntity>,
-    onLikeRequested: (CommentEntity) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = postItemSpacing)
-            .padding(bottom = postItemSpacing)
-    ) {
-        comments.forEach { comment ->
-            val author = crowd[comment.authorId] ?: return@forEach
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                PersonaProfilePicture(
-                    author.profilePic,
-                    modifier = Modifier.size(48.dp)
-                )
-                SelectionContainer(Modifier.weight(1f)) {
-                    Text(comment.content)
-                }
-                Icon(
-                    painter = painterResource(
-                        if (comment.liked) R.drawable.icon_hearted else R.drawable.icon_heart
-                    ),
-                    contentDescription = stringResource(R.string.like),
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clickable {
-                            onLikeRequested(comment)
-                        }
+            PostActions(
+                isStandalone,
+                postEntity,
+                onLikeRequested,
+                onBookmarkRequested,
+                onCommentRequested,
+                rootNavController,
+                graphicsLayer,
+                modifier = Modifier.background(backgroundColor)
+            )
+
+            if (comments != null && !isStandalone) {
+                PostComments(
+                    comments = remember(postId, comments) {
+                        comments.values.filter { it.postId == postId }
+                    },
+                    crowd = crowd,
+                    onLikeRequested = { viewModel.likeComment(it) },
+                    modifier = Modifier.background(backgroundColor)
                 )
             }
         }
-    }
+    else
+        Row(
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.Start,
+            modifier = modifier
+                .fillMaxWidth()
+                .background(backgroundColor)
+                .clickable(onClick = {
+                    rootNavController.navigate(InspectPostRoute(postEntity.id))
+                })
+        ) {
+            PersonaProfilePicture(
+                authorEntity.profilePic,
+                modifier = Modifier
+                    .padding(postItemSpacing)
+                    .size(postIconSize)
+                    .clickable(onClick = {
+                        rootNavController.navigate(InspectPersonaRoute(authorEntity.id))
+                    })
+            )
+
+            PostContent(
+                postEntity,
+                rootNavController,
+                isSimplified,
+                Modifier
+            )
+        }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -302,10 +283,11 @@ fun PostHeader(
                     })
             )
 
-            Column() {
+            Column {
                 Text(
                     text = authorEntity.name,
                 )
+
                 Text(
                     text = buildString {
                         append(formatInstant(postEntity.createdAt, "MMMM d")
@@ -416,6 +398,7 @@ fun PostHeader(
 fun PostContent(
     postEntity: PostEntity,
     rootNavController: NavController,
+    isSimplified: Boolean = false,
     modifier: Modifier,
 ) {
     val onMediaClicked: (List<String>, Int) -> Unit = { list, startAt ->
@@ -427,6 +410,7 @@ fun PostContent(
             PostContentNote(
                 postEntity,
                 onMediaClicked,
+                isSimplified,
                 modifier
             )
         }
@@ -434,6 +418,7 @@ fun PostContent(
             PostContentReel(
                 postEntity,
                 onMediaClicked,
+                isSimplified,
                 modifier
             )
         }
@@ -449,6 +434,7 @@ fun PostContent(
 fun PostContentNote(
     postEntity: PostEntity,
     onMediaClicked: (List<String>, Int) -> Unit,
+    isSimplified: Boolean,
     modifier: Modifier,
 ) {
     Column(
@@ -464,7 +450,10 @@ fun PostContentNote(
                             if (postEntity.media.isEmpty())
                                 Modifier.padding(vertical = postItemSpacing * 2)
                             else
-                                Modifier.padding(bottom = postItemSpacing)
+                                if (isSimplified)
+                                    Modifier.padding(vertical = postItemSpacing * 2)
+                                else
+                                    Modifier.padding(bottom = postItemSpacing)
                     )
             )
         }
@@ -508,6 +497,7 @@ fun PostContentNote(
 fun PostContentReel(
     postEntity: PostEntity,
     onMediaClicked: (List<String>, Int) -> Unit,
+    isSimplified: Boolean,
     modifier: Modifier,
 ) {
     Column(
@@ -574,7 +564,11 @@ fun PostContentReel(
             SelectionContainer {
                 Text(
                     text = postEntity.content,
-                    modifier = Modifier.padding(horizontal = postItemSpacing*2)
+                    modifier =
+                        if (isSimplified)
+                            Modifier.padding(all = postItemSpacing*2)
+                        else
+                            Modifier.padding(horizontal = postItemSpacing*2)
                 )
             }
     }
@@ -751,5 +745,49 @@ fun PostActions(
                     )
                 } } )
         )
+    }
+}
+
+@Composable
+fun PostComments(
+    comments: List<CommentEntity>,
+    crowd: Map<Long, PersonaEntity>,
+    onLikeRequested: (CommentEntity) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = postItemSpacing)
+            .padding(bottom = postItemSpacing)
+    ) {
+        comments.forEach { comment ->
+            val author = crowd[comment.authorId] ?: return@forEach
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                PersonaProfilePicture(
+                    author.profilePic,
+                    modifier = Modifier.size(48.dp)
+                )
+                SelectionContainer(Modifier.weight(1f)) {
+                    Text(comment.content)
+                }
+                Icon(
+                    painter = painterResource(
+                        if (comment.liked) R.drawable.icon_hearted else R.drawable.icon_heart
+                    ),
+                    contentDescription = stringResource(R.string.like),
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clickable {
+                            onLikeRequested(comment)
+                        }
+                )
+            }
+        }
     }
 }

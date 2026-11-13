@@ -1,6 +1,7 @@
 package dev.lucasangelo.thoughtcabinet.viewmodel
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lucasangelo.thoughtcabinet.data.AppRepository
@@ -15,11 +16,17 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.core.content.edit
 
 class ThoughtsViewModel(
     private val repository: AppRepository,
     application: Application
 ) : AndroidViewModel(application) {
+    private val preferences = application.getSharedPreferences(
+        "app_preferences",
+        Context.MODE_PRIVATE
+    )
+
     private val _isLoading = MutableStateFlow(true)
     val isLoading = _isLoading.asStateFlow()
 
@@ -29,22 +36,47 @@ class ThoughtsViewModel(
         ARCHIVED_ONLY,
         BLOCKED_PERSONAS_ONLY
     }
-    private var _feedMode = MutableStateFlow(FeedMode.STANDARD)
+    private var _feedMode = MutableStateFlow(
+        FeedMode.entries.firstOrNull {
+            it.name == preferences.getString("feed_mode", null)
+        } ?: FeedMode.STANDARD
+    )
     val feedMode = _feedMode.asStateFlow()
     fun onFeedModeChanged(to: FeedMode) {
         _isLoading.value = true
         _feedMode.value = to
+        preferences.edit { putString("feed_mode", to.name) }
     }
 
     enum class FeedSorting {
         RECENTLY_ADDED,
         CHRONOLOGICAL
     }
-    private var _feedSorting = MutableStateFlow(FeedSorting.RECENTLY_ADDED)
+    private var _feedSorting = MutableStateFlow(
+        FeedSorting.entries.firstOrNull {
+            it.name == preferences.getString("feed_sorting", null)
+        } ?: FeedSorting.RECENTLY_ADDED
+    )
     val feedSorting = _feedSorting.asStateFlow()
     fun onFeedSortingChanged(to: FeedSorting) {
         _isLoading.value = true
         _feedSorting.value = to
+        preferences.edit { putString("feed_sorting", to.name) }
+    }
+
+    enum class FeedStyle {
+        STANDARD,
+        SIMPLIFIED
+    }
+    private var _feedStyle = MutableStateFlow(
+        FeedStyle.entries.firstOrNull {
+            it.name == preferences.getString("feed_style", null)
+        } ?: FeedStyle.STANDARD
+    )
+    val feedStyle = _feedStyle.asStateFlow()
+    fun onFeedStyleChanged(to: FeedStyle) {
+        _feedStyle.value = to
+        preferences.edit { putString("feed_style", to.name) }
     }
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)

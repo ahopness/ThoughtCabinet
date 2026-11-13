@@ -152,4 +152,7 @@
     <string name="statistics">Статистика</string>
     <string name="search">Поиск</string>
     <string name="stats_persona_summary">Посты: %1$d, Репосты: %2$d, Комментарии: %3$d\nОтметки «Нравится»: %4$d, Закладки: %5$d, Черты: %6$d</string>
+    <string name="style">Стиль</string>
+    <string name="style_standard">Стандартный</string>
+    <string name="style_simplified">Упрощённый</string>
 </resources>

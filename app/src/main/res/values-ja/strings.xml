@@ -152,4 +152,7 @@
     <string name="statistics">統計</string>
     <string name="search">検索</string>
     <string name="stats_persona_summary">%1$d 投稿、%2$d リポスト、%3$d コメント\n%4$d いいね、%5$d ブックマーク、%6$d 特徴</string>
+    <string name="style">スタイル</string>
+    <string name="style_standard">標準</string>
+    <string name="style_simplified">シンプル</string>
 </resources>
